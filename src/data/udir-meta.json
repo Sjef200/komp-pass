@@ -1,0 +1,68 @@
+{
+  "api": "https://data.udir.no/kl06/v201906",
+  "hentet": "2026-09-03T18:03:49.592Z",
+  "fag": [
+    {
+      "id": "male1",
+      "fagkode": "SAM3045",
+      "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3045"
+    },
+    {
+      "id": "male2",
+      "fagkode": "SAM3046",
+      "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3046"
+    },
+    {
+      "id": "entrep1",
+      "fagkode": "SAM3063",
+      "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3063"
+    },
+    {
+      "id": "entrep2",
+      "fagkode": "SAM3064",
+      "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3064"
+    },
+    {
+      "id": "norsk-hovedmal",
+      "fagkode": "NOR1267",
+      "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/NOR1267"
+    },
+    {
+      "id": "norsk-muntlig",
+      "fagkode": "NOR1269",
+      "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/NOR1269"
+    }
+  ],
+  "kompetansemaalsett": [
+    {
+      "kode": "KV528",
+      "navn": "Kompetansemål og vurdering markedsføring og ledelse 1",
+      "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV528",
+      "antall": 14
+    },
+    {
+      "kode": "KV529",
+      "navn": "Kompetansemål og vurdering markedsføring og ledelse 2",
+      "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV529",
+      "antall": 13
+    },
+    {
+      "kode": "KV526",
+      "navn": "Kompetansemål og vurdering entreprenørskap og bedriftsutvikling 1",
+      "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV526",
+      "antall": 13
+    },
+    {
+      "kode": "KV527",
+      "navn": "Kompetansemål og vurdering entreprenørskap og bedriftsutvikling 2",
+      "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV527",
+      "antall": 13
+    },
+    {
+      "kode": "KV115",
+      "navn": "Kompetansemål og vurdering vg3 studieforberedende utdanningsprogram",
+      "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV115",
+      "antall": 10
+    }
+  ]
+}

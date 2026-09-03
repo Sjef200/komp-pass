@@ -1,4 +1,10 @@
-export type FagId = "male1" | "male2";
+export type FagId =
+  | "male1"
+  | "male2"
+  | "entrep1"
+  | "entrep2"
+  | "norsk-hovedmal"
+  | "norsk-muntlig";
 export type Karakter = 1 | 2 | 3 | 4 | 5 | 6;
 export type Kilde = "claude" | "selv" | "larer" | "ai";
 export type FagordStatus = "ny" | "usikker" | "sitter";
@@ -11,6 +17,7 @@ export type Fag = {
   navn: string;
   kode: string;
   emoji: string;
+  apiUrl?: string;
 };
 
 export type Kompetansemaal = {
@@ -19,6 +26,8 @@ export type Kompetansemaal = {
   kortnavn: string;
   tekst: string;
   emoji: string;
+  udirKode?: string;
+  apiUrl?: string;
 };
 
 export type Tema = {

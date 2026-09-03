@@ -13,6 +13,24 @@ npm run dev
 
 Åpner på [http://127.0.0.1:43147](http://127.0.0.1:43147). Bygg med `npm run build`.
 
+## Oppdatere fag og kompetansemål fra Udir
+
+Appen har hentet gjeldende kompetansemål fra Udirs Grep-API for seks fag:
+Markedsføring og ledelse 1 og 2, Entreprenørskap og bedriftsutvikling 1 og 2,
+Norsk hovedmål og Norsk muntlig.
+
+Kjør dette på nytt når du vil oppdatere innholdet:
+
+```bash
+npm run fetch:udir
+```
+
+Kilden og tidspunktet for siste henting ligger i `src/data/udir-meta.json`.
+Grep-dataene er åpne for viderebruk under NLOD. Udir opplyser samtidig at
+REST-API-et fra september 2026 kan rate-limite anonyme kall, så skriptet bør
+kjøres ved behov og dataene brukes lokalt i appen — ikke hentes på hver
+sidevisning.
+
 Ingen innlogging. Dataene ligger i `src/data/` og i nettleseren.
 
 For at KI-høringer skal dukke opp i UI uten refresh, må **både** `npm run dev` og MCP-serveren kjøre.

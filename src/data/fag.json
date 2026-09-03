@@ -2,13 +2,43 @@
   {
     "id": "male1",
     "navn": "Markedsføring og ledelse 1",
-    "kode": "MFL01-04",
-    "emoji": "📊"
+    "kode": "SAM3045",
+    "emoji": "📊",
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3045"
   },
   {
     "id": "male2",
     "navn": "Markedsføring og ledelse 2",
-    "kode": "MFL01-04",
-    "emoji": "📈"
+    "kode": "SAM3046",
+    "emoji": "📈",
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3046"
+  },
+  {
+    "id": "entrep1",
+    "navn": "Entreprenørskap og bedriftsutvikling 1",
+    "kode": "SAM3063",
+    "emoji": "💡",
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3063"
+  },
+  {
+    "id": "entrep2",
+    "navn": "Entreprenørskap og bedriftsutvikling 2",
+    "kode": "SAM3064",
+    "emoji": "🚀",
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3064"
+  },
+  {
+    "id": "norsk-hovedmal",
+    "navn": "Norsk hovedmål",
+    "kode": "NOR1267",
+    "emoji": "✍️",
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/NOR1267"
+  },
+  {
+    "id": "norsk-muntlig",
+    "navn": "Norsk muntlig",
+    "kode": "NOR1269",
+    "emoji": "🎙️",
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/NOR1269"
   }
 ]

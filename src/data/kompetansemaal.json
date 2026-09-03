@@ -1,191 +1,659 @@
 [
   {
-    "id": "m1-01",
+    "id": "male1-01",
     "fagId": "male1",
-    "kortnavn": "Kilder, teorier og modeller",
+    "kortnavn": "velge og bruke kilder, markedsførings- og ledelsesteorier og modeller…",
     "tekst": "velge og bruke kilder, markedsførings- og ledelsesteorier og modeller i arbeid med faglige spørsmål, emner og dagsaktuelle problemstillinger",
-    "emoji": "📚"
+    "emoji": "📊",
+    "udirKode": "KM6174",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6174"
   },
   {
-    "id": "m1-02",
+    "id": "male1-02",
     "fagId": "male1",
-    "kortnavn": "Forbrukeratferd",
+    "kortnavn": "vurdere forhold som påvirker forbrukeratferd, og reflektere over psyk…",
     "tekst": "vurdere forhold som påvirker forbrukeratferd, og reflektere over psykologiske, sosiale og kulturelle faktorer",
-    "emoji": "🧠"
+    "emoji": "📊",
+    "udirKode": "KM6176",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6176"
   },
   {
-    "id": "m1-03",
+    "id": "male1-03",
     "fagId": "male1",
-    "kortnavn": "Forretningsidé, mål og målgrupper",
+    "kortnavn": "utvikle forretningsideer og mål for virksomheten og vurdere aktuelle …",
     "tekst": "utvikle forretningsideer og mål for virksomheten og vurdere aktuelle målgrupper",
-    "emoji": "🎯"
+    "emoji": "📊",
+    "udirKode": "KM6152",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6152"
   },
   {
-    "id": "m1-04",
+    "id": "male1-04",
     "fagId": "male1",
-    "kortnavn": "Markedsundersøkelser",
+    "kortnavn": "bruke og utvikle markedsundersøkelser for å utforske og få innsikt i …",
     "tekst": "bruke og utvikle markedsundersøkelser for å utforske og få innsikt i markeder og målgrupper",
-    "emoji": "🔍"
+    "emoji": "📊",
+    "udirKode": "KM6175",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6175"
   },
   {
-    "id": "m1-05",
+    "id": "male1-05",
     "fagId": "male1",
-    "kortnavn": "Situasjonsanalyse",
+    "kortnavn": "gjennomføre situasjonsanalyser som grunnlag for beslutninger",
     "tekst": "gjennomføre situasjonsanalyser som grunnlag for beslutninger",
-    "emoji": "🧭"
+    "emoji": "📊",
+    "udirKode": "KM6166",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6166"
   },
   {
-    "id": "m1-06",
+    "id": "male1-06",
     "fagId": "male1",
-    "kortnavn": "Produkt og merkevare",
+    "kortnavn": "utforske produkt- og merkevarestrategier og vurdere hvordan virksomhe…",
     "tekst": "utforske produkt- og merkevarestrategier og vurdere hvordan virksomheter bruker produkter som konkurransemiddel",
-    "emoji": "📦"
+    "emoji": "📊",
+    "udirKode": "KM6173",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6173"
   },
   {
-    "id": "m1-07",
+    "id": "male1-07",
     "fagId": "male1",
-    "kortnavn": "Distribusjon",
+    "kortnavn": "utforske ulike distribusjonsstrategier i markedsføring og vurdere hvo…",
     "tekst": "utforske ulike distribusjonsstrategier i markedsføring og vurdere hvordan virksomheter bruker distribusjon som konkurransemiddel",
-    "emoji": "🚚"
+    "emoji": "📊",
+    "udirKode": "KM6172",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6172"
   },
   {
-    "id": "m1-08",
+    "id": "male1-08",
     "fagId": "male1",
-    "kortnavn": "Pris",
+    "kortnavn": "utforske ulike prisstrategier og prissettingsmetoder og vurdere hvord…",
     "tekst": "utforske ulike prisstrategier og prissettingsmetoder og vurdere hvordan virksomheter bruker pris som konkurransemiddel",
-    "emoji": "💰"
+    "emoji": "📊",
+    "udirKode": "KM6171",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6171"
   },
   {
-    "id": "m1-09",
+    "id": "male1-09",
     "fagId": "male1",
-    "kortnavn": "Kommunikasjon",
+    "kortnavn": "utforske ulike kommunikasjonsstrategier og vurdere hvordan virksomhet…",
     "tekst": "utforske ulike kommunikasjonsstrategier og vurdere hvordan virksomheter bruker markedskommunikasjon som konkurransemiddel",
-    "emoji": "📣"
+    "emoji": "📊",
+    "udirKode": "KM6170",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6170"
   },
   {
-    "id": "m1-10",
+    "id": "male1-10",
     "fagId": "male1",
-    "kortnavn": "Mediemiks og innhold",
+    "kortnavn": "planlegge mediemiks og utvikle innhold for ulike kanaler i markedskom…",
     "tekst": "planlegge mediemiks og utvikle innhold for ulike kanaler i markedskommunikasjon",
-    "emoji": "📱"
+    "emoji": "📊",
+    "udirKode": "KM6169",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6169"
   },
   {
-    "id": "m1-11",
+    "id": "male1-11",
     "fagId": "male1",
-    "kortnavn": "Kombinasjon av konkurransemidler",
+    "kortnavn": "utforske og vurdere hvordan virksomheter kombinerer bruk av konkurran…",
     "tekst": "utforske og vurdere hvordan virksomheter kombinerer bruk av konkurransemidler",
-    "emoji": "🧩"
+    "emoji": "📊",
+    "udirKode": "KM6168",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6168"
   },
   {
-    "id": "m1-12",
+    "id": "male1-12",
     "fagId": "male1",
-    "kortnavn": "Personal og ledelse i strategien",
+    "kortnavn": "reflektere over og vurdere rollen til personalet og ledelsen i gjenno…",
     "tekst": "reflektere over og vurdere rollen til personalet og ledelsen i gjennomføring av virksomhetens markedsføringsstrategi",
-    "emoji": "👥"
+    "emoji": "📊",
+    "udirKode": "KM6177",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6177"
   },
   {
-    "id": "m1-13",
+    "id": "male1-13",
     "fagId": "male1",
-    "kortnavn": "Regelverk og etikk",
+    "kortnavn": "utforske og følge gjeldende regelverk for markedsføring og vurdere vi…",
     "tekst": "utforske og følge gjeldende regelverk for markedsføring og vurdere virksomhetens etiske ansvar",
-    "emoji": "⚖️"
+    "emoji": "📊",
+    "udirKode": "KM6167",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6167"
   },
   {
-    "id": "m1-14",
+    "id": "male1-14",
     "fagId": "male1",
-    "kortnavn": "Bærekraft",
+    "kortnavn": "reflektere over sammenhengen mellom markedsføring og bærekraftig utvi…",
     "tekst": "reflektere over sammenhengen mellom markedsføring og bærekraftig utvikling ut fra sosiale, økonomiske og miljømessige forhold",
-    "emoji": "🌱"
+    "emoji": "📊",
+    "udirKode": "KM6165",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6165"
   },
   {
-    "id": "m2-01",
+    "id": "male2-01",
     "fagId": "male2",
-    "kortnavn": "Kilder, teorier og modeller",
+    "kortnavn": "velge og bruke kilder, markedsførings- og ledelsesteorier og modeller…",
     "tekst": "velge og bruke kilder, markedsførings- og ledelsesteorier og modeller i arbeid med faglige spørsmål, emner og dagsaktuelle problemstillinger",
-    "emoji": "📚"
+    "emoji": "📈",
+    "udirKode": "KM6164",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6164"
   },
   {
-    "id": "m2-02",
+    "id": "male2-02",
     "fagId": "male2",
-    "kortnavn": "Visjon, forretningsidé, overordnede mål",
+    "kortnavn": "utvikle og vurdere visjoner, forretningsideer og overordnede mål",
     "tekst": "utvikle og vurdere visjoner, forretningsideer og overordnede mål",
-    "emoji": "🌟"
+    "emoji": "📈",
+    "udirKode": "KM6163",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6163"
   },
   {
-    "id": "m2-03",
+    "id": "male2-03",
     "fagId": "male2",
-    "kortnavn": "Målgruppevalg",
+    "kortnavn": "drøfte og begrunne ulike faktorer som påvirker målgruppevalg",
     "tekst": "drøfte og begrunne ulike faktorer som påvirker målgruppevalg",
-    "emoji": "🎯"
+    "emoji": "📈",
+    "udirKode": "KM6162",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6162"
   },
   {
-    "id": "m2-04",
+    "id": "male2-04",
     "fagId": "male2",
-    "kortnavn": "Situasjons og bransjeanalyse",
+    "kortnavn": "bruke situasjonsanalyse og bransjeanalyse og vurdere markedsstrategis…",
     "tekst": "bruke situasjonsanalyse og bransjeanalyse og vurdere markedsstrategiske beslutninger",
-    "emoji": "🧭"
+    "emoji": "📈",
+    "udirKode": "KM6161",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6161"
   },
   {
-    "id": "m2-05",
+    "id": "male2-05",
     "fagId": "male2",
-    "kortnavn": "Merkevarestrategi og posisjonering",
+    "kortnavn": "utvikle merkevarestrategier og vurdere posisjonering i merkevarebygging",
     "tekst": "utvikle merkevarestrategier og vurdere posisjonering i merkevarebygging",
-    "emoji": "🏷️"
+    "emoji": "📈",
+    "udirKode": "KM6160",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6160"
   },
   {
-    "id": "m2-06",
+    "id": "male2-06",
     "fagId": "male2",
-    "kortnavn": "Distribusjon, makt i verdikjeden",
+    "kortnavn": "utvikle distribusjonsstrategier og vurdere påvirkning av makt og avhe…",
     "tekst": "utvikle distribusjonsstrategier og vurdere påvirkning av makt og avhengighet i en verdikjede",
-    "emoji": "🔗"
+    "emoji": "📈",
+    "udirKode": "KM6159",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6159"
   },
   {
-    "id": "m2-07",
+    "id": "male2-07",
     "fagId": "male2",
-    "kortnavn": "Prissetting og prisstrategi",
+    "kortnavn": "drøfte ulike faktorer som påvirker prissetting, og utvikle prisstrate…",
     "tekst": "drøfte ulike faktorer som påvirker prissetting, og utvikle prisstrategier",
-    "emoji": "💰"
+    "emoji": "📈",
+    "udirKode": "KM6158",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6158"
   },
   {
-    "id": "m2-08",
+    "id": "male2-08",
     "fagId": "male2",
-    "kortnavn": "Kommunikasjonsstrategi og mediemiks",
+    "kortnavn": "vurdere og utvikle kommunikasjonsstrategier, utforske dagsaktuelle ko…",
     "tekst": "vurdere og utvikle kommunikasjonsstrategier, utforske dagsaktuelle kommunikasjonskanaler og planlegge mediemiks",
-    "emoji": "📣"
+    "emoji": "📈",
+    "udirKode": "KM6157",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6157"
   },
   {
-    "id": "m2-09",
+    "id": "male2-09",
     "fagId": "male2",
-    "kortnavn": "Lederrolle og internmarkedsføring",
+    "kortnavn": "vurdere lederens rolle og funksjon i utviklingen av markedsstrategi o…",
     "tekst": "vurdere lederens rolle og funksjon i utviklingen av markedsstrategi og i internmarkedsføring",
-    "emoji": "👤"
+    "emoji": "📈",
+    "udirKode": "KM6156",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6156"
   },
   {
-    "id": "m2-10",
+    "id": "male2-10",
     "fagId": "male2",
-    "kortnavn": "Helhetlig markedsstrategi og etikk",
+    "kortnavn": "utvikle og begrunne helhetlige markedsstrategier og drøfte etisk bruk…",
     "tekst": "utvikle og begrunne helhetlige markedsstrategier og drøfte etisk bruk av konkurransemidler",
-    "emoji": "🧠"
+    "emoji": "📈",
+    "udirKode": "KM6155",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6155"
   },
   {
-    "id": "m2-11",
+    "id": "male2-11",
     "fagId": "male2",
-    "kortnavn": "Markedsmiks og effektmåling",
+    "kortnavn": "vurdere hvordan virksomheter kan utvikle helhetlig markedsmiks, og ut…",
     "tekst": "vurdere hvordan virksomheter kan utvikle helhetlig markedsmiks, og utforske ulike metoder for å måle effekten av markedsføringstiltakene",
-    "emoji": "📈"
+    "emoji": "📈",
+    "udirKode": "KM6154",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6154"
   },
   {
-    "id": "m2-12",
+    "id": "male2-12",
     "fagId": "male2",
-    "kortnavn": "Samfunnsansvar og omdømme",
+    "kortnavn": "drøfte virksomheters samfunnsansvar ut fra et etisk, lovmessig og for…",
     "tekst": "drøfte virksomheters samfunnsansvar ut fra et etisk, lovmessig og forretningsmessig perspektiv, og vurdere dette opp mot virksomhetens omdømme",
-    "emoji": "⚖️"
+    "emoji": "📈",
+    "udirKode": "KM6153",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6153"
   },
   {
-    "id": "m2-13",
+    "id": "male2-13",
     "fagId": "male2",
-    "kortnavn": "Bærekraftige valg",
+    "kortnavn": "vurdere bærekraftige valg for virksomheter med tanke på sosiale, økon…",
     "tekst": "vurdere bærekraftige valg for virksomheter med tanke på sosiale, økonomiske og miljømessige forhold",
-    "emoji": "🌱"
+    "emoji": "📈",
+    "udirKode": "KM6178",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6178"
+  },
+  {
+    "id": "entrep1-01",
+    "fagId": "entrep1",
+    "kortnavn": "bruke kilder, teorier og modeller i arbeid med faglige spørsmål, emne…",
+    "tekst": "bruke kilder, teorier og modeller i arbeid med faglige spørsmål, emner og problemstillinger",
+    "emoji": "💡",
+    "udirKode": "KM6138",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6138"
+  },
+  {
+    "id": "entrep1-02",
+    "fagId": "entrep1",
+    "kortnavn": "utforske ulike kreativitetsprosesser og utvikle forretningsideer",
+    "tekst": "utforske ulike kreativitetsprosesser og utvikle forretningsideer",
+    "emoji": "💡",
+    "udirKode": "KM6126",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6126"
+  },
+  {
+    "id": "entrep1-03",
+    "fagId": "entrep1",
+    "kortnavn": "utforske og bruke ulike innovasjonsprosesser ved etablering av virkso…",
+    "tekst": "utforske og bruke ulike innovasjonsprosesser ved etablering av virksomheter",
+    "emoji": "💡",
+    "udirKode": "KM6149",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6149"
+  },
+  {
+    "id": "entrep1-04",
+    "fagId": "entrep1",
+    "kortnavn": "utvikle forretningsmodeller og vurdere opp mot bærekraftig utvikling",
+    "tekst": "utvikle forretningsmodeller og vurdere opp mot bærekraftig utvikling",
+    "emoji": "💡",
+    "udirKode": "KM6148",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6148"
+  },
+  {
+    "id": "entrep1-05",
+    "fagId": "entrep1",
+    "kortnavn": "utforske og vurdere hvordan samhandling påvirker innovasjon og utvikling",
+    "tekst": "utforske og vurdere hvordan samhandling påvirker innovasjon og utvikling",
+    "emoji": "💡",
+    "udirKode": "KM6147",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6147"
+  },
+  {
+    "id": "entrep1-06",
+    "fagId": "entrep1",
+    "kortnavn": "sammenligne og vurdere informasjon om markeder, kjøpsatferd og segmen…",
+    "tekst": "sammenligne og vurdere informasjon om markeder, kjøpsatferd og segmenter for å ta beslutninger",
+    "emoji": "💡",
+    "udirKode": "KM6146",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6146"
+  },
+  {
+    "id": "entrep1-07",
+    "fagId": "entrep1",
+    "kortnavn": "gjennomføre situasjonsanalyse, vurdere utviklingsmuligheter og sette …",
+    "tekst": "gjennomføre situasjonsanalyse, vurdere utviklingsmuligheter og sette mål i en oppstartsfase",
+    "emoji": "💡",
+    "udirKode": "KM6145",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6145"
+  },
+  {
+    "id": "entrep1-08",
+    "fagId": "entrep1",
+    "kortnavn": "utforske og bruke ulike konkurransemidler i en oppstartsfase",
+    "tekst": "utforske og bruke ulike konkurransemidler i en oppstartsfase",
+    "emoji": "💡",
+    "udirKode": "KM6144",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6144"
+  },
+  {
+    "id": "entrep1-09",
+    "fagId": "entrep1",
+    "kortnavn": "vurdere og velge selskapsformer ut fra risiko og ansvar ved etablering",
+    "tekst": "vurdere og velge selskapsformer ut fra risiko og ansvar ved etablering",
+    "emoji": "💡",
+    "udirKode": "KM6143",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6143"
+  },
+  {
+    "id": "entrep1-10",
+    "fagId": "entrep1",
+    "kortnavn": "reflektere over hva som kjennetegner en god leder i etableringsfasen,…",
+    "tekst": "reflektere over hva som kjennetegner en god leder i etableringsfasen, og hvordan leder og medarbeidere samhandler og setter sammen gode team",
+    "emoji": "💡",
+    "udirKode": "KM6142",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6142"
+  },
+  {
+    "id": "entrep1-11",
+    "fagId": "entrep1",
+    "kortnavn": "beregne og vurdere pris og kapitalbehov, utarbeide budsjett og vurder…",
+    "tekst": "beregne og vurdere pris og kapitalbehov, utarbeide budsjett og vurdere finansieringsmuligheter med tanke på risiko og ansvar for en ny virksomhet",
+    "emoji": "💡",
+    "udirKode": "KM6141",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6141"
+  },
+  {
+    "id": "entrep1-12",
+    "fagId": "entrep1",
+    "kortnavn": "lese regnskap og nøkkeltall for å vurdere en virksomhets lønnsomhet",
+    "tekst": "lese regnskap og nøkkeltall for å vurdere en virksomhets lønnsomhet",
+    "emoji": "💡",
+    "udirKode": "KM6140",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6140"
+  },
+  {
+    "id": "entrep1-13",
+    "fagId": "entrep1",
+    "kortnavn": "reflektere over hva entreprenøriell kompetanse er, og vurdere hva det…",
+    "tekst": "reflektere over hva entreprenøriell kompetanse er, og vurdere hva det har å si for utvikling av virksomheter",
+    "emoji": "💡",
+    "udirKode": "KM6139",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6139"
+  },
+  {
+    "id": "entrep2-01",
+    "fagId": "entrep2",
+    "kortnavn": "bruke kilder, teorier og modeller i arbeid med faglige spørsmål, emne…",
+    "tekst": "bruke kilder, teorier og modeller i arbeid med faglige spørsmål, emner og problemstillinger",
+    "emoji": "🚀",
+    "udirKode": "KM6151",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6151"
+  },
+  {
+    "id": "entrep2-02",
+    "fagId": "entrep2",
+    "kortnavn": "utforske ulike innovasjonsprosesser og drøfte betydningen innovasjon …",
+    "tekst": "utforske ulike innovasjonsprosesser og drøfte betydningen innovasjon har for videreutvikling av en virksomhet",
+    "emoji": "🚀",
+    "udirKode": "KM6137",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6137"
+  },
+  {
+    "id": "entrep2-03",
+    "fagId": "entrep2",
+    "kortnavn": "utforske og vurdere konsekvenser bærekraftig verdiskaping har for vid…",
+    "tekst": "utforske og vurdere konsekvenser bærekraftig verdiskaping har for videreutvikling av en virksomhet",
+    "emoji": "🚀",
+    "udirKode": "KM6136",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6136"
+  },
+  {
+    "id": "entrep2-04",
+    "fagId": "entrep2",
+    "kortnavn": "utforske og vurdere forretningsmodeller for å videreutvikle virksomheter",
+    "tekst": "utforske og vurdere forretningsmodeller for å videreutvikle virksomheter",
+    "emoji": "🚀",
+    "udirKode": "KM6135",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6135"
+  },
+  {
+    "id": "entrep2-05",
+    "fagId": "entrep2",
+    "kortnavn": "reflektere over hva samfunnsansvar innebærer, og utforske og sammenli…",
+    "tekst": "reflektere over hva samfunnsansvar innebærer, og utforske og sammenligne virksomheters samfunnsansvar lokalt og globalt",
+    "emoji": "🚀",
+    "udirKode": "KM6134",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6134"
+  },
+  {
+    "id": "entrep2-06",
+    "fagId": "entrep2",
+    "kortnavn": "kartlegge og vurdere støtteordninger i videreutvikling av virksomhete…",
+    "tekst": "kartlegge og vurdere støtteordninger i videreutvikling av virksomheter nasjonalt og internasjonalt",
+    "emoji": "🚀",
+    "udirKode": "KM6133",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6133"
+  },
+  {
+    "id": "entrep2-07",
+    "fagId": "entrep2",
+    "kortnavn": "utforske og vurdere hvordan virksomheter kan bruke ulike vekst-, mark…",
+    "tekst": "utforske og vurdere hvordan virksomheter kan bruke ulike vekst-, markeds- og konkurransestrategier ved videreutvikling",
+    "emoji": "🚀",
+    "udirKode": "KM6132",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6132"
+  },
+  {
+    "id": "entrep2-08",
+    "fagId": "entrep2",
+    "kortnavn": "vurdere internasjonale forretningsmuligheter og sammenligne nasjonale…",
+    "tekst": "vurdere internasjonale forretningsmuligheter og sammenligne nasjonale og internasjonale forretningskulturer",
+    "emoji": "🚀",
+    "udirKode": "KM6131",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6131"
+  },
+  {
+    "id": "entrep2-09",
+    "fagId": "entrep2",
+    "kortnavn": "vurdere ulike lederstiler og drøfte hvordan ledere og medarbeidere ka…",
+    "tekst": "vurdere ulike lederstiler og drøfte hvordan ledere og medarbeidere kan påvirke utviklingen av virksomheter",
+    "emoji": "🚀",
+    "udirKode": "KM6130",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6130"
+  },
+  {
+    "id": "entrep2-10",
+    "fagId": "entrep2",
+    "kortnavn": "vurdere bruk av prosjekt og andre samarbeidsformer og betydningen net…",
+    "tekst": "vurdere bruk av prosjekt og andre samarbeidsformer og betydningen nettverksbygging har i utvikling av virksomheter",
+    "emoji": "🚀",
+    "udirKode": "KM6129",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6129"
+  },
+  {
+    "id": "entrep2-11",
+    "fagId": "entrep2",
+    "kortnavn": "vurdere behovet for organisasjonsutvikling i etablerte virksomheter",
+    "tekst": "vurdere behovet for organisasjonsutvikling i etablerte virksomheter",
+    "emoji": "🚀",
+    "udirKode": "KM6128",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6128"
+  },
+  {
+    "id": "entrep2-12",
+    "fagId": "entrep2",
+    "kortnavn": "vurdere hvordan finansiering av kapitalbehov bidrar til framtidig løn…",
+    "tekst": "vurdere hvordan finansiering av kapitalbehov bidrar til framtidig lønnsomhet og verdiskaping for virksomheter",
+    "emoji": "🚀",
+    "udirKode": "KM6127",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6127"
+  },
+  {
+    "id": "entrep2-13",
+    "fagId": "entrep2",
+    "kortnavn": "reflektere over og vurdere betydningen entreprenøriell kompetanse har…",
+    "tekst": "reflektere over og vurdere betydningen entreprenøriell kompetanse har for videreutvikling av en virksomhet",
+    "emoji": "🚀",
+    "udirKode": "KM6150",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM6150"
+  },
+  {
+    "id": "norsk-hovedmal-01",
+    "fagId": "norsk-hovedmal",
+    "kortnavn": "analysere og tolke romaner, noveller, drama, lyrikk og sakprosa på bo…",
+    "tekst": "analysere og tolke romaner, noveller, drama, lyrikk og sakprosa på bokmål og nynorsk fra 1850 til i dag og reflektere over tekstene i lys av den kulturhistoriske konteksten og egen samtid",
+    "emoji": "✍️",
+    "udirKode": "KM1236",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1236"
+  },
+  {
+    "id": "norsk-hovedmal-02",
+    "fagId": "norsk-hovedmal",
+    "kortnavn": "utforske og reflektere over hvordan tekster fra den realistiske og de…",
+    "tekst": "utforske og reflektere over hvordan tekster fra den realistiske og den modernistiske tradisjonen framstiller menneske, natur og samfunn",
+    "emoji": "✍️",
+    "udirKode": "KM1235",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1235"
+  },
+  {
+    "id": "norsk-hovedmal-03",
+    "fagId": "norsk-hovedmal",
+    "kortnavn": "skrive essay som utforsker og reflekterer over innhold i tekster",
+    "tekst": "skrive essay som utforsker og reflekterer over innhold i tekster",
+    "emoji": "✍️",
+    "udirKode": "KM1227",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1227"
+  },
+  {
+    "id": "norsk-hovedmal-04",
+    "fagId": "norsk-hovedmal",
+    "kortnavn": "skrive litterære tolkninger og sammenligninger",
+    "tekst": "skrive litterære tolkninger og sammenligninger",
+    "emoji": "✍️",
+    "udirKode": "KM1234",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1234"
+  },
+  {
+    "id": "norsk-hovedmal-05",
+    "fagId": "norsk-hovedmal",
+    "kortnavn": "analysere uttrykksformer i sammensatte tekster i ulike medier og vurd…",
+    "tekst": "analysere uttrykksformer i sammensatte tekster i ulike medier og vurdere samspillet mellom dem",
+    "emoji": "✍️",
+    "udirKode": "KM1233",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1233"
+  },
+  {
+    "id": "norsk-hovedmal-06",
+    "fagId": "norsk-hovedmal",
+    "kortnavn": "bruke fagkunnskap og presist fagspråk i utforskende samtaler, diskusj…",
+    "tekst": "bruke fagkunnskap og presist fagspråk i utforskende samtaler, diskusjoner og muntlige presentasjoner om norskfaglige emner",
+    "emoji": "✍️",
+    "udirKode": "KM1230",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1230"
+  },
+  {
+    "id": "norsk-hovedmal-07",
+    "fagId": "norsk-hovedmal",
+    "kortnavn": "skrive retoriske analyser og tolkninger av sakprosatekster",
+    "tekst": "skrive retoriske analyser og tolkninger av sakprosatekster",
+    "emoji": "✍️",
+    "udirKode": "KM1231",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1231"
+  },
+  {
+    "id": "norsk-hovedmal-08",
+    "fagId": "norsk-hovedmal",
+    "kortnavn": "mestre språklige formkrav på hovedmål og sidemål og skrive tekster me…",
+    "tekst": "mestre språklige formkrav på hovedmål og sidemål og skrive tekster med etterrettelig kildebruk og et presist og nyansert språk",
+    "emoji": "✍️",
+    "udirKode": "KM1229",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1229"
+  },
+  {
+    "id": "norsk-hovedmal-09",
+    "fagId": "norsk-hovedmal",
+    "kortnavn": "orientere seg i faglitteratur, vurdere kilder kritisk og skrive fagar…",
+    "tekst": "orientere seg i faglitteratur, vurdere kilder kritisk og skrive fagartikler som greier ut om og drøfter norskfaglige emner",
+    "emoji": "✍️",
+    "udirKode": "KM1228",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1228"
+  },
+  {
+    "id": "norsk-hovedmal-10",
+    "fagId": "norsk-hovedmal",
+    "kortnavn": "gjøre rede for endringer i talespråk i Norge i dag og reflektere over…",
+    "tekst": "gjøre rede for endringer i talespråk i Norge i dag og reflektere over sammenhenger mellom språk, kultur og identitet",
+    "emoji": "✍️",
+    "udirKode": "KM1232",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1232"
+  },
+  {
+    "id": "norsk-muntlig-01",
+    "fagId": "norsk-muntlig",
+    "kortnavn": "analysere og tolke romaner, noveller, drama, lyrikk og sakprosa på bo…",
+    "tekst": "analysere og tolke romaner, noveller, drama, lyrikk og sakprosa på bokmål og nynorsk fra 1850 til i dag og reflektere over tekstene i lys av den kulturhistoriske konteksten og egen samtid",
+    "emoji": "🎙️",
+    "udirKode": "KM1236",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1236"
+  },
+  {
+    "id": "norsk-muntlig-02",
+    "fagId": "norsk-muntlig",
+    "kortnavn": "utforske og reflektere over hvordan tekster fra den realistiske og de…",
+    "tekst": "utforske og reflektere over hvordan tekster fra den realistiske og den modernistiske tradisjonen framstiller menneske, natur og samfunn",
+    "emoji": "🎙️",
+    "udirKode": "KM1235",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1235"
+  },
+  {
+    "id": "norsk-muntlig-03",
+    "fagId": "norsk-muntlig",
+    "kortnavn": "skrive essay som utforsker og reflekterer over innhold i tekster",
+    "tekst": "skrive essay som utforsker og reflekterer over innhold i tekster",
+    "emoji": "🎙️",
+    "udirKode": "KM1227",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1227"
+  },
+  {
+    "id": "norsk-muntlig-04",
+    "fagId": "norsk-muntlig",
+    "kortnavn": "skrive litterære tolkninger og sammenligninger",
+    "tekst": "skrive litterære tolkninger og sammenligninger",
+    "emoji": "🎙️",
+    "udirKode": "KM1234",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1234"
+  },
+  {
+    "id": "norsk-muntlig-05",
+    "fagId": "norsk-muntlig",
+    "kortnavn": "analysere uttrykksformer i sammensatte tekster i ulike medier og vurd…",
+    "tekst": "analysere uttrykksformer i sammensatte tekster i ulike medier og vurdere samspillet mellom dem",
+    "emoji": "🎙️",
+    "udirKode": "KM1233",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1233"
+  },
+  {
+    "id": "norsk-muntlig-06",
+    "fagId": "norsk-muntlig",
+    "kortnavn": "bruke fagkunnskap og presist fagspråk i utforskende samtaler, diskusj…",
+    "tekst": "bruke fagkunnskap og presist fagspråk i utforskende samtaler, diskusjoner og muntlige presentasjoner om norskfaglige emner",
+    "emoji": "🎙️",
+    "udirKode": "KM1230",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1230"
+  },
+  {
+    "id": "norsk-muntlig-07",
+    "fagId": "norsk-muntlig",
+    "kortnavn": "skrive retoriske analyser og tolkninger av sakprosatekster",
+    "tekst": "skrive retoriske analyser og tolkninger av sakprosatekster",
+    "emoji": "🎙️",
+    "udirKode": "KM1231",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1231"
+  },
+  {
+    "id": "norsk-muntlig-08",
+    "fagId": "norsk-muntlig",
+    "kortnavn": "mestre språklige formkrav på hovedmål og sidemål og skrive tekster me…",
+    "tekst": "mestre språklige formkrav på hovedmål og sidemål og skrive tekster med etterrettelig kildebruk og et presist og nyansert språk",
+    "emoji": "🎙️",
+    "udirKode": "KM1229",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1229"
+  },
+  {
+    "id": "norsk-muntlig-09",
+    "fagId": "norsk-muntlig",
+    "kortnavn": "orientere seg i faglitteratur, vurdere kilder kritisk og skrive fagar…",
+    "tekst": "orientere seg i faglitteratur, vurdere kilder kritisk og skrive fagartikler som greier ut om og drøfter norskfaglige emner",
+    "emoji": "🎙️",
+    "udirKode": "KM1228",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1228"
+  },
+  {
+    "id": "norsk-muntlig-10",
+    "fagId": "norsk-muntlig",
+    "kortnavn": "gjøre rede for endringer i talespråk i Norge i dag og reflektere over…",
+    "tekst": "gjøre rede for endringer i talespråk i Norge i dag og reflektere over sammenhenger mellom språk, kultur og identitet",
+    "emoji": "🎙️",
+    "udirKode": "KM1232",
+    "apiUrl": "https://data.udir.no/kl06/v201906/kompetansemaal-lk20/KM1232"
   }
 ]
