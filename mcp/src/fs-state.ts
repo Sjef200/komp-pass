@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { mergeTreLag } from "../../src/lib/ai-overlay.ts";
 import { nyId } from "../../src/lib/format.ts";
-import { hentSkillsFraGithub, parseSkillMarkdown } from "../../src/lib/skill-import.ts";
+import { byggSkillKatalog, hentSkillsFraUrl, parseSkillMarkdown } from "../../src/lib/skill-import.ts";
 import type {
   AiInnsats,
   AiOverlay,
@@ -74,6 +74,32 @@ export function lesPrompterFraDisk(): Prompt[] {
       importert: rad.importert,
     };
   });
+}
+
+export function skillKatalogForOrigin(origin: string) {
+  const prompts = lesPrompterFraDisk();
+  return byggSkillKatalog(
+    origin,
+    prompts.map((p) => ({ id: p.id, navn: p.navn, beskrivelse: p.beskrivelse })),
+  );
+}
+
+export function pluginManifestForOrigin(origin: string) {
+  const base = origin.replace(/\/+$/, "");
+  return {
+    name: "mfl-ovingsapp",
+    description: "Øvingsapp for markedsføring og ledelse. Skills ligger under /skills.",
+    version: "0.1.0",
+    skills: "./skills",
+    skillsIndex: `${base}/skills`,
+  };
+}
+
+export function lesSkillMarkdown(id: string): string | null {
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) return null;
+  const fil = dataFil("prompts", id, "SKILL.md");
+  if (!fs.existsSync(fil)) return null;
+  return fs.readFileSync(fil, "utf8");
 }
 
 export function lesBaseState(): AppState {
@@ -170,36 +196,28 @@ export function oppdaterFagord(input: {
 }
 
 export async function importerPromptFraUrl(url: string): Promise<Prompt[]> {
-  const hentet = await hentSkillsFraGithub(url);
+  const hentet = await hentSkillsFraUrl(url);
   const indexFil = dataFil("prompts", "index.json");
   const index = fs.existsSync(indexFil)
     ? lesJson<{ prompts: PromptKatalogRad[] }>(indexFil)
     : { prompts: [] };
   const brukt = new Set(index.prompts.map((p) => p.id));
-  const lagret: Prompt[] = [];
 
   for (const p of hentet) {
-    let id = p.id;
-    if (brukt.has(id)) {
-      let n = 2;
-      while (brukt.has(`${id}-${n}`)) n += 1;
-      id = `${id}-${n}`;
-    }
-    brukt.add(id);
-    const mappe = dataFil("prompts", id);
+    if (brukt.has(p.id)) continue;
+    brukt.add(p.id);
+    const mappe = dataFil("prompts", p.id);
     fs.mkdirSync(mappe, { recursive: true });
-    const prompt: Prompt = { ...p, id };
-    fs.writeFileSync(path.join(mappe, "SKILL.md"), skillTilMarkdown(prompt), "utf8");
+    fs.writeFileSync(path.join(mappe, "SKILL.md"), skillTilMarkdown(p), "utf8");
     index.prompts.push({
-      id,
-      fil: `${id}/SKILL.md`,
-      navn: prompt.navn,
-      beskrivelse: prompt.beskrivelse,
-      kilde: "github",
-      kildeUrl: prompt.kildeUrl,
-      importert: prompt.importert,
+      id: p.id,
+      fil: `${p.id}/SKILL.md`,
+      navn: p.navn,
+      beskrivelse: p.beskrivelse,
+      kilde: p.kilde,
+      kildeUrl: p.kildeUrl,
+      importert: p.importert,
     });
-    lagret.push(prompt);
   }
   atomicWrite(indexFil, `${JSON.stringify(index, null, 2)}\n`);
   return lesPrompterFraDisk();

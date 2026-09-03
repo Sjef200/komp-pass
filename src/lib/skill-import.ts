@@ -1,6 +1,6 @@
 import type { Prompt, PromptKilde } from "./types";
 
-const TILLATTE_VERTER = new Set([
+const GITHUB_VERTER = new Set([
   "github.com",
   "www.github.com",
   "raw.githubusercontent.com",
@@ -17,6 +17,21 @@ export type ParsertSkill = {
 };
 
 export type ImportertPrompt = Prompt & { fil: string };
+
+export type SkillKatalogSkill = {
+  id: string;
+  name: string;
+  description: string;
+  path: string;
+  url: string;
+};
+
+export type SkillKatalog = {
+  name: string;
+  description: string;
+  plugin: string;
+  skills: SkillKatalogSkill[];
+};
 
 export function slugify(tekst: string): string {
   const s = tekst
@@ -74,10 +89,57 @@ export function erTillattGithubUrl(url: string): boolean {
   try {
     const u = new URL(url);
     if (u.protocol !== "https:") return false;
-    return TILLATTE_VERTER.has(u.hostname);
+    return GITHUB_VERTER.has(u.hostname);
   } catch {
     return false;
   }
+}
+
+function erLoopback(hostname: string): boolean {
+  const h = hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  return h === "localhost" || h === "127.0.0.1" || h === "::1" || h === "0.0.0.0";
+}
+
+export function erTillattPlattformUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    if (u.protocol === "https:") return u.hostname !== "169.254.169.254";
+    if (u.protocol === "http:") return erLoopback(u.hostname);
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/** Gjør om en plattform-URL til .../skills, med mindre det allerede er en SKILL.md. */
+export function skillsIndeksUrl(raw: string): string {
+  const u = new URL(raw);
+  const pathname = u.pathname.replace(/\/+$/, "") || "";
+  if (pathname.toLowerCase().endsWith("skill.md")) return u.toString();
+  if (pathname.toLowerCase().endsWith("/skills") || pathname.toLowerCase() === "/skills") {
+    return `${u.origin}${pathname || "/skills"}`;
+  }
+  if (!pathname || pathname === "/") return `${u.origin}/skills`;
+  return `${u.origin}${pathname}/skills`;
+}
+
+export function byggSkillKatalog(
+  origin: string,
+  skills: Array<{ id: string; navn: string; beskrivelse: string }>,
+): SkillKatalog {
+  const base = origin.replace(/\/+$/, "");
+  return {
+    name: "mfl-ovingsapp",
+    description: "Prompter og ferdigheter for markedsføring og ledelse",
+    plugin: `${base}/plugin.json`,
+    skills: skills.map((s) => ({
+      id: s.id,
+      name: s.navn,
+      description: s.beskrivelse,
+      path: `/skills/${s.id}/SKILL.md`,
+      url: `${base}/skills/${s.id}/SKILL.md`,
+    })),
+  };
 }
 
 type GithubFil = { path: string; text: string };
@@ -381,4 +443,104 @@ export function filerTilPrompts(
     });
   }
   return ut;
+}
+
+function skillsFraKatalogJson(data: unknown): SkillKatalogSkill[] {
+  if (!data || typeof data !== "object") return [];
+  const o = data as Record<string, unknown>;
+  const direkte = Array.isArray(o.skills) ? o.skills : [];
+  const fraPlugins: unknown[] = [];
+  if (Array.isArray(o.plugins)) {
+    for (const plugin of o.plugins) {
+      if (plugin && typeof plugin === "object" && Array.isArray((plugin as { skills?: unknown }).skills)) {
+        fraPlugins.push(...((plugin as { skills: unknown[] }).skills));
+      }
+    }
+  }
+  const ut: SkillKatalogSkill[] = [];
+  for (const raw of [...direkte, ...fraPlugins]) {
+    if (!raw || typeof raw !== "object") continue;
+    const s = raw as Record<string, unknown>;
+    const id = String(s.id ?? s.name ?? "").trim();
+    const url = String(s.url ?? s.path ?? "").trim();
+    if (!id || !url) continue;
+    ut.push({
+      id,
+      name: String(s.name ?? s.navn ?? id),
+      description: String(s.description ?? s.beskrivelse ?? ""),
+      path: String(s.path ?? url),
+      url,
+    });
+  }
+  return ut;
+}
+
+function absUrl(base: string, maybe: string): string {
+  try {
+    return new URL(maybe, base).toString();
+  } catch {
+    return maybe;
+  }
+}
+
+export async function hentSkillsFraPlattform(
+  url: string,
+  fetchFn: FetchFn = fetch,
+): Promise<ImportertPrompt[]> {
+  if (!erTillattPlattformUrl(url)) {
+    throw new Error("Lim inn URL-en til plattformen (http på localhost, ellers https).");
+  }
+  const indeks = skillsIndeksUrl(url);
+  const res = await fetchFn(indeks, {
+    headers: { Accept: "application/json, text/markdown;q=0.8, text/plain;q=0.5" },
+  });
+  if (!res.ok) {
+    throw new Error("Fant ingen /skills på den URL-en.");
+  }
+  const ctype = res.headers.get("content-type") ?? "";
+  const body = await res.text();
+
+  if (indeks.toLowerCase().endsWith("skill.md") || /markdown|text\/plain/.test(ctype) && !ctype.includes("json")) {
+    const looksMd = body.startsWith("---") || body.startsWith("#") || indeks.toLowerCase().endsWith(".md");
+    if (looksMd && !body.trim().startsWith("{")) {
+      return filerTilPrompts([{ path: "SKILL.md", text: body }], url, "plattform");
+    }
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    throw new Error("Fant ingen /skills på den URL-en.");
+  }
+
+  const listed = skillsFraKatalogJson(parsed);
+  if (listed.length === 0) {
+    throw new Error("Fant ingen SKILL.md der.");
+  }
+
+  const filer: GithubFil[] = [];
+  for (const skill of listed) {
+    const skillUrl = absUrl(indeks, skill.url);
+    if (!erTillattPlattformUrl(skillUrl) && !erTillattGithubUrl(skillUrl)) continue;
+    const filRes = await fetchFn(skillUrl, {
+      headers: { Accept: "text/markdown, text/plain;q=0.9" },
+    });
+    if (!filRes.ok) continue;
+    filer.push({
+      path: `${skill.id}/SKILL.md`,
+      text: await filRes.text(),
+    });
+  }
+  if (filer.length === 0) throw new Error("Fant ingen SKILL.md der.");
+  return filerTilPrompts(filer, url, "plattform");
+}
+
+/** Plattform-URL med /skills er hovedveien. GitHub beholdes som reserve. */
+export async function hentSkillsFraUrl(
+  url: string,
+  fetchFn: FetchFn = fetch,
+): Promise<ImportertPrompt[]> {
+  if (erTillattGithubUrl(url)) return hentSkillsFraGithub(url, fetchFn);
+  return hentSkillsFraPlattform(url, fetchFn);
 }

@@ -141,8 +141,9 @@ export function createServer(): McpServer {
   server.registerTool(
     "importer_prompt",
     {
-      title: "Importer prompt fra GitHub",
-      description: "Hent SKILL.md eller plugin-mappe fra en offentlig GitHub-lenke.",
+      title: "Importer prompt fra plattform",
+      description:
+        "Lim inn URL-en til plattformen. Vi henter /skills og SKILL.md-filene (pluginene). Eksempel: http://127.0.0.1:43147 eller …/skills.",
       inputSchema: z.object({ url: z.string().url() }),
     },
     async ({ url }) => kallImporterPrompt(url),

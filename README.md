@@ -54,7 +54,13 @@ Ikke bruk `console.log` i MCP-serveren — stdout er JSON-RPC.
 
 ## Promptbibliotek
 
-Prompter ligger i `src/data/prompts/` som SKILL.md (samme layout som Agent Skills). Fanen **Prompter** kan hente en offentlig GitHub-lenke (fil, mappe eller gist). Bare SKILL.md hentes, ikke `scripts/` eller `references/`.
+Skills ligger på **denne plattformen**, ikke på GitHub. Samme mønster som Claude: du gir bare URL-en, så hentes `/skills` og pluginene.
+
+- Katalog: `http://127.0.0.1:43147/skills`
+- En skill: `http://127.0.0.1:43147/skills/horing-svake-temaer/SKILL.md`
+- Plugin-manifest: `http://127.0.0.1:43147/plugin.json`
+
+Lim inn plattform-URL-en i fanen **Prompter**, eller kall MCP-verktøyet `importer_prompt` med den. Claude henter SKILL.md-filene derfra.
 
 To medfølgende prompter: `horing-svake-temaer` og `fagord-status`.
 

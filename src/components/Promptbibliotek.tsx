@@ -16,13 +16,14 @@ export function Promptbibliotek({
   const [apen, setApen] = useState<string | null>(null);
   const [laster, setLaster] = useState(false);
   const dev = import.meta.env.DEV;
+  const egenSkillsUrl = `${window.location.origin}/skills`;
 
-  async function hentFraGithub(e: FormEvent) {
+  async function hentFraPlattform(e: FormEvent) {
     e.preventDefault();
     setFeil(null);
     setStatus(null);
     if (!url.trim()) {
-      setFeil("Lim inn en GitHub-lenke.");
+      setFeil("Lim inn URL-en til plattformen.");
       return;
     }
     if (!dev) {
@@ -37,10 +38,10 @@ export function Promptbibliotek({
         body: JSON.stringify({ url: url.trim() }),
       });
       const data = (await res.json()) as { prompts?: Prompt[]; error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Fant ingen SKILL.md der.");
+      if (!res.ok) throw new Error(data.error ?? "Fant ingen /skills på den URL-en.");
       onImportert(data.prompts ?? []);
       setStatus(
-        `Hentet ${(data.prompts ?? []).length} prompt${(data.prompts ?? []).length === 1 ? "" : "er"}. Bare SKILL.md er hentet.`,
+        `Hentet ${(data.prompts ?? []).length} skill${(data.prompts ?? []).length === 1 ? "" : "s"} fra /skills.`,
       );
       setUrl("");
     } catch (err) {
@@ -58,18 +59,34 @@ export function Promptbibliotek({
   return (
     <div className="space-y-4">
       <p className="text-sm text-[#191C1F]/70">
-        Prompter og ferdigheter KI bruker når den hører deg. Lim inn en GitHub-lenke til en
-        SKILL.md eller en plugin-mappe.
+        Prompter og ferdigheter KI bruker når den hører deg. Lim inn URL-en til plattformen — vi
+        henter <code className="rounded bg-white px-1">/skills</code> og pluginene der, slik Claude
+        gjør med en ferdighetskatalog.
       </p>
 
-      <form onSubmit={hentFraGithub} className="rounded-2xl bg-white p-4">
+      <div className="rounded-2xl bg-white p-4">
+        <p className="text-sm font-medium">Denne plattformens skills</p>
+        <p className="mt-1 break-all font-mono text-xs text-[#191C1F]/70">{egenSkillsUrl}</p>
+        <button
+          type="button"
+          className="mt-2 rounded-lg bg-[#F6F5F1] px-3 py-1.5 text-sm"
+          onClick={() => {
+            void navigator.clipboard.writeText(egenSkillsUrl);
+            setStatus("Kopiert /skills-URL. Gi den til Claude, så hentes pluginene.");
+          }}
+        >
+          Kopier URL
+        </button>
+      </div>
+
+      <form onSubmit={hentFraPlattform} className="rounded-2xl bg-white p-4">
         <label className="block text-sm font-medium">
-          GitHub-lenke
+          Plattform-URL
           <input
             className="mt-1 w-full rounded-lg border border-[#191C1F]/15 px-3 py-2 text-sm"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://github.com/eier/repo/blob/main/SKILL.md"
+            placeholder={window.location.origin}
           />
         </label>
         <button
@@ -77,7 +94,7 @@ export function Promptbibliotek({
           disabled={laster}
           className="mt-3 rounded-lg bg-[#191C1F] px-3 py-2 text-sm text-white disabled:opacity-50"
         >
-          {laster ? "Henter…" : "Hent fra GitHub"}
+          {laster ? "Henter…" : "Hent /skills"}
         </button>
         {!dev && (
           <p className="mt-2 text-xs text-[#191C1F]/50">
@@ -97,8 +114,8 @@ export function Promptbibliotek({
           />
         </label>
         <p className="mt-2 text-xs text-[#191C1F]/50">
-          Lim inn SKILL.md her hvis GitHub-henting ikke er tilgjengelig. Legg den til i økten,
-          eller bruk MCP-verktøyet importer_prompt for å lagre i repoet.
+          Lim inn SKILL.md her hvis du ikke har en plattform-URL. Legg den til i økten, eller bruk
+          MCP-verktøyet importer_prompt.
         </p>
         <button
           type="button"
@@ -136,7 +153,7 @@ export function Promptbibliotek({
 
       {prompts.length === 0 ? (
         <p className="rounded-2xl bg-white px-4 py-8 text-center text-sm text-[#191C1F]/60">
-          Ingen prompter ennå. Lim inn en GitHub-lenke, eller be KI om å importere med
+          Ingen prompter ennå. Lim inn en plattform-URL, eller be KI om å importere med
           verktøyet importer_prompt.
         </p>
       ) : (
@@ -148,7 +165,11 @@ export function Promptbibliotek({
                   <p className="font-medium">{p.navn}</p>
                   <p className="mt-1 text-sm text-[#191C1F]/70">{p.beskrivelse}</p>
                   <p className="mt-1 text-xs text-[#191C1F]/45">
-                    {p.kilde === "github" ? "GitHub" : "Lokal"}
+                    {p.kilde === "plattform"
+                      ? "Plattform"
+                      : p.kilde === "github"
+                        ? "GitHub"
+                        : "Lokal"}
                     {p.kildeUrl ? (
                       <>
                         {" · "}

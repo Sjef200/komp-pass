@@ -4,7 +4,7 @@ export type Kilde = "claude" | "selv" | "larer" | "ai";
 export type FagordStatus = "ny" | "usikker" | "sitter";
 export type MaalStatus = "udekket" | "svak" | "ok" | "sterk";
 export type AiInnsats = "lav" | "medium" | "hoy" | "maks";
-export type PromptKilde = "lokal" | "github";
+export type PromptKilde = "lokal" | "plattform" | "github";
 
 export type Fag = {
   id: FagId;
