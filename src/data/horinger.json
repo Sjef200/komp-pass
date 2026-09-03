@@ -1,0 +1,65 @@
+[
+  {
+    "id": "h-def-1",
+    "temaId": "def",
+    "dato": "2026-08-04",
+    "karakter": 4,
+    "riktig": "",
+    "mangler": "",
+    "kilde": "selv"
+  },
+  {
+    "id": "h-formaal-1",
+    "temaId": "formaal",
+    "dato": "2026-08-07",
+    "karakter": 3,
+    "riktig": "",
+    "mangler": "",
+    "kilde": "selv"
+  },
+  {
+    "id": "h-mis-1",
+    "temaId": "mis",
+    "dato": "2026-08-11",
+    "karakter": 4,
+    "riktig": "",
+    "mangler": "",
+    "kilde": "selv"
+  },
+  {
+    "id": "h-hovedtyper-1",
+    "temaId": "hovedtyper",
+    "dato": "2026-08-14",
+    "karakter": 4,
+    "riktig": "",
+    "mangler": "",
+    "kilde": "selv"
+  },
+  {
+    "id": "h-obs-1",
+    "temaId": "obs",
+    "dato": "2026-08-18",
+    "karakter": 4,
+    "riktig": "",
+    "mangler": "",
+    "kilde": "selv"
+  },
+  {
+    "id": "h-eksperiment-1",
+    "temaId": "eksperiment",
+    "dato": "2026-08-21",
+    "karakter": 3,
+    "riktig": "",
+    "mangler": "",
+    "kilde": "selv"
+  },
+  {
+    "id": "h-survey-1",
+    "temaId": "survey",
+    "dato": "2026-08-25",
+    "karakter": 4,
+    "riktig": "",
+    "mangler": "",
+    "kilde": "selv"
+  }
+]

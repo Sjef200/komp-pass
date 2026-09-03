@@ -1,0 +1,14 @@
+[
+  {
+    "id": "male1",
+    "navn": "Markedsføring og ledelse 1",
+    "kode": "MFL01-04",
+    "emoji": "📊"
+  },
+  {
+    "id": "male2",
+    "navn": "Markedsføring og ledelse 2",
+    "kode": "MFL01-04",
+    "emoji": "📈"
+  }
+]

@@ -1,0 +1,191 @@
+[
+  {
+    "id": "m1-01",
+    "fagId": "male1",
+    "kortnavn": "Kilder, teorier og modeller",
+    "tekst": "velge og bruke kilder, markedsførings- og ledelsesteorier og modeller i arbeid med faglige spørsmål, emner og dagsaktuelle problemstillinger",
+    "emoji": "📚"
+  },
+  {
+    "id": "m1-02",
+    "fagId": "male1",
+    "kortnavn": "Forbrukeratferd",
+    "tekst": "vurdere forhold som påvirker forbrukeratferd, og reflektere over psykologiske, sosiale og kulturelle faktorer",
+    "emoji": "🧠"
+  },
+  {
+    "id": "m1-03",
+    "fagId": "male1",
+    "kortnavn": "Forretningsidé, mål og målgrupper",
+    "tekst": "utvikle forretningsideer og mål for virksomheten og vurdere aktuelle målgrupper",
+    "emoji": "🎯"
+  },
+  {
+    "id": "m1-04",
+    "fagId": "male1",
+    "kortnavn": "Markedsundersøkelser",
+    "tekst": "bruke og utvikle markedsundersøkelser for å utforske og få innsikt i markeder og målgrupper",
+    "emoji": "🔍"
+  },
+  {
+    "id": "m1-05",
+    "fagId": "male1",
+    "kortnavn": "Situasjonsanalyse",
+    "tekst": "gjennomføre situasjonsanalyser som grunnlag for beslutninger",
+    "emoji": "🧭"
+  },
+  {
+    "id": "m1-06",
+    "fagId": "male1",
+    "kortnavn": "Produkt og merkevare",
+    "tekst": "utforske produkt- og merkevarestrategier og vurdere hvordan virksomheter bruker produkter som konkurransemiddel",
+    "emoji": "📦"
+  },
+  {
+    "id": "m1-07",
+    "fagId": "male1",
+    "kortnavn": "Distribusjon",
+    "tekst": "utforske ulike distribusjonsstrategier i markedsføring og vurdere hvordan virksomheter bruker distribusjon som konkurransemiddel",
+    "emoji": "🚚"
+  },
+  {
+    "id": "m1-08",
+    "fagId": "male1",
+    "kortnavn": "Pris",
+    "tekst": "utforske ulike prisstrategier og prissettingsmetoder og vurdere hvordan virksomheter bruker pris som konkurransemiddel",
+    "emoji": "💰"
+  },
+  {
+    "id": "m1-09",
+    "fagId": "male1",
+    "kortnavn": "Kommunikasjon",
+    "tekst": "utforske ulike kommunikasjonsstrategier og vurdere hvordan virksomheter bruker markedskommunikasjon som konkurransemiddel",
+    "emoji": "📣"
+  },
+  {
+    "id": "m1-10",
+    "fagId": "male1",
+    "kortnavn": "Mediemiks og innhold",
+    "tekst": "planlegge mediemiks og utvikle innhold for ulike kanaler i markedskommunikasjon",
+    "emoji": "📱"
+  },
+  {
+    "id": "m1-11",
+    "fagId": "male1",
+    "kortnavn": "Kombinasjon av konkurransemidler",
+    "tekst": "utforske og vurdere hvordan virksomheter kombinerer bruk av konkurransemidler",
+    "emoji": "🧩"
+  },
+  {
+    "id": "m1-12",
+    "fagId": "male1",
+    "kortnavn": "Personal og ledelse i strategien",
+    "tekst": "reflektere over og vurdere rollen til personalet og ledelsen i gjennomføring av virksomhetens markedsføringsstrategi",
+    "emoji": "👥"
+  },
+  {
+    "id": "m1-13",
+    "fagId": "male1",
+    "kortnavn": "Regelverk og etikk",
+    "tekst": "utforske og følge gjeldende regelverk for markedsføring og vurdere virksomhetens etiske ansvar",
+    "emoji": "⚖️"
+  },
+  {
+    "id": "m1-14",
+    "fagId": "male1",
+    "kortnavn": "Bærekraft",
+    "tekst": "reflektere over sammenhengen mellom markedsføring og bærekraftig utvikling ut fra sosiale, økonomiske og miljømessige forhold",
+    "emoji": "🌱"
+  },
+  {
+    "id": "m2-01",
+    "fagId": "male2",
+    "kortnavn": "Kilder, teorier og modeller",
+    "tekst": "velge og bruke kilder, markedsførings- og ledelsesteorier og modeller i arbeid med faglige spørsmål, emner og dagsaktuelle problemstillinger",
+    "emoji": "📚"
+  },
+  {
+    "id": "m2-02",
+    "fagId": "male2",
+    "kortnavn": "Visjon, forretningsidé, overordnede mål",
+    "tekst": "utvikle og vurdere visjoner, forretningsideer og overordnede mål",
+    "emoji": "🌟"
+  },
+  {
+    "id": "m2-03",
+    "fagId": "male2",
+    "kortnavn": "Målgruppevalg",
+    "tekst": "drøfte og begrunne ulike faktorer som påvirker målgruppevalg",
+    "emoji": "🎯"
+  },
+  {
+    "id": "m2-04",
+    "fagId": "male2",
+    "kortnavn": "Situasjons og bransjeanalyse",
+    "tekst": "bruke situasjonsanalyse og bransjeanalyse og vurdere markedsstrategiske beslutninger",
+    "emoji": "🧭"
+  },
+  {
+    "id": "m2-05",
+    "fagId": "male2",
+    "kortnavn": "Merkevarestrategi og posisjonering",
+    "tekst": "utvikle merkevarestrategier og vurdere posisjonering i merkevarebygging",
+    "emoji": "🏷️"
+  },
+  {
+    "id": "m2-06",
+    "fagId": "male2",
+    "kortnavn": "Distribusjon, makt i verdikjeden",
+    "tekst": "utvikle distribusjonsstrategier og vurdere påvirkning av makt og avhengighet i en verdikjede",
+    "emoji": "🔗"
+  },
+  {
+    "id": "m2-07",
+    "fagId": "male2",
+    "kortnavn": "Prissetting og prisstrategi",
+    "tekst": "drøfte ulike faktorer som påvirker prissetting, og utvikle prisstrategier",
+    "emoji": "💰"
+  },
+  {
+    "id": "m2-08",
+    "fagId": "male2",
+    "kortnavn": "Kommunikasjonsstrategi og mediemiks",
+    "tekst": "vurdere og utvikle kommunikasjonsstrategier, utforske dagsaktuelle kommunikasjonskanaler og planlegge mediemiks",
+    "emoji": "📣"
+  },
+  {
+    "id": "m2-09",
+    "fagId": "male2",
+    "kortnavn": "Lederrolle og internmarkedsføring",
+    "tekst": "vurdere lederens rolle og funksjon i utviklingen av markedsstrategi og i internmarkedsføring",
+    "emoji": "👤"
+  },
+  {
+    "id": "m2-10",
+    "fagId": "male2",
+    "kortnavn": "Helhetlig markedsstrategi og etikk",
+    "tekst": "utvikle og begrunne helhetlige markedsstrategier og drøfte etisk bruk av konkurransemidler",
+    "emoji": "🧠"
+  },
+  {
+    "id": "m2-11",
+    "fagId": "male2",
+    "kortnavn": "Markedsmiks og effektmåling",
+    "tekst": "vurdere hvordan virksomheter kan utvikle helhetlig markedsmiks, og utforske ulike metoder for å måle effekten av markedsføringstiltakene",
+    "emoji": "📈"
+  },
+  {
+    "id": "m2-12",
+    "fagId": "male2",
+    "kortnavn": "Samfunnsansvar og omdømme",
+    "tekst": "drøfte virksomheters samfunnsansvar ut fra et etisk, lovmessig og forretningsmessig perspektiv, og vurdere dette opp mot virksomhetens omdømme",
+    "emoji": "⚖️"
+  },
+  {
+    "id": "m2-13",
+    "fagId": "male2",
+    "kortnavn": "Bærekraftige valg",
+    "tekst": "vurdere bærekraftige valg for virksomheter med tanke på sosiale, økonomiske og miljømessige forhold",
+    "emoji": "🌱"
+  }
+]

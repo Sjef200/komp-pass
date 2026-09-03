@@ -1,0 +1,106 @@
+[
+  {
+    "id": "def",
+    "fagId": "male1",
+    "navn": "Hva en markedsundersøkelse er",
+    "emoji": "🔍",
+    "maalIds": ["m1-04"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "formaal",
+    "fagId": "male1",
+    "navn": "Formålet med undersøkelser",
+    "emoji": "🎯",
+    "maalIds": ["m1-04", "m1-05"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "mis",
+    "fagId": "male1",
+    "navn": "Markedsinformasjonssystem",
+    "emoji": "🗄️",
+    "maalIds": ["m1-04", "m1-05"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "hovedtyper",
+    "fagId": "male1",
+    "navn": "Primær, sekundær, kvalitativ, kvantitativ",
+    "emoji": "🌳",
+    "maalIds": ["m1-04"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "design",
+    "fagId": "male1",
+    "navn": "Undersøkelsesdesign",
+    "emoji": "🧭",
+    "maalIds": ["m1-04", "m1-05"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "prosess",
+    "fagId": "male1",
+    "navn": "Arbeidsfasene",
+    "emoji": "📋",
+    "maalIds": ["m1-04"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "dybde",
+    "fagId": "male1",
+    "navn": "Dybdeintervju",
+    "emoji": "🎙️",
+    "maalIds": ["m1-04"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "fokus",
+    "fagId": "male1",
+    "navn": "Fokusgruppe",
+    "emoji": "👥",
+    "maalIds": ["m1-04"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "obs",
+    "fagId": "male1",
+    "navn": "Observasjon",
+    "emoji": "👀",
+    "maalIds": ["m1-04", "m1-02"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "eksperiment",
+    "fagId": "male1",
+    "navn": "Eksperiment",
+    "emoji": "🧪",
+    "maalIds": ["m1-04"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "survey",
+    "fagId": "male1",
+    "navn": "Survey",
+    "emoji": "📝",
+    "maalIds": ["m1-04"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "utvalg",
+    "fagId": "male1",
+    "navn": "Utvalg og populasjon",
+    "emoji": "🎲",
+    "maalIds": ["m1-04"],
+    "kapittel": "Markedsundersøkelser"
+  },
+  {
+    "id": "validitet",
+    "fagId": "male1",
+    "navn": "Validitet, reliabilitet, feilkilder",
+    "emoji": "⚖️",
+    "maalIds": ["m1-04"],
+    "kapittel": "Markedsundersøkelser"
+  }
+]

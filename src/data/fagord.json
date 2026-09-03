@@ -1,0 +1,114 @@
+[
+  {
+    "id": "fo-primaerdata",
+    "term": "Primærdata",
+    "forklaring": "Data du samler inn selv for denne undersøkelsen. Skilt mot sekundærdata, som allerede finnes og er samlet inn til et annet formål.",
+    "temaIds": ["hovedtyper"],
+    "status": "sitter"
+  },
+  {
+    "id": "fo-sekundaerdata",
+    "term": "Sekundærdata",
+    "forklaring": "Data som allerede er samlet inn til et annet formål. Skilt mot primærdata, som du henter inn nå for akkurat denne undersøkelsen.",
+    "temaIds": ["hovedtyper"],
+    "status": "sitter"
+  },
+  {
+    "id": "fo-kvalitativ",
+    "term": "Kvalitativ metode",
+    "forklaring": "Få enheter, dybde og åpne svar. Målet er å forstå hvorfor. Skilt mot kvantitativ, som teller og generaliserer.",
+    "temaIds": ["hovedtyper", "dybde", "fokus"],
+    "status": "usikker"
+  },
+  {
+    "id": "fo-kvantitativ",
+    "term": "Kvantitativ metode",
+    "forklaring": "Mange enheter, tall og strukturerte spørsmål. Målet er å måle og generalisere. Skilt mot kvalitativ, som går i dybden hos få.",
+    "temaIds": ["hovedtyper", "survey"],
+    "status": "usikker"
+  },
+  {
+    "id": "fo-mis",
+    "term": "Markedsinformasjonssystem (MIS)",
+    "forklaring": "Et fast system for å samle, lagre og spre markedsinformasjon løpende. Skilt mot en markedsundersøkelse, som er et avgrenset prosjekt.",
+    "temaIds": ["mis", "def"],
+    "status": "usikker"
+  },
+  {
+    "id": "fo-undersokelse",
+    "term": "Markedsundersøkelse",
+    "forklaring": "Et avgrenset prosjekt for å hente inn data om marked og målgrupper. Skilt mot MIS, som er den løpende informasjonsflyten.",
+    "temaIds": ["def", "formaal"],
+    "status": "usikker"
+  },
+  {
+    "id": "fo-dybdeintervju",
+    "term": "Dybdeintervju",
+    "forklaring": "En-til-en-samtale med åpne spørsmål. Egnet for dybde og sensitive tema. Skilt mot fokusgruppe, der dataene kommer fra samspill i gruppe.",
+    "temaIds": ["dybde"],
+    "status": "ny"
+  },
+  {
+    "id": "fo-fokusgruppe",
+    "term": "Fokusgruppe",
+    "forklaring": "Gruppeintervju der samspillet mellom deltakerne er en del av dataene. Skilt mot dybdeintervju, som er én og én.",
+    "temaIds": ["fokus"],
+    "status": "ny"
+  },
+  {
+    "id": "fo-observasjon",
+    "term": "Observasjon",
+    "forklaring": "Du ser hva folk gjør, ikke hva de sier at de gjør. Skilt mot intervju og survey, og mot eksperiment der du griper inn og endrer noe.",
+    "temaIds": ["obs"],
+    "status": "usikker"
+  },
+  {
+    "id": "fo-eksperiment",
+    "term": "Eksperiment",
+    "forklaring": "Du endrer én variabel og måler effekten, med kontroll over omgivelsene. Skilt mot observasjon, der du ikke manipulerer situasjonen.",
+    "temaIds": ["eksperiment"],
+    "status": "usikker"
+  },
+  {
+    "id": "fo-survey",
+    "term": "Survey",
+    "forklaring": "Standardiserte spørsmål til mange respondenter. Skilt mot dybdeintervju, som er fleksibelt og treffer få.",
+    "temaIds": ["survey"],
+    "status": "usikker"
+  },
+  {
+    "id": "fo-populasjon",
+    "term": "Populasjon",
+    "forklaring": "Alle du vil si noe om. Skilt mot utvalg, som er de du faktisk undersøker.",
+    "temaIds": ["utvalg"],
+    "status": "ny"
+  },
+  {
+    "id": "fo-utvalg",
+    "term": "Utvalg",
+    "forklaring": "De som inngår i undersøkelsen. Skilt mot populasjon, som er hele gruppen funnene skal gjelde for.",
+    "temaIds": ["utvalg"],
+    "status": "ny"
+  },
+  {
+    "id": "fo-validitet",
+    "term": "Validitet",
+    "forklaring": "Måler du det du tror du måler? Skilt mot reliabilitet, som handler om om du får samme resultat ved gjentakelse.",
+    "temaIds": ["validitet"],
+    "status": "ny"
+  },
+  {
+    "id": "fo-reliabilitet",
+    "term": "Reliabilitet",
+    "forklaring": "Stabilitet i målingen: samme opplegg gir samme resultat. Skilt mot validitet, som handler om du treffer det rette fenomenet.",
+    "temaIds": ["validitet"],
+    "status": "ny"
+  },
+  {
+    "id": "fo-design",
+    "term": "Undersøkelsesdesign",
+    "forklaring": "Helhetlig plan for hvordan undersøkelsen skal gjennomføres. Skilt mot metode (intervju, observasjon, survey), som er ett valg inni designet.",
+    "temaIds": ["design", "prosess"],
+    "status": "ny"
+  }
+]
