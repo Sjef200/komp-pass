@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mfl": {
+      "command": "./node_modules/.bin/tsx",
+      "args": ["mcp/src/server.ts"]
+    }
+  }
+}

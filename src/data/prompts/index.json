@@ -1,0 +1,18 @@
+{
+  "prompts": [
+    {
+      "id": "horing-svake-temaer",
+      "fil": "horing-svake-temaer/SKILL.md",
+      "navn": "Høring i svake temaer",
+      "beskrivelse": "Brukes når du skal høre eleven i temaer med karakter under 4 eller uten høring. Still ett spørsmål om gangen, krev skille mot nabobegrep, og logg høringen med modell, innsats og denne prompten.",
+      "kilde": "lokal"
+    },
+    {
+      "id": "fagord-status",
+      "fil": "fagord-status/SKILL.md",
+      "navn": "Fagord etter høring",
+      "beskrivelse": "Brukes etter en høring for å sette fagord til ny, usikker eller sitter ut fra hva som glapp, og knytte sisteFeil.",
+      "kilde": "lokal"
+    }
+  ]
+}

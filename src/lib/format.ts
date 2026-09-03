@@ -42,4 +42,23 @@ export const KILDE_LABEL: Record<string, string> = {
   claude: "Claude",
   selv: "Selv",
   larer: "Lærer",
+  ai: "KI",
 };
+
+export const INNSATS_LABEL: Record<string, string> = {
+  lav: "lav",
+  medium: "medium",
+  hoy: "høy",
+  maks: "maks",
+};
+
+export function kildeLinje(h: {
+  kilde: string;
+  ai?: { modell: string; innsats: string; promptNavn: string };
+}): string {
+  if (h.kilde === "ai" && h.ai) {
+    const innsats = INNSATS_LABEL[h.ai.innsats] ?? h.ai.innsats;
+    return `KI · ${h.ai.modell} · ${innsats} innsats · «${h.ai.promptNavn}»`;
+  }
+  return KILDE_LABEL[h.kilde] ?? h.kilde;
+}

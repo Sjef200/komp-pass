@@ -1,18 +1,25 @@
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { karakterFarge } from "../lib/colors";
 import { iDagIso, nyId } from "../lib/format";
-import type { Karakter, Horing, Kilde, Tema } from "../lib/types";
+import type { AiInnsats, Karakter, Horing, Kilde, Prompt, Tema } from "../lib/types";
 
 const KARAKTERER: Karakter[] = [1, 2, 3, 4, 5, 6];
 const KILDER: { id: Kilde; label: string }[] = [
   { id: "selv", label: "Selv" },
-  { id: "claude", label: "Claude" },
   { id: "larer", label: "Lærer" },
+  { id: "ai", label: "KI" },
+];
+const INNSATS: { id: AiInnsats; label: string }[] = [
+  { id: "lav", label: "Lav" },
+  { id: "medium", label: "Medium" },
+  { id: "hoy", label: "Høy" },
+  { id: "maks", label: "Maks" },
 ];
 
 type Props = {
   temaer: Tema[];
   visEmoji: boolean;
+  prompts?: Prompt[];
   forhåndsvalgtTemaId?: string;
   onLagre: (horing: Horing) => void;
   onAvbryt: () => void;
@@ -21,6 +28,7 @@ type Props = {
 export function HoringForm({
   temaer,
   visEmoji,
+  prompts = [],
   forhåndsvalgtTemaId,
   onLagre,
   onAvbryt,
@@ -34,6 +42,10 @@ export function HoringForm({
   const [riktig, setRiktig] = useState("");
   const [mangler, setMangler] = useState("");
   const [kilde, setKilde] = useState<Kilde>("selv");
+  const [modell, setModell] = useState("");
+  const [innsats, setInnsats] = useState<AiInnsats>("hoy");
+  const [promptId, setPromptId] = useState(prompts[0]?.id ?? "");
+  const valgtPromptId = promptId || prompts[0]?.id || "";
   const [feil, setFeil] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,6 +66,17 @@ export function HoringForm({
       setFeil("Velg karakter.");
       return;
     }
+    if (kilde === "ai") {
+      if (!modell.trim()) {
+        setFeil("Oppgi hvilken modell som ble brukt.");
+        return;
+      }
+      if (!valgtPromptId) {
+        setFeil("Velg hvilken prompt som ble brukt.");
+        return;
+      }
+    }
+    const prompt = prompts.find((p) => p.id === valgtPromptId);
     onLagre({
       id: nyId("h"),
       temaId,
@@ -62,6 +85,15 @@ export function HoringForm({
       riktig: riktig.trim(),
       mangler: mangler.trim(),
       kilde,
+      ai:
+        kilde === "ai"
+          ? {
+              modell: modell.trim(),
+              innsats,
+              promptId: valgtPromptId,
+              promptNavn: prompt?.navn ?? valgtPromptId,
+            }
+          : undefined,
     });
   }
 
@@ -177,6 +209,55 @@ export function HoringForm({
             ))}
           </div>
         </fieldset>
+
+        {kilde === "ai" && (
+          <div className="mt-4 space-y-3 rounded-xl bg-[#F6F5F1] p-3">
+            <label className="block text-sm font-medium">
+              Modell
+              <input
+                className="mt-1 w-full rounded-lg border border-[#191C1F]/15 bg-white px-3 py-2 text-sm"
+                value={modell}
+                onChange={(e) => setModell(e.target.value)}
+                placeholder="f.eks. Cursor Grok 4.6"
+              />
+            </label>
+            <fieldset>
+              <legend className="text-sm font-medium">Innsats</legend>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {INNSATS.map((i) => (
+                  <button
+                    key={i.id}
+                    type="button"
+                    onClick={() => setInnsats(i.id)}
+                    className={`rounded-lg px-3 py-1.5 text-sm ${
+                      innsats === i.id ? "bg-[#191C1F] text-white" : "bg-white"
+                    }`}
+                    aria-pressed={innsats === i.id}
+                  >
+                    {i.label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <label className="block text-sm font-medium">
+              Prompt
+              <select
+                className="mt-1 w-full rounded-lg border border-[#191C1F]/15 bg-white px-3 py-2 text-sm"
+                value={valgtPromptId}
+                onChange={(e) => setPromptId(e.target.value)}
+              >
+                {prompts.length === 0 && (
+                  <option value="">Ingen prompter i biblioteket</option>
+                )}
+                {prompts.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.navn}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
 
         {feil && (
           <p className="mt-4 text-sm text-[#A63A2A]" role="alert">

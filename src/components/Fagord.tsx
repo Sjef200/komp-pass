@@ -148,6 +148,11 @@ function FagordKort({
           {fagord.sisteFeil ? (
             <p className="mt-2 text-xs text-[#A63A2A]">Sist sagt i stedet: {fagord.sisteFeil}</p>
           ) : null}
+          {fagord.ai ? (
+            <p className="mt-2 text-xs text-[#191C1F]/45">
+              Sist satt av KI · {fagord.ai.modell} · «{fagord.ai.promptNavn}»
+            </p>
+          ) : null}
         </div>
       </button>
       <div className="flex gap-1.5 border-t border-[#191C1F]/8 px-4 py-2.5">

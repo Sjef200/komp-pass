@@ -3,7 +3,11 @@ import kompetansemaalJson from "../data/kompetansemaal.json";
 import temaerJson from "../data/temaer.json";
 import horingerJson from "../data/horinger.json";
 import fagordJson from "../data/fagord.json";
+import aiOverlayJson from "../data/ai-overlay.json";
+import { mergeTreLag } from "./ai-overlay";
+import { seedPrompts } from "./prompt-katalog";
 import type {
+  AiOverlay,
   AppState,
   Fag,
   Fagord,
@@ -22,24 +26,6 @@ const defaultInnstillinger: Innstillinger = {
   visEmoji: true,
 };
 
-function mergeById<T extends { id: string }>(base: T[], overlay?: T[]): T[] {
-  const map = new Map<string, T>();
-  for (const item of base) map.set(item.id, item);
-  for (const item of overlay ?? []) {
-    if (!item || typeof item.id !== "string") continue;
-    map.set(item.id, item);
-  }
-  const overlayOnly: T[] = [];
-  const seen = new Set(base.map((b) => b.id));
-  for (const item of overlay ?? []) {
-    if (item?.id && !seen.has(item.id)) {
-      overlayOnly.push(map.get(item.id)!);
-      seen.add(item.id);
-    }
-  }
-  return [...base.map((b) => map.get(b.id)!), ...overlayOnly];
-}
-
 export function baseState(): AppState {
   return {
     fag: fagJson as Fag[],
@@ -47,6 +33,7 @@ export function baseState(): AppState {
     temaer: temaerJson as Tema[],
     horinger: horingerJson as Horing[],
     fagord: fagordJson as Fagord[],
+    prompts: seedPrompts(),
     innstillinger: { ...defaultInnstillinger },
   };
 }
@@ -63,23 +50,20 @@ export function lesOverlay(): PersistedState | null {
   }
 }
 
-export function mergeState(base: AppState, overlay: PersistedState | null): AppState {
-  if (!overlay) return base;
-  return {
-    fag: mergeById(base.fag, overlay.fag),
-    kompetansemaal: mergeById(base.kompetansemaal, overlay.kompetansemaal),
-    temaer: mergeById(base.temaer, overlay.temaer),
-    horinger: mergeById(base.horinger, overlay.horinger),
-    fagord: mergeById(base.fagord, overlay.fagord),
-    innstillinger: {
-      ...base.innstillinger,
-      ...overlay.innstillinger,
-    },
-  };
+export function seedAiOverlay(): AiOverlay {
+  return aiOverlayJson as AiOverlay;
 }
 
-export function lastState(): AppState {
-  return mergeState(baseState(), lesOverlay());
+export function mergeState(
+  base: AppState,
+  overlay: PersistedState | null,
+  ai: AiOverlay | null = null,
+): AppState {
+  return mergeTreLag(base, overlay, ai);
+}
+
+export function lastState(ai: AiOverlay | null = seedAiOverlay()): AppState {
+  return mergeTreLag(baseState(), lesOverlay(), ai);
 }
 
 export function lagreOverlay(state: AppState): void {
@@ -89,6 +73,7 @@ export function lagreOverlay(state: AppState): void {
     temaer: state.temaer,
     horinger: state.horinger,
     fagord: state.fagord,
+    prompts: state.prompts,
     innstillinger: state.innstillinger,
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(overlay));
@@ -102,7 +87,8 @@ export function erGyldigTilstand(value: unknown): value is PersistedState {
     Array.isArray(o.kompetansemaal) ||
     Array.isArray(o.temaer) ||
     Array.isArray(o.horinger) ||
-    Array.isArray(o.fagord);
+    Array.isArray(o.fagord) ||
+    Array.isArray(o.prompts);
   const hasSettings = o.innstillinger != null && typeof o.innstillinger === "object";
   return hasArray || hasSettings;
 }
@@ -129,31 +115,11 @@ export function settFagordIState(
   };
 }
 
-export function filtrerFag<T extends { fagId: string }>(
-  items: T[],
-  fagId: string,
-): T[] {
-  return items.filter((item) => item.fagId === fagId);
-}
-
-export function temaerIFag(state: AppState): Tema[] {
-  return filtrerFag(state.temaer, state.innstillinger.aktivtFag);
-}
-
-export function maalIFag(state: AppState): Kompetansemaal[] {
-  return filtrerFag(state.kompetansemaal, state.innstillinger.aktivtFag);
-}
-
-export function fagordIFag(state: AppState): Fagord[] {
-  const temaIds = new Set(temaerIFag(state).map((t) => t.id));
-  return state.fagord.filter((f) => f.temaIds.some((id) => temaIds.has(id)));
-}
-
-export function horingerIFag(state: AppState): Horing[] {
-  const temaIds = new Set(temaerIFag(state).map((t) => t.id));
-  return state.horinger.filter((h) => temaIds.has(h.temaId));
-}
-
-export function aktivtFag(state: AppState): Fag | undefined {
-  return state.fag.find((f) => f.id === state.innstillinger.aktivtFag);
-}
+export {
+  aktivtFag,
+  fagordIFag,
+  filtrerFag,
+  horingerIFag,
+  maalIFag,
+  temaerIFag,
+} from "./fag-utvalg";

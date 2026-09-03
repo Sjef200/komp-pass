@@ -88,6 +88,7 @@ export function Temaer({
         <HoringForm
           temaer={temaer}
           visEmoji={visEmoji}
+          prompts={state.prompts}
           forhåndsvalgtTemaId={skjemaTema}
           onLagre={(h) => {
             onLagreHoring(h);

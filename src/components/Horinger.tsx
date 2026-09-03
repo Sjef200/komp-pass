@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { formatDato, KILDE_LABEL } from "../lib/format";
+import { formatDato, kildeLinje } from "../lib/format";
 import { horingerIFag, temaerIFag } from "../lib/store";
 import type { AppState, Horing } from "../lib/types";
 import { HoringForm } from "./HoringForm";
@@ -88,7 +88,7 @@ export function Horinger({
                   <p className="mt-2 text-sm text-[#191C1F]/45">Uten notat.</p>
                 )}
                 <p className="mt-2 text-xs text-[#191C1F]/45">
-                  {KILDE_LABEL[h.kilde] ?? h.kilde}
+                  {kildeLinje(h)}
                 </p>
               </li>
             );
@@ -100,6 +100,7 @@ export function Horinger({
         <HoringForm
           temaer={temaer}
           visEmoji={visEmoji}
+          prompts={state.prompts}
           onLagre={(h) => {
             onLagreHoring(h);
             setSkjema(false);

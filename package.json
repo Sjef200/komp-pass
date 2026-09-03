@@ -7,11 +7,16 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "mcp": "tsx mcp/src/server.ts",
+    "mcp:inspect": "npx @modelcontextprotocol/inspector ./node_modules/.bin/tsx mcp/src/server.ts",
+    "test": "tsx --test src/lib/ai-overlay.test.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/server": "^2.0.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -21,6 +26,7 @@
     "@vitejs/plugin-react": "^6.1.0",
     "oxlint": "^1.79.0",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.13",
     "typescript": "~6.0.2",
     "vite": "^8.2.2"
   }

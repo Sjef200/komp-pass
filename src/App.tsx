@@ -2,17 +2,19 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { FagordListe } from "./components/Fagord";
 import { Horinger } from "./components/Horinger";
 import { Oversikt } from "./components/Oversikt";
+import { Promptbibliotek } from "./components/Promptbibliotek";
 import { Temaer } from "./components/Temaer";
 import { Utvikling } from "./components/Utvikling";
 import { eksporterFilnavn } from "./lib/store";
 import { StoreProvider, useStore } from "./lib/store-context";
 
-type Side = "oversikt" | "temaer" | "fagord" | "horinger" | "utvikling";
+type Side = "oversikt" | "temaer" | "fagord" | "prompter" | "horinger" | "utvikling";
 
 const SIDER: { id: Side; label: string }[] = [
   { id: "oversikt", label: "Oversikt" },
   { id: "temaer", label: "Temaer" },
   { id: "fagord", label: "Fagord" },
+  { id: "prompter", label: "Prompter" },
   { id: "horinger", label: "Høringer" },
   { id: "utvikling", label: "Utvikling" },
 ];
@@ -26,7 +28,7 @@ export default function App() {
 }
 
 function Skall() {
-  const { state, appendHoring, setFagordStatus, setInnstillinger, importer, eksporter } =
+  const { state, appendHoring, setFagordStatus, setInnstillinger, importer, eksporter, settPromptsFraDisk } =
     useStore();
   const [side, setSide] = useState<Side>("oversikt");
   const [importFeil, setImportFeil] = useState<string | null>(null);
@@ -177,6 +179,9 @@ function Skall() {
         )}
         {side === "fagord" && (
           <FagordListe state={state} onStatus={setFagordStatus} />
+        )}
+        {side === "prompter" && (
+          <Promptbibliotek prompts={state.prompts} onImportert={settPromptsFraDisk} />
         )}
         {side === "horinger" && (
           <Horinger state={state} onLagreHoring={appendHoring} />
