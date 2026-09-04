@@ -4,41 +4,71 @@
     "navn": "Markedsføring og ledelse 1",
     "kode": "SAM3045",
     "emoji": "📊",
-    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3045"
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3045",
+    "laereplanKode": "MFL01-04",
+    "kompetansemaalsettKode": "KV528",
+    "kompetansemaalsettUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV528",
+    "spraak": "nob",
+    "sistEndret": "2026-09-03T18:03:49.592Z"
   },
   {
     "id": "male2",
     "navn": "Markedsføring og ledelse 2",
     "kode": "SAM3046",
     "emoji": "📈",
-    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3046"
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3046",
+    "laereplanKode": "MFL01-04",
+    "kompetansemaalsettKode": "KV529",
+    "kompetansemaalsettUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV529",
+    "spraak": "nob",
+    "sistEndret": "2026-09-03T18:03:49.592Z"
   },
   {
     "id": "entrep1",
     "navn": "Entreprenørskap og bedriftsutvikling 1",
     "kode": "SAM3063",
     "emoji": "💡",
-    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3063"
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3063",
+    "laereplanKode": "ENT01-03",
+    "kompetansemaalsettKode": "KV526",
+    "kompetansemaalsettUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV526",
+    "spraak": "nob",
+    "sistEndret": "2026-09-03T18:03:49.592Z"
   },
   {
     "id": "entrep2",
     "navn": "Entreprenørskap og bedriftsutvikling 2",
     "kode": "SAM3064",
     "emoji": "🚀",
-    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3064"
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/SAM3064",
+    "laereplanKode": "ENT01-03",
+    "kompetansemaalsettKode": "KV527",
+    "kompetansemaalsettUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV527",
+    "spraak": "nob",
+    "sistEndret": "2026-09-03T18:03:49.592Z"
   },
   {
     "id": "norsk-hovedmal",
     "navn": "Norsk hovedmål",
     "kode": "NOR1267",
     "emoji": "✍️",
-    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/NOR1267"
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/NOR1267",
+    "laereplanKode": "NOR01-08",
+    "kompetansemaalsettKode": "KV115",
+    "kompetansemaalsettUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV115",
+    "spraak": "nob",
+    "sistEndret": "2026-09-03T18:03:49.592Z"
   },
   {
     "id": "norsk-muntlig",
     "navn": "Norsk muntlig",
     "kode": "NOR1269",
     "emoji": "🎙️",
-    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/NOR1269"
+    "apiUrl": "https://data.udir.no/kl06/v201906/fagkoder/NOR1269",
+    "laereplanKode": "NOR01-08",
+    "kompetansemaalsettKode": "KV115",
+    "kompetansemaalsettUrl": "https://data.udir.no/kl06/v201906/kompetansemaalsett-lk20/KV115",
+    "spraak": "nob",
+    "sistEndret": "2026-09-03T18:03:49.592Z"
   }
 ]

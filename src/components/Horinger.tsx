@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { formatDato, kildeLinje } from "../lib/format";
-import { horingerIFag, temaerIFag } from "../lib/store";
-import type { AppState, Horing } from "../lib/types";
+import { aktivtFag, horingerIFag, temaerIFag } from "../lib/store";
+import type { AppState, Horing, Prompt } from "../lib/types";
 import { HoringForm } from "./HoringForm";
 import { KarakterTall } from "./KarakterTall";
 import { TomtFag } from "./Temaer";
@@ -9,11 +9,16 @@ import { TomtFag } from "./Temaer";
 export function Horinger({
   state,
   onLagreHoring,
+  prompts,
+  onHoringPagar,
 }: {
   state: AppState;
   onLagreHoring: (h: Horing) => void;
+  prompts?: Prompt[];
+  onHoringPagar?: (pagar: boolean) => void;
 }) {
   const visEmoji = state.innstillinger.visEmoji;
+  const fag = aktivtFag(state);
   const temaer = temaerIFag(state);
   const temaById = Object.fromEntries(temaer.map((t) => [t.id, t]));
   const horinger = [...horingerIFag(state)].sort((a, b) => {
@@ -36,11 +41,15 @@ export function Horinger({
     <div>
       <div className="mb-4 flex items-center justify-between gap-3">
         <p className="text-sm text-[#191C1F]/60">
-          {horinger.length} høring{horinger.length === 1 ? "" : "er"} · nyeste først
+          {fag ? `${fag.navn} · ${fag.kode}` : "Fag"} · {horinger.length} høring
+          {horinger.length === 1 ? "" : "er"} · nyeste først
         </p>
         <button
           type="button"
-          onClick={() => setSkjema(true)}
+          onClick={() => {
+            setSkjema(true);
+            onHoringPagar?.(true);
+          }}
           className="rounded-lg bg-[#191C1F] px-3 py-2 text-sm text-white"
         >
           Ny høring
@@ -88,6 +97,7 @@ export function Horinger({
                   <p className="mt-2 text-sm text-[#191C1F]/45">Uten notat.</p>
                 )}
                 <p className="mt-2 text-xs text-[#191C1F]/45">
+                  {fag ? `${fag.kode} · ` : ""}
                   {kildeLinje(h)}
                 </p>
               </li>
@@ -100,12 +110,16 @@ export function Horinger({
         <HoringForm
           temaer={temaer}
           visEmoji={visEmoji}
-          prompts={state.prompts}
+          prompts={prompts ?? state.prompts}
           onLagre={(h) => {
             onLagreHoring(h);
             setSkjema(false);
+            onHoringPagar?.(false);
           }}
-          onAvbryt={() => setSkjema(false)}
+          onAvbryt={() => {
+            setSkjema(false);
+            onHoringPagar?.(false);
+          }}
         />
       )}
     </div>

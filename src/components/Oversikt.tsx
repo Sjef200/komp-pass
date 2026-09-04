@@ -6,12 +6,13 @@ import {
   maalStatusLabel,
   snittSisteKarakter,
 } from "../lib/dekning";
-import { fagordIFag, maalIFag, temaerIFag } from "../lib/store";
+import { fagordIFag, maalIFag, temaerIFag, aktivtFag } from "../lib/store";
 import type { AppState, Kompetansemaal } from "../lib/types";
 import { Dekningsstripe } from "./Dekningsstripe";
 
 export function Oversikt({ state }: { state: AppState }) {
   const visEmoji = state.innstillinger.visEmoji;
+  const fag = aktivtFag(state);
   const temaer = temaerIFag(state);
   const maal = maalIFag(state);
   const fagord = fagordIFag(state);
@@ -26,6 +27,13 @@ export function Oversikt({ state }: { state: AppState }) {
 
   return (
     <div className="space-y-6">
+      {fag && (
+        <p className="text-sm text-[#191C1F]/60">
+          {fag.navn} · {fag.kode}
+          {fag.laereplanKode ? ` · ${fag.laereplanKode}` : ""}
+          {fag.kompetansemaalsettKode ? ` · ${fag.kompetansemaalsettKode}` : ""}
+        </p>
+      )}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Kpi label="Snittkarakter" hint="Siste karakter per hørte tema">
           <p
@@ -150,6 +158,7 @@ function MaalRad({
             <p className="text-xs text-[#191C1F]/55">
               <span style={{ color: statusFarge }}>{maalStatusLabel(d.status)}</span>
               {d.snitt != null && <> · snitt {formatSnitt(d.snitt)}</>}
+              {maal.udirKode ? <> · Udir {maal.udirKode}</> : null}
             </p>
           </div>
         </div>

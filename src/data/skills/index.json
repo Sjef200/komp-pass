@@ -1,0 +1,75 @@
+{
+  "skills": [
+    {
+      "id": "velg-fag-forst",
+      "fil": "velg-fag-forst/SKILL.md",
+      "navn": "Velg fag først",
+      "beskrivelse": "Velg og bekreft fag før ethvert spørsmål, oppslag eller høring. Ikke anta Markedsføring og ledelse 1.",
+      "kilde": "plattform",
+      "kategori": "plattform",
+      "fagIds": []
+    },
+    {
+      "id": "lareplanstyrt-horing",
+      "fil": "lareplanstyrt-horing/SKILL.md",
+      "navn": "Læreplanstyrt høring",
+      "beskrivelse": "Koble spørsmål og vurdering til konkrete kompetansemål i det valgte faget.",
+      "kilde": "plattform",
+      "kategori": "plattform",
+      "fagIds": []
+    },
+    {
+      "id": "muntlig-horing",
+      "fil": "muntlig-horing/SKILL.md",
+      "navn": "Muntlig høring",
+      "beskrivelse": "Ett spørsmål om gangen, krev begrepsskille, gi karaktergrunnlag.",
+      "kilde": "plattform",
+      "kategori": "plattform",
+      "fagIds": []
+    },
+    {
+      "id": "logg-etter-horing",
+      "fil": "logg-etter-horing/SKILL.md",
+      "navn": "Logg etter høring",
+      "beskrivelse": "Logg høring og oppdater bare relevante fagord, med full KI-proveniens.",
+      "kilde": "plattform",
+      "kategori": "plattform",
+      "fagIds": []
+    },
+    {
+      "id": "fagbytte",
+      "fil": "fagbytte/SKILL.md",
+      "navn": "Fagbytte",
+      "beskrivelse": "Avslutt kontekst før bytte mellom MFL, entreprenørskap og norsk.",
+      "kilde": "plattform",
+      "kategori": "plattform",
+      "fagIds": []
+    },
+    {
+      "id": "markedsforingslaering",
+      "fil": "markedsforingslaering/SKILL.md",
+      "navn": "Markedsføringslæring",
+      "beskrivelse": "Læringsmodus for markedsføring mot karakter 6: definisjon, begrunnelse, eksempel og avgrensning mot nabobegrep.",
+      "kilde": "plattform",
+      "kategori": "fag",
+      "fagIds": ["male1", "male2"],
+      "referanser": [
+        {
+          "id": "karakterkjennetegn",
+          "navn": "Karakterkjennetegn",
+          "sti": "markedsforingslaering/references/karakterkjennetegn.md"
+        },
+        {
+          "id": "markedsforingsfaget",
+          "navn": "Markedsføringsfaget",
+          "sti": "markedsforingslaering/references/markedsforingsfaget.md"
+        },
+        {
+          "id": "markedsundersokelser",
+          "navn": "Markedsundersøkelser",
+          "sti": "markedsforingslaering/references/markedsundersokelser.md"
+        }
+      ]
+    }
+  ]
+}

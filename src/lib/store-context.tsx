@@ -15,6 +15,7 @@ import type {
   Innstillinger,
   PersistedState,
   Prompt,
+  Skill,
 } from "./types";
 import {
   appendHoringIState,
@@ -31,6 +32,7 @@ import {
 type HmrPayload = {
   overlay?: AiOverlay;
   prompts?: Prompt[];
+  skills?: Skill[];
 };
 
 type StoreApi = {
@@ -41,6 +43,7 @@ type StoreApi = {
   importer: (raw: unknown) => void;
   eksporter: () => AppState;
   settPromptsFraDisk: (prompts: Prompt[]) => void;
+  settBibliotekFraDisk: (prompts: Prompt[], skills?: Skill[]) => void;
 };
 
 const StoreContext = createContext<StoreApi | null>(null);
@@ -52,12 +55,17 @@ function skriv(next: AppState): AppState {
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [aiOverlay, setAiOverlay] = useState<AiOverlay>(() => seedAiOverlay());
+  const [diskSkills, setDiskSkills] = useState<Skill[] | null>(null);
   const [state, setState] = useState<AppState>(() => lastState(seedAiOverlay()));
 
-  const byggPaNytt = useCallback((overlay: AiOverlay) => {
+  const byggPaNytt = useCallback((overlay: AiOverlay, skills?: Skill[]) => {
     setAiOverlay(overlay);
-    setState(mergeState(baseState(), lesOverlay(), overlay));
-  }, []);
+    if (skills) setDiskSkills(skills);
+    const base = baseState();
+    if (skills) base.skills = skills;
+    else if (diskSkills) base.skills = diskSkills;
+    setState(mergeState(base, lesOverlay(), overlay));
+  }, [diskSkills]);
 
   useEffect(() => {
     const hot = import.meta.hot;
@@ -67,7 +75,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ...(data.overlay ?? {}),
         prompts: data.prompts ?? data.overlay?.prompts,
       };
-      byggPaNytt(overlay);
+      byggPaNytt(overlay, data.skills);
     };
     hot.on("mfl:ai-overlay", onOverlay);
     return () => {
@@ -78,13 +86,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!import.meta.env.DEV) return;
     let avbrutt = false;
-    fetch("/api/prompts")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((prompts: Prompt[] | null) => {
-        if (avbrutt || !Array.isArray(prompts)) return;
+    Promise.all([
+      fetch("/api/prompts").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/skills").then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([prompts, skills]: [Prompt[] | null, Skill[] | null]) => {
+        if (avbrutt) return;
         setAiOverlay((prev) => {
-          const next = { ...prev, prompts };
-          setState(mergeState(baseState(), lesOverlay(), next));
+          const next = { ...prev, prompts: Array.isArray(prompts) ? prompts : prev.prompts };
+          const base = baseState();
+          if (Array.isArray(skills)) {
+            setDiskSkills(skills);
+            base.skills = skills;
+          }
+          setState(mergeState(base, lesOverlay(), next));
           return next;
         });
       })
@@ -130,10 +145,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const settPromptsFraDisk = useCallback((prompts: Prompt[]) => {
     setAiOverlay((prev) => {
       const next = { ...prev, prompts };
-      setState(mergeState(baseState(), lesOverlay(), next));
+      const base = baseState();
+      if (diskSkills) base.skills = diskSkills;
+      setState(mergeState(base, lesOverlay(), next));
       return next;
     });
-  }, []);
+  }, [diskSkills]);
+
+  const settBibliotekFraDisk = useCallback((prompts: Prompt[], skills?: Skill[]) => {
+    if (skills) setDiskSkills(skills);
+    setAiOverlay((prev) => {
+      const next = { ...prev, prompts };
+      const base = baseState();
+      if (skills) base.skills = skills;
+      else if (diskSkills) base.skills = diskSkills;
+      setState(mergeState(base, lesOverlay(), next));
+      return next;
+    });
+  }, [diskSkills]);
 
   const eksporter = useCallback(() => state, [state]);
 
@@ -146,6 +175,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       importer,
       eksporter,
       settPromptsFraDisk,
+      settBibliotekFraDisk,
     }),
     [
       state,
@@ -155,6 +185,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       importer,
       eksporter,
       settPromptsFraDisk,
+      settBibliotekFraDisk,
     ],
   );
 

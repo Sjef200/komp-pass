@@ -5,7 +5,7 @@ import horingerJson from "../data/horinger.json";
 import fagordJson from "../data/fagord.json";
 import aiOverlayJson from "../data/ai-overlay.json";
 import { mergeTreLag } from "./ai-overlay";
-import { seedPrompts } from "./prompt-katalog";
+import { seedPrompts, seedSkills } from "./skill-katalog";
 import type {
   AiOverlay,
   AppState,
@@ -34,6 +34,7 @@ export function baseState(): AppState {
     horinger: horingerJson as Horing[],
     fagord: fagordJson as Fagord[],
     prompts: seedPrompts(),
+    skills: seedSkills(),
     innstillinger: { ...defaultInnstillinger },
   };
 }
@@ -88,7 +89,8 @@ export function erGyldigTilstand(value: unknown): value is PersistedState {
     Array.isArray(o.temaer) ||
     Array.isArray(o.horinger) ||
     Array.isArray(o.fagord) ||
-    Array.isArray(o.prompts);
+    Array.isArray(o.prompts) ||
+    Array.isArray(o.skills);
   const hasSettings = o.innstillinger != null && typeof o.innstillinger === "object";
   return hasArray || hasSettings;
 }

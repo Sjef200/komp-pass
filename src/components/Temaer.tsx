@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { statusTekst } from "../lib/colors";
 import { sisteHoring, sisteKarakter } from "../lib/dekning";
 import { maalIFag, temaerIFag } from "../lib/store";
-import type { AppState, Horing, Tema } from "../lib/types";
+import type { AppState, Horing, Prompt, Tema } from "../lib/types";
 import { HoringForm } from "./HoringForm";
 import { KarakterTall } from "./KarakterTall";
 
@@ -11,9 +11,13 @@ type Filter = "alle" | "svake" | "uhorte";
 export function Temaer({
   state,
   onLagreHoring,
+  prompts,
+  onHoringPagar,
 }: {
   state: AppState;
   onLagreHoring: (h: Horing) => void;
+  prompts?: Prompt[];
+  onHoringPagar?: (pagar: boolean) => void;
 }) {
   const visEmoji = state.innstillinger.visEmoji;
   const temaer = temaerIFag(state);
@@ -78,7 +82,10 @@ export function Temaer({
               state={state}
               visEmoji={visEmoji}
               maalById={maalById}
-              onNyHoring={() => setSkjemaTema(tema.id)}
+              onNyHoring={() => {
+                setSkjemaTema(tema.id);
+                onHoringPagar?.(true);
+              }}
             />
           ))}
         </ul>
@@ -88,13 +95,17 @@ export function Temaer({
         <HoringForm
           temaer={temaer}
           visEmoji={visEmoji}
-          prompts={state.prompts}
+          prompts={prompts ?? state.prompts}
           forhåndsvalgtTemaId={skjemaTema}
           onLagre={(h) => {
             onLagreHoring(h);
             setSkjemaTema(null);
+            onHoringPagar?.(false);
           }}
-          onAvbryt={() => setSkjemaTema(null)}
+          onAvbryt={() => {
+            setSkjemaTema(null);
+            onHoringPagar?.(false);
+          }}
         />
       )}
     </div>

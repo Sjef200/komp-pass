@@ -7,6 +7,8 @@ import { Temaer } from "./components/Temaer";
 import { Utvikling } from "./components/Utvikling";
 import { eksporterFilnavn } from "./lib/store";
 import { StoreProvider, useStore } from "./lib/store-context";
+import udirMetaJson from "./data/udir-meta.json";
+import { skillsSomPrompts } from "./lib/skill-katalog";
 
 type Side = "oversikt" | "temaer" | "fagord" | "prompter" | "horinger" | "utvikling";
 
@@ -28,14 +30,31 @@ export default function App() {
 }
 
 function Skall() {
-  const { state, appendHoring, setFagordStatus, setInnstillinger, importer, eksporter, settPromptsFraDisk } =
-    useStore();
+  const {
+    state,
+    appendHoring,
+    setFagordStatus,
+    setInnstillinger,
+    importer,
+    eksporter,
+    settBibliotekFraDisk,
+  } = useStore();
   const [side, setSide] = useState<Side>("oversikt");
   const [importFeil, setImportFeil] = useState<string | null>(null);
   const [importOk, setImportOk] = useState(false);
+  const [horingPagar, setHoringPagar] = useState(false);
   const filRef = useRef<HTMLInputElement>(null);
   const fag = state.fag.find((f) => f.id === state.innstillinger.aktivtFag);
   const visEmoji = state.innstillinger.visEmoji;
+  const udir = udirMetaJson as {
+    status?: string;
+    hentet?: string;
+    feilmelding?: string | null;
+  };
+  const proveniensPrompts = [
+    ...skillsSomPrompts(state.skills),
+    ...state.prompts.filter((p) => !state.skills.some((s) => s.id === p.id)),
+  ];
 
   function lastNed() {
     const blob = new Blob([JSON.stringify(eksporter(), null, 2)], {
@@ -71,6 +90,27 @@ function Skall() {
     }
   }
 
+  function byttFag(neste: string) {
+    if (neste === state.innstillinger.aktivtFag) return;
+    if (horingPagar) {
+      const ok = window.confirm(
+        "En høring pågår. Bytt fag likevel? Konteksten fra dette faget følger ikke med.",
+      );
+      if (!ok) return;
+      setHoringPagar(false);
+    }
+    setInnstillinger({ aktivtFag: neste });
+  }
+
+  const udirStatus =
+    udir.status === "rate-limited"
+      ? "Udir rate-limitet · lokal cache"
+      : udir.status === "cache"
+        ? "Udir-cache"
+        : udir.status === "feil"
+          ? "Udir-feil · lokal cache"
+          : "Udir Grep";
+
   return (
     <div className="min-h-dvh bg-bg text-ink">
       <header className="border-b border-[#191C1F]/8 bg-white/80 backdrop-blur">
@@ -79,11 +119,17 @@ function Skall() {
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-[#191C1F]/45">
                 Øvingsapp · {fag?.kode}
+                {fag?.laereplanKode ? ` · ${fag.laereplanKode}` : ""}
+                {" · "}
+                {udirStatus}
               </p>
               <h1 className="mt-0.5 truncate text-xl font-medium sm:text-2xl">
                 {visEmoji && fag ? <span className="mr-2">{fag.emoji}</span> : null}
-                {fag?.navn ?? "Markedsføring og ledelse"}
+                {fag?.navn ?? "Øvingsapp"}
               </h1>
+              {udir.feilmelding ? (
+                <p className="mt-1 text-xs text-[#C2622C]">{udir.feilmelding}</p>
+              ) : null}
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <label className="sr-only" htmlFor="fag-velger">
@@ -93,12 +139,12 @@ function Skall() {
                 id="fag-velger"
                 className="rounded-lg border border-[#191C1F]/15 bg-white px-2.5 py-1.5 text-sm"
                 value={state.innstillinger.aktivtFag}
-                onChange={(e) => setInnstillinger({ aktivtFag: e.target.value })}
+                onChange={(e) => byttFag(e.target.value)}
               >
                 {state.fag.map((f) => (
                   <option key={f.id} value={f.id}>
                     {visEmoji ? `${f.emoji} ` : ""}
-                    {f.navn}
+                    {f.navn} ({f.kode})
                   </option>
                 ))}
               </select>
@@ -175,16 +221,31 @@ function Skall() {
 
         {side === "oversikt" && <Oversikt state={state} />}
         {side === "temaer" && (
-          <Temaer state={state} onLagreHoring={appendHoring} />
+          <Temaer
+            state={state}
+            prompts={proveniensPrompts}
+            onLagreHoring={appendHoring}
+            onHoringPagar={setHoringPagar}
+          />
         )}
         {side === "fagord" && (
           <FagordListe state={state} onStatus={setFagordStatus} />
         )}
         {side === "prompter" && (
-          <Promptbibliotek prompts={state.prompts} onImportert={settPromptsFraDisk} />
+          <Promptbibliotek
+            prompts={state.prompts}
+            skills={state.skills}
+            fag={state.fag}
+            onImportert={settBibliotekFraDisk}
+          />
         )}
         {side === "horinger" && (
-          <Horinger state={state} onLagreHoring={appendHoring} />
+          <Horinger
+            state={state}
+            prompts={proveniensPrompts}
+            onLagreHoring={appendHoring}
+            onHoringPagar={setHoringPagar}
+          />
         )}
         {side === "utvikling" && <Utvikling state={state} />}
       </main>

@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "mcp": "tsx mcp/src/server.ts",
     "mcp:inspect": "npx @modelcontextprotocol/inspector ./node_modules/.bin/tsx mcp/src/server.ts",
-    "test": "tsx --test src/lib/ai-overlay.test.ts",
+    "test": "tsx --test src/lib/*.test.ts",
     "fetch:udir": "tsx scripts/fetch-udir.ts"
   },
   "dependencies": {

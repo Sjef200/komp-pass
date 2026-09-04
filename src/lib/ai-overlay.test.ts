@@ -66,6 +66,7 @@ test("mergeTreLag gir tre lag på app-state", () => {
       },
     ],
     prompts: [],
+    skills: [],
     innstillinger: { aktivtFag: "male1", visEmoji: true },
   } as AppState;
   const next = mergeTreLag(

@@ -52,6 +52,7 @@ export function mergeTreLag(
     ]),
     fagord: mergeByIdSisteVinner([base.fagord, local?.fagord, ai?.fagord]),
     prompts: mergeByIdSisteVinner([base.prompts, local?.prompts, ai?.prompts]),
+    skills: mergeByIdSisteVinner([base.skills, local?.skills]),
     innstillinger: {
       ...base.innstillinger,
       ...local?.innstillinger,

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { fagordIFag, temaerIFag } from "../lib/store";
+import { aktivtFag, fagordIFag, temaerIFag } from "../lib/store";
+import { INNSATS_LABEL } from "../lib/format";
 import type { AppState, Fagord, FagordStatus } from "../lib/types";
 import { TomtFag } from "./Temaer";
 
@@ -23,6 +24,7 @@ export function FagordListe({
   onStatus: (id: string, status: FagordStatus) => void;
 }) {
   const visEmoji = state.innstillinger.visEmoji;
+  const fag = aktivtFag(state);
   const temaer = temaerIFag(state);
   const fagord = fagordIFag(state);
   const [temaFilter, setTemaFilter] = useState("alle");
@@ -61,6 +63,10 @@ export function FagordListe({
   return (
     <div>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-[#191C1F]/60">
+          {fag ? `${fag.navn} · ${fag.kode}` : "Fag"}
+          {fag?.laereplanKode ? ` · ${fag.laereplanKode}` : ""}
+        </p>
         <label className="text-sm">
           <span className="sr-only">Filter på tema</span>
           <select
@@ -150,7 +156,8 @@ function FagordKort({
           ) : null}
           {fagord.ai ? (
             <p className="mt-2 text-xs text-[#191C1F]/45">
-              Sist satt av KI · {fagord.ai.modell} · «{fagord.ai.promptNavn}»
+              Sist satt av KI · {fagord.ai.modell} · {INNSATS_LABEL[fagord.ai.innsats] ?? fagord.ai.innsats} innsats · «
+              {fagord.ai.promptNavn}»
             </p>
           ) : null}
         </div>

@@ -11,6 +11,21 @@ export type FagordStatus = "ny" | "usikker" | "sitter";
 export type MaalStatus = "udekket" | "svak" | "ok" | "sterk";
 export type AiInnsats = "lav" | "medium" | "hoy" | "maks";
 export type PromptKilde = "lokal" | "plattform" | "github";
+export type SkillKategori = "plattform" | "fag" | "prompt";
+export type UdirStatus = "ok" | "cache" | "rate-limited" | "feil";
+
+export const FAG_IDS: FagId[] = [
+  "male1",
+  "male2",
+  "entrep1",
+  "entrep2",
+  "norsk-hovedmal",
+  "norsk-muntlig",
+];
+
+export function erFagId(value: string): value is FagId {
+  return (FAG_IDS as string[]).includes(value);
+}
 
 export type Fag = {
   id: FagId;
@@ -18,6 +33,11 @@ export type Fag = {
   kode: string;
   emoji: string;
   apiUrl?: string;
+  laereplanKode?: string;
+  kompetansemaalsettKode?: string;
+  kompetansemaalsettUrl?: string;
+  spraak?: string;
+  sistEndret?: string;
 };
 
 export type Kompetansemaal = {
@@ -28,6 +48,8 @@ export type Kompetansemaal = {
   emoji: string;
   udirKode?: string;
   apiUrl?: string;
+  spraak?: string;
+  sistEndret?: string;
 };
 
 export type Tema = {
@@ -67,6 +89,39 @@ export type Fagord = {
   ai?: AiProveniens;
 };
 
+export type SkillReference = {
+  id: string;
+  navn: string;
+  sti: string;
+  markdown: string;
+};
+
+export type Skill = {
+  id: string;
+  navn: string;
+  beskrivelse: string;
+  markdown: string;
+  kilde: PromptKilde;
+  kildeUrl?: string;
+  importert?: string;
+  fagIds: FagId[];
+  referanser: SkillReference[];
+  kategori: SkillKategori;
+};
+
+export type SkillKatalogRad = {
+  id: string;
+  fil: string;
+  navn: string;
+  beskrivelse: string;
+  kilde: PromptKilde;
+  kildeUrl?: string;
+  importert?: string;
+  fagIds?: FagId[];
+  kategori?: SkillKategori;
+  referanser?: Array<{ id: string; navn: string; sti: string }>;
+};
+
 export type Prompt = {
   id: string;
   navn: string;
@@ -75,6 +130,7 @@ export type Prompt = {
   kilde: PromptKilde;
   kildeUrl?: string;
   importert?: string;
+  fagIds?: FagId[];
 };
 
 export type PromptKatalogRad = {
@@ -85,6 +141,7 @@ export type PromptKatalogRad = {
   kilde: PromptKilde;
   kildeUrl?: string;
   importert?: string;
+  fagIds?: FagId[];
 };
 
 export type Innstillinger = {
@@ -105,6 +162,7 @@ export type AppState = {
   horinger: Horing[];
   fagord: Fagord[];
   prompts: Prompt[];
+  skills: Skill[];
   innstillinger: Innstillinger;
 };
 

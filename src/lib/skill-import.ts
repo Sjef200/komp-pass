@@ -130,7 +130,7 @@ export function byggSkillKatalog(
   const base = origin.replace(/\/+$/, "");
   return {
     name: "mfl-ovingsapp",
-    description: "Prompter og ferdigheter for markedsføring og ledelse",
+    description: "Øvingsapp for markedsføring, entreprenørskap og norsk. Skills for fagvalg, læreplanstyrt høring og logging.",
     plugin: `${base}/plugin.json`,
     skills: skills.map((s) => ({
       id: s.id,
