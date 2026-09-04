@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { mergeHoringerAppendOnly } from "./ai-overlay.ts";
-import { hentLareplan, hentOversikt, hentSkill, hentSkillReference, kallLoggHoring, kallOppdaterFagord, listFag, listSkills, stillSporsmal } from "../../mcp/src/tools.ts";
+import { hentLareplan, hentOversikt, hentSkill, hentSkillReference, kallLoggHoring, kallOppdaterFagord, listFag, listKapitler, listSkills, stillSporsmal } from "../../mcp/src/tools.ts";
 
 function parse(res: { content: { type: "text"; text: string }[]; isError?: boolean }) {
   if (res.isError) return { error: res.content[0]?.text ?? "" };
@@ -37,11 +37,21 @@ test("hent_oversikt holder fagene adskilt", () => {
   assert.notEqual(a.temaerHort, undefined);
 });
 
-test("list_skills(male1) inkluderer markedsforingslaering", () => {
+test("list_skills(male1) inkluderer markedsforingslaering og kompetansemaal-mot-kapittel", () => {
   const data = parse(listSkills("male1"));
   const skills = data.skills as Array<{ id: string }>;
   assert.ok(skills.some((s) => s.id === "markedsforingslaering"));
+  assert.ok(skills.some((s) => s.id === "kompetansemaal-mot-kapittel"));
   assert.ok(skills.some((s) => s.id === "velg-fag-forst"));
+});
+
+test("list_kapitler er læreverk, ikke Udir-mål", () => {
+  const data = parse(listKapitler("male1"));
+  const kapitler = data.kapitler as Array<{ navn: string; temaer: unknown[]; maal: Array<{ id: string }> }>;
+  assert.ok(kapitler.some((k) => k.navn === "Markedsundersøkelser"));
+  const undersokelse = kapitler.find((k) => k.navn === "Markedsundersøkelser");
+  assert.ok((undersokelse?.temaer.length ?? 0) > 0);
+  assert.ok(undersokelse?.maal.some((m) => m.id === "male1-04"));
 });
 
 test("hent_skill og referanse for markedsundersøkelser", () => {

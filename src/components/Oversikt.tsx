@@ -1,22 +1,16 @@
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { karakterFarge } from "../lib/colors";
-import {
-  formatSnitt,
-  maalDekning,
-  maalStatusLabel,
-  snittSisteKarakter,
-} from "../lib/dekning";
+import { formatSnitt, maalDekning, maalStatusLabel, snittSisteKarakter } from "../lib/dekning";
+import { grupperKapittel } from "../lib/kapittel";
 import { fagordIFag, maalIFag, temaerIFag, aktivtFag } from "../lib/store";
-import type { AppState, Kompetansemaal } from "../lib/types";
-import { Dekningsstripe } from "./Dekningsstripe";
+import type { AppState } from "../lib/types";
 
 export function Oversikt({ state }: { state: AppState }) {
-  const visEmoji = state.innstillinger.visEmoji;
   const fag = aktivtFag(state);
   const temaer = temaerIFag(state);
   const maal = maalIFag(state);
   const fagord = fagordIFag(state);
-  const [apnet, setApnet] = useState<string | null>(null);
+  const kapitler = grupperKapittel(temaer, state.horinger);
 
   const horte = temaer.filter((t) =>
     state.horinger.some((h) => h.temaId === t.id),
@@ -24,6 +18,8 @@ export function Oversikt({ state }: { state: AppState }) {
   const snitt = snittSisteKarakter(temaer, state.horinger);
   const glipper = fagord.filter((f) => f.status !== "sitter").length;
   const dekning = maal.map((m) => maalDekning(m, temaer, state.horinger));
+  const maalUdekket = dekning.filter((d) => d.status === "udekket").length;
+  const maalSvake = dekning.filter((d) => d.status === "svak").length;
 
   return (
     <div className="space-y-6">
@@ -34,6 +30,17 @@ export function Oversikt({ state }: { state: AppState }) {
           {fag.kompetansemaalsettKode ? ` · ${fag.kompetansemaalsettKode}` : ""}
         </p>
       )}
+
+      <div className="rounded-2xl bg-white px-4 py-3.5 text-sm leading-relaxed text-[#191C1F]/75">
+        <p>
+          <span className="font-medium text-[#191C1F]">Kompetansemål</span> er Udirs krav
+          til hva du skal kunne.{" "}
+          <span className="font-medium text-[#191C1F]">Kapittel</span> er hvordan boka
+          deler opp faget. Du huker ikke av et mål fordi kapittelet er ferdig — dekning
+          kommer fra høringer på temaer.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Kpi label="Snittkarakter" hint="Siste karakter per hørte tema">
           <p
@@ -66,31 +73,65 @@ export function Oversikt({ state }: { state: AppState }) {
         </Kpi>
       </div>
 
-      {temaer.length === 0 && (
-        <p className="rounded-2xl bg-white px-4 py-3 text-sm text-[#191C1F]/70">
-          Dette faget har kompetansemål, men ingen temaer ennå. Legg dem inn i{" "}
-          <code className="rounded bg-[#F6F5F1] px-1">src/data/temaer.json</code>{" "}
-          når dere kommer dit.
-        </p>
-      )}
-
       <section>
-        <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-[#191C1F]/55">
+        <h2 className="mb-2 text-sm font-medium uppercase tracking-wide text-[#191C1F]/55">
           Kompetansemål
         </h2>
+        <p className="mb-3 text-sm text-[#191C1F]/60">
+          {maal.length} mål fra Udir
+          {maalUdekket > 0 ? ` · ${maalUdekket} udekket` : ""}
+          {maalSvake > 0 ? ` · ${maalSvake} svake` : ""}
+          . Full liste under fanen Kompetansemål.
+        </p>
         <ul className="space-y-2">
-          {dekning.map((d) => (
-            <MaalRad
-              key={d.maal.id}
-              d={d}
-              visEmoji={visEmoji}
-              apnet={apnet === d.maal.id}
-              onToggle={() =>
-                setApnet((id) => (id === d.maal.id ? null : d.maal.id))
-              }
-            />
+          {dekning.slice(0, 4).map((d) => (
+            <li key={d.maal.id} className="rounded-2xl bg-white px-4 py-3">
+              <p className="truncate font-medium">{d.maal.kortnavn}</p>
+              <p className="text-xs text-[#191C1F]/55">
+                {maalStatusLabel(d.status)}
+                {d.snitt != null && <> · snitt {formatSnitt(d.snitt)}</>}
+                {d.maal.udirKode ? <> · {d.maal.udirKode}</> : null}
+              </p>
+            </li>
           ))}
         </ul>
+      </section>
+
+      <section>
+        <h2 className="mb-2 text-sm font-medium uppercase tracking-wide text-[#191C1F]/55">
+          Kapittel
+        </h2>
+        {kapitler.length === 0 ? (
+          <p className="rounded-2xl bg-white px-4 py-3 text-sm text-[#191C1F]/70">
+            Dette faget har kompetansemål, men ingen kapitler eller temaer ennå. Legg dem inn i{" "}
+            <code className="rounded bg-[#F6F5F1] px-1">src/data/temaer.json</code>.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {kapitler.map((k) => (
+              <li key={k.id} className="rounded-2xl bg-white px-4 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{k.navn}</p>
+                    <p className="text-xs text-[#191C1F]/55">
+                      {k.horte}/{k.temaer.length} temaer hørt · læreverk, ikke Udir-mål
+                    </p>
+                  </div>
+                  <p
+                    className="font-serif text-2xl font-semibold"
+                    style={{
+                      color: karakterFarge(
+                        k.snitt == null ? null : Math.min(6, Math.max(1, Math.round(k.snitt))),
+                      ),
+                    }}
+                  >
+                    {formatSnitt(k.snitt)}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );
@@ -111,88 +152,5 @@ function Kpi({
       <div className="mt-3 flex flex-col items-start">{children}</div>
       <p className="mt-2 text-xs text-[#191C1F]/45">{hint}</p>
     </div>
-  );
-}
-
-function MaalRad({
-  d,
-  visEmoji,
-  apnet,
-  onToggle,
-}: {
-  d: ReturnType<typeof maalDekning>;
-  visEmoji: boolean;
-  apnet: boolean;
-  onToggle: () => void;
-}) {
-  const maal: Kompetansemaal = d.maal;
-  const statusFarge =
-    d.status === "udekket"
-      ? "#9B9B93"
-      : d.status === "svak"
-        ? "#C2622C"
-        : d.status === "ok"
-          ? "#B0770F"
-          : "#2E6B4B";
-
-  const tittel = d.segmenter
-    .map((s) => `${s.navn}: ${s.karakter ?? "ikke hørt"}`)
-    .join(" · ");
-
-  return (
-    <li className="rounded-2xl bg-white">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full flex-col gap-3 px-4 py-3.5 text-left sm:flex-row sm:items-center"
-        aria-expanded={apnet}
-      >
-        <div className="flex min-w-0 flex-1 items-center gap-3">
-          {visEmoji && (
-            <span className="text-xl" aria-hidden>
-              {maal.emoji}
-            </span>
-          )}
-          <div className="min-w-0">
-            <p className="truncate font-medium">{maal.kortnavn}</p>
-            <p className="text-xs text-[#191C1F]/55">
-              <span style={{ color: statusFarge }}>{maalStatusLabel(d.status)}</span>
-              {d.snitt != null && <> · snitt {formatSnitt(d.snitt)}</>}
-              {maal.udirKode ? <> · Udir {maal.udirKode}</> : null}
-            </p>
-          </div>
-        </div>
-        <div className="flex w-full items-center gap-3 sm:w-64 sm:shrink-0">
-          <Dekningsstripe segmenter={d.segmenter} tittel={tittel} />
-          <span className="w-20 shrink-0 text-right text-xs text-[#191C1F]/55">
-            {d.totaltTemaer === 0
-              ? "0 temaer"
-              : `${d.totaltTemaer} tema${d.totaltTemaer === 1 ? "" : "er"}`}
-          </span>
-        </div>
-      </button>
-      {apnet && (
-        <div className="border-t border-[#191C1F]/8 px-4 py-3 text-sm text-[#191C1F]/80">
-          <p className="leading-relaxed">{maal.tekst}</p>
-          {d.segmenter.length > 0 ? (
-            <ul className="mt-3 space-y-1.5">
-              {d.segmenter.map((s) => (
-                <li key={s.temaId} className="flex items-center justify-between gap-3">
-                  <span>{s.navn}</span>
-                  <span
-                    className="font-serif font-semibold"
-                    style={{ color: karakterFarge(s.karakter) }}
-                  >
-                    {s.karakter ?? "–"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-3 text-[#191C1F]/55">Ingen temaer er koblet til dette målet ennå.</p>
-          )}
-        </div>
-      )}
-    </li>
   );
 }

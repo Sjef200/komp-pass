@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { statusTekst } from "../lib/colors";
-import { sisteHoring, sisteKarakter } from "../lib/dekning";
+import { formatSnitt, sisteHoring, sisteKarakter } from "../lib/dekning";
+import { grupperKapittel, maalSomTrefferKapittel } from "../lib/kapittel";
 import { maalIFag, temaerIFag } from "../lib/store";
 import type { AppState, Horing, Prompt, Tema } from "../lib/types";
 import { HoringForm } from "./HoringForm";
@@ -28,25 +29,38 @@ export function Temaer({
   );
   const [filter, setFilter] = useState<Filter>("alle");
   const [skjemaTema, setSkjemaTema] = useState<string | null>(null);
+  const kapitler = grupperKapittel(temaer, state.horinger);
 
-  const filtrert = temaer.filter((t) => {
-    const k = sisteKarakter(state.horinger, t.id);
-    if (filter === "uhorte") return k == null;
-    if (filter === "svake") return k != null && k < 4;
-    return true;
-  });
+  const filtrertIds = new Set(
+    temaer
+      .filter((t) => {
+        const k = sisteKarakter(state.horinger, t.id);
+        if (filter === "uhorte") return k == null;
+        if (filter === "svake") return k != null && k < 4;
+        return true;
+      })
+      .map((t) => t.id),
+  );
+
+  const visteKapitler = kapitler
+    .map((k) => ({ ...k, temaer: k.temaer.filter((t) => filtrertIds.has(t.id)) }))
+    .filter((k) => k.temaer.length > 0);
 
   if (temaer.length === 0) {
     return (
       <TomtFag
-        tittel="Ingen temaer i dette faget ennå"
-        tekst="Strukturen tåler at dere legger inn temaer etter hvert, uten å endre appen. Start i src/data/temaer.json, eller importer en oppdatert tilstandsfil."
+        tittel="Ingen kapitler i dette faget ennå"
+        tekst="Kapittel er læreverkets inndeling. Legg inn temaer med kapittel i src/data/temaer.json."
       />
     );
   }
 
   return (
     <div>
+      <p className="mb-4 text-sm text-[#191C1F]/70">
+        Kapittel er læreverkets inndeling, ikke Udirs kompetansemål. Temaer inni kapittelet
+        treffer ett eller flere mål. Høringen logges på temaet.
+      </p>
       <div className="mb-4 flex flex-wrap gap-2">
         {(
           [
@@ -69,26 +83,56 @@ export function Temaer({
         ))}
       </div>
 
-      {filtrert.length === 0 ? (
+      {visteKapitler.length === 0 ? (
         <p className="rounded-2xl bg-white px-4 py-8 text-center text-sm text-[#191C1F]/60">
           Ingen temaer matcher filteret.
         </p>
       ) : (
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {filtrert.map((tema) => (
-            <TemaKort
-              key={tema.id}
-              tema={tema}
-              state={state}
-              visEmoji={visEmoji}
-              maalById={maalById}
-              onNyHoring={() => {
-                setSkjemaTema(tema.id);
-                onHoringPagar?.(true);
-              }}
-            />
-          ))}
-        </ul>
+        <div className="space-y-8">
+          {visteKapitler.map((kapittel) => {
+            const maalIKapittel = maalSomTrefferKapittel(maal, kapittel.temaer);
+            return (
+              <section key={kapittel.id}>
+                <div className="mb-3 flex items-end justify-between gap-3">
+                  <div>
+                    <h2 className="font-medium">{kapittel.navn}</h2>
+                    <p className="mt-0.5 text-xs text-[#191C1F]/50">
+                      Kapittel · {kapittel.horte}/{kapittel.temaer.length} temaer hørt
+                      {kapittel.snitt != null ? ` · snitt ${formatSnitt(kapittel.snitt)}` : ""}
+                    </p>
+                  </div>
+                </div>
+                {maalIKapittel.length > 0 && (
+                  <div className="mb-3 flex flex-wrap gap-1.5">
+                    {maalIKapittel.map((m) => (
+                      <span
+                        key={m.id}
+                        className="rounded-full bg-white px-2 py-0.5 text-xs text-[#191C1F]/70"
+                      >
+                        {m.udirKode ?? m.id}: {m.kortnavn}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  {kapittel.temaer.map((tema) => (
+                    <TemaKort
+                      key={tema.id}
+                      tema={tema}
+                      state={state}
+                      visEmoji={visEmoji}
+                      maalById={maalById}
+                      onNyHoring={() => {
+                        setSkjemaTema(tema.id);
+                        onHoringPagar?.(true);
+                      }}
+                    />
+                  ))}
+                </ul>
+              </section>
+            );
+          })}
+        </div>
       )}
 
       {skjemaTema && (
@@ -140,7 +184,10 @@ function TemaKort({
           )}
           <div className="min-w-0">
             <h3 className="font-medium leading-snug">{tema.navn}</h3>
-            <p className="mt-0.5 text-xs text-[#191C1F]/50">{statusTekst(karakter)}</p>
+            <p className="mt-0.5 text-xs text-[#191C1F]/50">
+              {tema.kapittel ? `${tema.kapittel} · ` : ""}
+              {statusTekst(karakter)}
+            </p>
           </div>
         </div>
         <KarakterTall karakter={karakter} size="lg" />

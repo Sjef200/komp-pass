@@ -10,6 +10,15 @@
       "fagIds": []
     },
     {
+      "id": "kompetansemaal-mot-kapittel",
+      "fil": "kompetansemaal-mot-kapittel/SKILL.md",
+      "navn": "Kompetansemål mot kapittel",
+      "beskrivelse": "Skille Udirs kompetansemål fra læreverkets kapitler. Huk aldri av et mål fordi kapittelet er ferdig.",
+      "kilde": "plattform",
+      "kategori": "plattform",
+      "fagIds": []
+    },
+    {
       "id": "lareplanstyrt-horing",
       "fil": "lareplanstyrt-horing/SKILL.md",
       "navn": "Læreplanstyrt høring",

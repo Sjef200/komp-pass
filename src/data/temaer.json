@@ -4,7 +4,7 @@
     "fagId": "male1",
     "navn": "Hva en markedsundersøkelse er",
     "emoji": "🔍",
-    "maalIds": ["m1-04"],
+    "maalIds": ["male1-04"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -12,7 +12,7 @@
     "fagId": "male1",
     "navn": "Formålet med undersøkelser",
     "emoji": "🎯",
-    "maalIds": ["m1-04", "m1-05"],
+    "maalIds": ["male1-04", "male1-05"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -20,7 +20,7 @@
     "fagId": "male1",
     "navn": "Markedsinformasjonssystem",
     "emoji": "🗄️",
-    "maalIds": ["m1-04", "m1-05"],
+    "maalIds": ["male1-04", "male1-05"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -28,7 +28,7 @@
     "fagId": "male1",
     "navn": "Primær, sekundær, kvalitativ, kvantitativ",
     "emoji": "🌳",
-    "maalIds": ["m1-04"],
+    "maalIds": ["male1-04"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -36,7 +36,7 @@
     "fagId": "male1",
     "navn": "Undersøkelsesdesign",
     "emoji": "🧭",
-    "maalIds": ["m1-04", "m1-05"],
+    "maalIds": ["male1-04", "male1-05"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -44,7 +44,7 @@
     "fagId": "male1",
     "navn": "Arbeidsfasene",
     "emoji": "📋",
-    "maalIds": ["m1-04"],
+    "maalIds": ["male1-04"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -52,7 +52,7 @@
     "fagId": "male1",
     "navn": "Dybdeintervju",
     "emoji": "🎙️",
-    "maalIds": ["m1-04"],
+    "maalIds": ["male1-04"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -60,7 +60,7 @@
     "fagId": "male1",
     "navn": "Fokusgruppe",
     "emoji": "👥",
-    "maalIds": ["m1-04"],
+    "maalIds": ["male1-04"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -68,7 +68,7 @@
     "fagId": "male1",
     "navn": "Observasjon",
     "emoji": "👀",
-    "maalIds": ["m1-04", "m1-02"],
+    "maalIds": ["male1-04", "male1-02"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -76,7 +76,7 @@
     "fagId": "male1",
     "navn": "Eksperiment",
     "emoji": "🧪",
-    "maalIds": ["m1-04"],
+    "maalIds": ["male1-04"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -84,7 +84,7 @@
     "fagId": "male1",
     "navn": "Survey",
     "emoji": "📝",
-    "maalIds": ["m1-04"],
+    "maalIds": ["male1-04"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -92,7 +92,7 @@
     "fagId": "male1",
     "navn": "Utvalg og populasjon",
     "emoji": "🎲",
-    "maalIds": ["m1-04"],
+    "maalIds": ["male1-04"],
     "kapittel": "Markedsundersøkelser"
   },
   {
@@ -100,7 +100,7 @@
     "fagId": "male1",
     "navn": "Validitet, reliabilitet, feilkilder",
     "emoji": "⚖️",
-    "maalIds": ["m1-04"],
+    "maalIds": ["male1-04"],
     "kapittel": "Markedsundersøkelser"
   }
 ]

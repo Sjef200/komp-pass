@@ -2,7 +2,13 @@
 
 Lokal app for å se hvor du står per tema, hvilke fagbegreper som glipper, og hvilke kompetansemål som faktisk er dekket gjennom muntlige høringer. Alt kan leses og oppdateres av både deg og KI via MCP.
 
-Kompetansemål og temaer er to forskjellige ting. Ett mål dekkes av flere temaer, og ett tema treffer flere mål. Dekningsgrad på et mål er avledet fra siste karakter per tema, ikke noe du huker av manuelt.
+Kompetansemål, kapittel og tema er tre forskjellige ting:
+
+- **Kompetansemål** er Udirs krav. Du huker dem ikke av.
+- **Kapittel** er læreverkets inndeling.
+- **Tema** er det dere hører. Ett tema treffer ett eller flere mål, og ligger i ett kapittel.
+
+Dekning på et mål er avledet fra siste karakter per tema, ikke fra at kapittelet er «ferdig».
 
 De seks fagene er adskilte kontekster: Markedsføring og ledelse 1 og 2, Entreprenørskap og bedriftsutvikling 1 og 2, Norsk hovedmål og Norsk muntlig. Norsk hovedmål og muntlig kan dele kompetansemålsett fra Udir, men de er likevel to fag. Bland dem ikke i samme høring.
 
@@ -86,7 +92,7 @@ Ikke bruk `console.log` i MCP-serveren — stdout er JSON-RPC.
 
 ### Verktøy
 
-Lesing: `list_fag`, `hent_lareplan`, `hent_oversikt`, `list_temaer`, `list_fagord`, `list_horinger`, `still_sporsmal`, `list_skills`, `hent_skill`, `hent_skill_reference`, `list_prompts`, `hent_prompt`.
+Lesing: `list_fag`, `hent_lareplan`, `list_kapitler`, `hent_oversikt`, `list_temaer`, `list_fagord`, `list_horinger`, `still_sporsmal`, `list_skills`, `hent_skill`, `hent_skill_reference`, `list_prompts`, `hent_prompt`.
 
 Skriving: `logg_horing` og `oppdater_fagord` krever `fagId`, modell, innsats (`lav` | `medium` | `hoy` | `maks`) og `promptId`. Tema og fagord må tilhøre faget. Høringer er append-only.
 
@@ -109,7 +115,7 @@ Skills ligger på **denne plattformen**. Samme mønster som Claude: du gir URL-e
 - Referanse: `http://127.0.0.1:43147/skills/markedsforingslaering/references/markedsundersokelser.md`
 - Plugin-manifest: `http://127.0.0.1:43147/plugin.json`
 
-Plattform-skills (alle fag): `velg-fag-forst`, `lareplanstyrt-horing`, `muntlig-horing`, `logg-etter-horing`, `fagbytte`.
+Plattform-skills (alle fag): `velg-fag-forst`, `kompetansemaal-mot-kapittel`, `lareplanstyrt-horing`, `muntlig-horing`, `logg-etter-horing`, `fagbytte`.
 
 Fagskill: `markedsforingslaering` (MFL1 og MFL2) med referansene karakterkjennetegn, markedsføringsfaget og markedsundersøkelser. Last opp en `.skill`-zip i fanen Prompter. Scripts og annen kode i pakken ignoreres.
 

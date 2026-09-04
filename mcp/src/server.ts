@@ -11,6 +11,7 @@ import {
   kallImporterPrompt,
   kallLoggHoring,
   kallOppdaterFagord,
+  listKapitler,
   listFag,
   listFagord,
   listHoringer,
@@ -59,6 +60,17 @@ export function createServer(): McpServer {
       }),
     },
     async ({ fagId }) => hentOversikt(fagId),
+  );
+
+  server.registerTool(
+    "list_kapitler",
+    {
+      title: "List kapitler",
+      description:
+        "Læreverkets kapitler i faget, med temaer og hvilke kompetansemål de treffer. Ikke det samme som hent_lareplan.",
+      inputSchema: z.object({ fagId: fagIdFelt.optional() }),
+    },
+    async ({ fagId }) => listKapitler(fagId),
   );
 
   server.registerTool(

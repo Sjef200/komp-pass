@@ -3,6 +3,7 @@ import { FagordListe } from "./components/Fagord";
 import { Horinger } from "./components/Horinger";
 import { Oversikt } from "./components/Oversikt";
 import { Promptbibliotek } from "./components/Promptbibliotek";
+import { KompetansemaalListe } from "./components/Kompetansemaal";
 import { Temaer } from "./components/Temaer";
 import { Utvikling } from "./components/Utvikling";
 import { eksporterFilnavn } from "./lib/store";
@@ -10,11 +11,19 @@ import { StoreProvider, useStore } from "./lib/store-context";
 import udirMetaJson from "./data/udir-meta.json";
 import { skillsSomPrompts } from "./lib/skill-katalog";
 
-type Side = "oversikt" | "temaer" | "fagord" | "prompter" | "horinger" | "utvikling";
+type Side =
+  | "oversikt"
+  | "kompetansemaal"
+  | "kapittel"
+  | "fagord"
+  | "prompter"
+  | "horinger"
+  | "utvikling";
 
 const SIDER: { id: Side; label: string }[] = [
   { id: "oversikt", label: "Oversikt" },
-  { id: "temaer", label: "Temaer" },
+  { id: "kompetansemaal", label: "Kompetansemål" },
+  { id: "kapittel", label: "Kapittel" },
   { id: "fagord", label: "Fagord" },
   { id: "prompter", label: "Prompter" },
   { id: "horinger", label: "Høringer" },
@@ -220,7 +229,10 @@ function Skall() {
         )}
 
         {side === "oversikt" && <Oversikt state={state} />}
-        {side === "temaer" && (
+        {side === "kompetansemaal" && (
+          <KompetansemaalListe key={state.innstillinger.aktivtFag} state={state} />
+        )}
+        {side === "kapittel" && (
           <Temaer
             key={state.innstillinger.aktivtFag}
             state={state}

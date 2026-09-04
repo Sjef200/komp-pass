@@ -5,6 +5,7 @@ import {
   sisteKarakter,
   snittSisteKarakter,
 } from "../../src/lib/dekning.ts";
+import { grupperKapittel } from "../../src/lib/kapittel.ts";
 import { fagordIFag, horingerIFag, maalIFag, temaerIFag } from "../../src/lib/fag-utvalg.ts";
 import { krevFag } from "../../src/lib/fag-validering.ts";
 import { skillGjelderFag } from "../../src/lib/skill-pack.ts";
@@ -139,11 +140,37 @@ export function listTemaer(fagId?: string, filter?: "alle" | "svake" | "uhorte")
           id: t.id,
           navn: t.navn,
           fagId: t.fagId,
+          kapittel: t.kapittel ?? null,
           maalIds: t.maalIds,
           sisteKarakter: siste?.karakter ?? null,
           sisteMangler: siste?.mangler ?? "",
         };
       }),
+    });
+  });
+}
+
+export function listKapitler(fagId?: string) {
+  return wrap(() => {
+    const { state, fagId: id } = medFag(fagId);
+    const temaer = temaerIFag(state, id);
+    const maal = maalIFag(state, id);
+    const kapitler = grupperKapittel(temaer, state.horinger);
+    return jsonText({
+      fagId: id,
+      merknad:
+        "Kapittel er læreverkets inndeling. Kompetansemål er Udir. Ikke behandle kapittelnavn som mål.",
+      kapitler: kapitler.map((k) => ({
+        id: k.id,
+        navn: k.navn,
+        snitt: formatSnitt(k.snitt),
+        temaerHort: `${k.horte}/${k.temaer.length}`,
+        maalIds: [...new Set(k.temaer.flatMap((t) => t.maalIds))],
+        maal: maal
+          .filter((m) => k.temaer.some((t) => t.maalIds.includes(m.id)))
+          .map((m) => ({ id: m.id, kortnavn: m.kortnavn, udirKode: m.udirKode ?? null })),
+        temaer: k.temaer.map((t) => ({ id: t.id, navn: t.navn, maalIds: t.maalIds })),
+      })),
     });
   });
 }
@@ -321,7 +348,7 @@ export function stillSporsmal(fagId?: string, temaId?: string) {
     return jsonText({
       fagId: fag.id,
       fag: { id: fag.id, navn: fag.navn, kode: fag.kode },
-      tema: { id: tema.id, navn: tema.navn, maalIds: tema.maalIds },
+      tema: { id: tema.id, navn: tema.navn, kapittel: tema.kapittel ?? null, maalIds: tema.maalIds },
       maal: maal.map((m) => ({
         id: m.id,
         kortnavn: m.kortnavn,
@@ -331,7 +358,8 @@ export function stillSporsmal(fagId?: string, temaId?: string) {
       fagordSomGlipper: fagord.map((f) => ({ id: f.id, term: f.term, status: f.status })),
       sisteMangler: siste?.mangler ?? "",
       forslagTilSporsmal,
-      merknad: "Still ett av forslagene i chatten. Ikke dump listen til eleven.",
+      merknad:
+        "Still ett av forslagene i chatten. Si både kapittel og kompetansemål. Ikke dump listen til eleven.",
     });
   });
 }
