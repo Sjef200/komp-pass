@@ -113,7 +113,7 @@ function Skall() {
 
   return (
     <div className="min-h-dvh bg-bg text-ink">
-      <header className="border-b border-[#191C1F]/8 bg-white/80 backdrop-blur">
+      <header className="sticky top-0 z-[60] border-b border-[#191C1F]/8 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-4 sm:px-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
@@ -222,6 +222,7 @@ function Skall() {
         {side === "oversikt" && <Oversikt state={state} />}
         {side === "temaer" && (
           <Temaer
+            key={state.innstillinger.aktivtFag}
             state={state}
             prompts={proveniensPrompts}
             onLagreHoring={appendHoring}
@@ -229,7 +230,7 @@ function Skall() {
           />
         )}
         {side === "fagord" && (
-          <FagordListe state={state} onStatus={setFagordStatus} />
+          <FagordListe key={state.innstillinger.aktivtFag} state={state} onStatus={setFagordStatus} />
         )}
         {side === "prompter" && (
           <Promptbibliotek
@@ -241,13 +242,14 @@ function Skall() {
         )}
         {side === "horinger" && (
           <Horinger
+            key={state.innstillinger.aktivtFag}
             state={state}
             prompts={proveniensPrompts}
             onLagreHoring={appendHoring}
             onHoringPagar={setHoringPagar}
           />
         )}
-        {side === "utvikling" && <Utvikling state={state} />}
+        {side === "utvikling" && <Utvikling key={state.innstillinger.aktivtFag} state={state} />}
       </main>
     </div>
   );
