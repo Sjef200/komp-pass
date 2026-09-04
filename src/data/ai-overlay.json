@@ -14,6 +14,21 @@
         "promptId": "horing-svake-temaer",
         "promptNavn": "Høring i svake temaer"
       }
+    },
+    {
+      "id": "h-ai-mtmu8vfd-zzhpk",
+      "temaId": "def",
+      "dato": "2026-09-04",
+      "karakter": 5,
+      "riktig": "Definisjon av undersøkelse og skillet mot metode satt.",
+      "mangler": "Konkret navngitt eksempel og ordet fordi i begrunnelsen.",
+      "kilde": "ai",
+      "ai": {
+        "modell": "Cursor Grok 4.6",
+        "innsats": "hoy",
+        "promptId": "muntlig-horing",
+        "promptNavn": "Muntlig høring"
+      }
     }
   ],
   "fagord": []
