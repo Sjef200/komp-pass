@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mfl-ovingsapp",
+  "compatibility_date": "2026-09-01",
+
+  // Statisk SPA. Samtykkesiden i OAuth-flyten ligger på /oauth/consent,
+  // og single-page-application gjør at den ruta treffer index.html i
+  // stedet for 404.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}

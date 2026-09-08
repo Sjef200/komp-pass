@@ -17,7 +17,8 @@
     "indekser": "tsx scripts/indekser-kilde.ts",
     "bygg:plugin": "tsx scripts/bygg-plugin.ts",
     "logg-inn": "tsx scripts/logg-inn.ts",
-    "mcp:http": "tsx mcp/src/http-server.ts"
+    "mcp:http": "tsx mcp/src/http-server.ts",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",

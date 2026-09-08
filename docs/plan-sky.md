@@ -131,7 +131,25 @@ Verifikatoren må kaste `OAuthError`, ikke en vanlig `Error` — ellers svarer S
 
 ---
 
-## Del C — Hostet UI og synk
+## Del C — Hostet UI og synk ⏳ startet
+
+**Gjort: nettsiden er deployet.** Cloudflare Workers som statisk SPA, `npm run deploy`. https://mfl-ovingsapp.william-kiautomatisering.workers.dev
+
+Samtykkesiden virker der nå — den trenger bare Supabase fra nettleseren. Det er den som skal stå i Site URL, i stedet for en localhost-adresse som bare virker mens dev-serveren kjører.
+
+Resten av appen viser bare JSON-grunnlaget, siden læringsdataene går gjennom `/api/tilstand` i utviklingsserveren. Neste steg er å la UI-et lese Supabase direkte.
+
+**MCP-serveren på Workers krever en egen refaktorering**, målt opp:
+
+- `fs-state.ts` leser 14 ganger fra disk. Basedataene er 140K til sammen og må bundles som en generert modul i stedet.
+- `db-sqlite.ts` importerer `node:sqlite` statisk i `db.ts`. Den må lastes lazy, ellers havner den i Worker-bundelen.
+- `kilde-inntak.ts` bruker `execFileSync` til whisper og unzip. Rene lokalfunksjoner som må skilles ut.
+- `sesjon.ts` og `env.ts` leser filer. På Workers kommer tokenet fra forespørselen og konfigurasjonen fra bindings.
+- `AsyncLocalStorage` virker med `nodejs_compat`, så brukerkonteksten er grei.
+
+---
+
+## Del C, resten — UI mot Supabase og synk
 
 Uten dette ser du dataene bare gjennom Claude, ikke i appen.
 

@@ -37,6 +37,24 @@ Skjemaet ligger i `supabase/migrations/`. Kjør det i SQL Editor før første in
 
 Rekkefølgen `db.ts` velger etter: `MFL_DB` satt eksplisitt vinner alltid, så Supabase hvis du er logget inn, ellers SQLite. Serveren bruker den publiserbare nøkkelen og ditt eget token — aldri en secret key, som ville omgått RLS.
 
+## Deploy
+
+Nettsiden ligger på Cloudflare Workers som statisk SPA:
+
+```bash
+npm run deploy
+```
+
+https://mfl-ovingsapp.william-kiautomatisering.workers.dev
+
+`not_found_handling: single-page-application` gjør at `/oauth/consent` treffer appen i stedet for 404. Den publiserbare Supabase-nøkkelen bakes inn i bundelen — det er meningen; RLS beskytter radene.
+
+**Hva som virker der i dag:** samtykkesiden i OAuth-flyten. Den trenger bare Supabase fra nettleseren.
+
+**Hva som ikke virker ennå:** resten av appen viser bare JSON-grunnlaget. Læringsdataene går gjennom `/api/tilstand` i utviklingsserveren, som ikke finnes på Workers. UI-et må lese Supabase direkte — se `docs/plan-sky.md`, del C.
+
+MCP-serveren er ikke deployet. Den krever at basedata bundles i stedet for å leses fra disk, og at SQLite holdes utenfor bundelen.
+
 ## MCP over HTTP
 
 Samme server, to inngangsdører. Stdio for Claude Desktop og Claude Code, HTTP for claude.ai — web støtter ikke lokale stdio-servere.
