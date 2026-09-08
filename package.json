@@ -10,8 +10,12 @@
     "preview": "vite preview",
     "mcp": "tsx mcp/src/server.ts",
     "mcp:inspect": "npx @modelcontextprotocol/inspector ./node_modules/.bin/tsx mcp/src/server.ts",
-    "test": "tsx --test src/lib/*.test.ts",
-    "fetch:udir": "tsx scripts/fetch-udir.ts"
+    "test": "MFL_DB=\"${TMPDIR:-/tmp}/mfl-test-$$.db\" tsx --test src/lib/*.test.ts",
+    "fetch:udir": "tsx scripts/fetch-udir.ts",
+    "migrer": "tsx scripts/migrer-til-sqlite.ts",
+    "transkriber": "tsx scripts/transkriber.ts",
+    "indekser": "tsx scripts/indekser-kilde.ts",
+    "bygg:plugin": "tsx scripts/bygg-plugin.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",

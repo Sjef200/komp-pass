@@ -1,6 +1,8 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { FagordListe } from "./components/Fagord";
 import { Horinger } from "./components/Horinger";
+import { Kilder } from "./components/Kilder";
+import { Laringslop } from "./components/Laringslop";
 import { Oversikt } from "./components/Oversikt";
 import { Promptbibliotek } from "./components/Promptbibliotek";
 import { KompetansemaalListe } from "./components/Kompetansemaal";
@@ -16,6 +18,8 @@ type Side =
   | "kompetansemaal"
   | "kapittel"
   | "fagord"
+  | "kilder"
+  | "laringslop"
   | "prompter"
   | "horinger"
   | "utvikling";
@@ -25,6 +29,8 @@ const SIDER: { id: Side; label: string }[] = [
   { id: "kompetansemaal", label: "Kompetansemål" },
   { id: "kapittel", label: "Kapittel" },
   { id: "fagord", label: "Fagord" },
+  { id: "kilder", label: "Kilder" },
+  { id: "laringslop", label: "Læringsløp" },
   { id: "prompter", label: "Prompter" },
   { id: "horinger", label: "Høringer" },
   { id: "utvikling", label: "Utvikling" },
@@ -47,6 +53,10 @@ function Skall() {
     importer,
     eksporter,
     settBibliotekFraDisk,
+    lagringsfeil,
+    umigrert,
+    koblingTekster,
+    avgjorKobling,
   } = useStore();
   const [side, setSide] = useState<Side>("oversikt");
   const [importFeil, setImportFeil] = useState<string | null>(null);
@@ -85,7 +95,7 @@ function Skall() {
     try {
       const text = await file.text();
       const raw: unknown = JSON.parse(text);
-      importer(raw);
+      await importer(raw);
       setImportFeil(null);
       setImportOk(true);
     } catch (err) {
@@ -210,6 +220,20 @@ function Skall() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+        {lagringsfeil && (
+          <p className="mb-4 rounded-xl bg-[#A63A2A]/10 px-4 py-3 text-sm text-[#A63A2A]" role="alert">
+            {lagringsfeil}
+          </p>
+        )}
+        {umigrert && (
+          <p className="mb-4 rounded-xl bg-[#B0770F]/10 px-4 py-3 text-sm text-[#191C1F]/80">
+            Nettleseren har {(umigrert.horinger?.length ?? 0) + (umigrert.hendelser?.length ?? 0)}{" "}
+            rader fra før databasen ble tatt i bruk. De er ikke slettet. Trykk{" "}
+            <span className="font-medium">Eksporter</span> og kjør{" "}
+            <code className="rounded bg-[#F6F5F1] px-1">npm run migrer -- filen.json</code> for å få
+            dem inn.
+          </p>
+        )}
         {importFeil && (
           <p className="mb-4 rounded-xl bg-[#A63A2A]/10 px-4 py-3 text-sm text-[#A63A2A]" role="alert">
             Import feilet: {importFeil}{" "}
@@ -243,6 +267,17 @@ function Skall() {
         )}
         {side === "fagord" && (
           <FagordListe key={state.innstillinger.aktivtFag} state={state} onStatus={setFagordStatus} />
+        )}
+        {side === "kilder" && (
+          <Kilder
+            key={state.innstillinger.aktivtFag}
+            state={state}
+            koblingTekster={koblingTekster}
+            onAvgjor={(id, bekreftet) => void avgjorKobling(id, bekreftet)}
+          />
+        )}
+        {side === "laringslop" && (
+          <Laringslop key={state.innstillinger.aktivtFag} state={state} />
         )}
         {side === "prompter" && (
           <Promptbibliotek

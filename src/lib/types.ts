@@ -1,3 +1,6 @@
+import type { Hendelse, Kobling } from "./hendelser";
+import type { Kildedokument } from "./kilder";
+
 export type FagId =
   | "male1"
   | "male2"
@@ -76,6 +79,14 @@ export type Horing = {
   riktig: string;
   mangler: string;
   kilde: Kilde;
+  /** Spørsmålet som faktisk ble stilt. */
+  sporsmal?: string;
+  /** Elevens svar, ordrett nok til at det kan vurderes på nytt. */
+  svar?: string;
+  /** Svaret som ville gitt 6, slik det ble vist i høringen. */
+  modellsvar?: string;
+  /** Målene svaret faktisk viste, ikke alle målene temaet er koblet til. */
+  maalIds?: string[];
   ai?: AiProveniens;
 };
 
@@ -150,9 +161,12 @@ export type Innstillinger = {
 };
 
 export type AiOverlay = {
+  kilder?: Kildedokument[];
   horinger?: Horing[];
   fagord?: Fagord[];
   prompts?: Prompt[];
+  /** Append-only logg. Fagordstatus avledes herfra, ikke ved å overskrive raden. */
+  hendelser?: Hendelse[];
 };
 
 export type AppState = {
@@ -161,6 +175,9 @@ export type AppState = {
   temaer: Tema[];
   horinger: Horing[];
   fagord: Fagord[];
+  hendelser: Hendelse[];
+  koblinger: Kobling[];
+  kilder: Kildedokument[];
   prompts: Prompt[];
   skills: Skill[];
   innstillinger: Innstillinger;

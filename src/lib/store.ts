@@ -5,13 +5,13 @@ import horingerJson from "../data/horinger.json";
 import fagordJson from "../data/fagord.json";
 import aiOverlayJson from "../data/ai-overlay.json";
 import { mergeTreLag } from "./ai-overlay";
+import { observerFagordIState } from "./hendelser";
 import { seedPrompts, seedSkills } from "./skill-katalog";
 import type {
   AiOverlay,
   AppState,
   Fag,
   Fagord,
-  FagordStatus,
   Horing,
   Innstillinger,
   Kompetansemaal,
@@ -19,7 +19,11 @@ import type {
   Tema,
 } from "./types";
 
+/** Gammel nøkkel med hele tilstanden. Leses fortsatt, men skrives aldri mer. */
 export const STORAGE_KEY = "mfl:state:v1";
+
+/** Preferanser. Databasen eier dataene; nettleseren eier bare visningsvalgene. */
+export const INNSTILLINGER_KEY = "mfl:innstillinger:v1";
 
 const defaultInnstillinger: Innstillinger = {
   aktivtFag: "male1",
@@ -33,15 +37,18 @@ export function baseState(): AppState {
     temaer: temaerJson as Tema[],
     horinger: horingerJson as Horing[],
     fagord: fagordJson as Fagord[],
+    hendelser: [],
+    koblinger: [],
+    kilder: [],
     prompts: seedPrompts(),
     skills: seedSkills(),
     innstillinger: { ...defaultInnstillinger },
   };
 }
 
-export function lesOverlay(): PersistedState | null {
+function lesNokkel(nokkel: string): PersistedState | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(nokkel);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return null;
@@ -49,6 +56,27 @@ export function lesOverlay(): PersistedState | null {
   } catch {
     return null;
   }
+}
+
+export function lesInnstillinger(): PersistedState | null {
+  const nye = lesNokkel(INNSTILLINGER_KEY);
+  if (nye?.innstillinger) return { innstillinger: nye.innstillinger };
+  const gamle = lesNokkel(STORAGE_KEY);
+  return gamle?.innstillinger ? { innstillinger: gamle.innstillinger } : null;
+}
+
+/**
+ * Læringsdata som ligger igjen i nettleseren fra før databasen fantes.
+ * Den slettes ikke — eksporter og kjør `npm run migrer` for å få den inn.
+ */
+export function lesUmigrertTilstand(): PersistedState | null {
+  const gamle = lesNokkel(STORAGE_KEY);
+  if (!gamle) return null;
+  const antall =
+    (gamle.horinger?.length ?? 0) +
+    (gamle.hendelser?.length ?? 0) +
+    (gamle.fagord?.length ?? 0);
+  return antall > 0 ? gamle : null;
 }
 
 export function seedAiOverlay(): AiOverlay {
@@ -64,20 +92,15 @@ export function mergeState(
 }
 
 export function lastState(ai: AiOverlay | null = seedAiOverlay()): AppState {
-  return mergeTreLag(baseState(), lesOverlay(), ai);
+  return mergeTreLag(baseState(), lesInnstillinger(), ai);
 }
 
-export function lagreOverlay(state: AppState): void {
-  const overlay: PersistedState = {
-    fag: state.fag,
-    kompetansemaal: state.kompetansemaal,
-    temaer: state.temaer,
-    horinger: state.horinger,
-    fagord: state.fagord,
-    prompts: state.prompts,
-    innstillinger: state.innstillinger,
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(overlay));
+export function lagreInnstillinger(innstillinger: Innstillinger): void {
+  try {
+    localStorage.setItem(INNSTILLINGER_KEY, JSON.stringify({ innstillinger }));
+  } catch {
+    /* privat modus */
+  }
 }
 
 export function erGyldigTilstand(value: unknown): value is PersistedState {
@@ -89,6 +112,7 @@ export function erGyldigTilstand(value: unknown): value is PersistedState {
     Array.isArray(o.temaer) ||
     Array.isArray(o.horinger) ||
     Array.isArray(o.fagord) ||
+    Array.isArray(o.hendelser) ||
     Array.isArray(o.prompts) ||
     Array.isArray(o.skills);
   const hasSettings = o.innstillinger != null && typeof o.innstillinger === "object";
@@ -106,16 +130,7 @@ export function appendHoringIState(state: AppState, horing: Horing): AppState {
   return { ...state, horinger: [...state.horinger, horing] };
 }
 
-export function settFagordIState(
-  state: AppState,
-  id: string,
-  patch: { status?: FagordStatus; sisteFeil?: string },
-): AppState {
-  return {
-    ...state,
-    fagord: state.fagord.map((f) => (f.id === id ? { ...f, ...patch } : f)),
-  };
-}
+export { observerFagordIState };
 
 export {
   aktivtFag,

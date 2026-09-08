@@ -1,0 +1,8 @@
+{
+  "name": "mfl",
+  "description": "Øvingsapp for markedsføring, entreprenørskap og norsk. Gir Claude læreplanen fra Udir, temaene dine, høringene og fagordene dine — og lar den høre deg mot kompetansemål med karakter og proveniens.",
+  "version": "0.3.0",
+  "author": {
+    "name": "Fokus digital"
+  }
+}

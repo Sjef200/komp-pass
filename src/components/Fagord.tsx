@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { aktivtFag, fagordIFag, temaerIFag } from "../lib/store";
-import { INNSATS_LABEL } from "../lib/format";
+import { INNSATS_LABEL, KILDE_LABEL, formatDato } from "../lib/format";
+import { fagordHistorikk, type FagordObservert } from "../lib/hendelser";
 import type { AppState, Fagord, FagordStatus } from "../lib/types";
 import { TomtFag } from "./Temaer";
 
@@ -108,6 +109,7 @@ export function FagordListe({
             <FagordKort
               key={f.id}
               fagord={f}
+              historikk={fagordHistorikk(state.hendelser, f.id)}
               visForklaring={visForklaring(f.id)}
               flashcard={flashcard}
               onToggle={() => toggle(f.id)}
@@ -122,12 +124,14 @@ export function FagordListe({
 
 function FagordKort({
   fagord,
+  historikk,
   visForklaring,
   flashcard,
   onToggle,
   onStatus,
 }: {
   fagord: Fagord;
+  historikk: FagordObservert[];
   visForklaring: boolean;
   flashcard: boolean;
   onToggle: () => void;
@@ -162,6 +166,27 @@ function FagordKort({
           ) : null}
         </div>
       </button>
+      {historikk.length > 0 && (
+        <details className="border-t border-[#191C1F]/8 px-4 py-2.5">
+          <summary className="cursor-pointer text-xs text-[#191C1F]/45">
+            Historikk · {historikk.length} observasjon
+            {historikk.length === 1 ? "" : "er"}
+          </summary>
+          <ol className="mt-2 space-y-1.5">
+            {historikk.map((o) => (
+              <li key={o.id} className="text-xs text-[#191C1F]/60">
+                <span className="text-[#191C1F]/45">{formatDato(o.tid)} · </span>
+                <span style={{ color: STATUS_FARGE[o.status] }}>{o.status}</span>
+                {o.sisteFeil ? <> · sa i stedet: «{o.sisteFeil}»</> : null}
+                <span className="text-[#191C1F]/40">
+                  {" · "}
+                  {o.ai ? `${o.ai.modell}, «${o.ai.promptNavn}»` : KILDE_LABEL[o.kilde] ?? o.kilde}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
       <div className="flex gap-1.5 border-t border-[#191C1F]/8 px-4 py-2.5">
         {STATUS.map((s) => (
           <button

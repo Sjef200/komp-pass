@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { mergeHoringerAppendOnly } from "./ai-overlay.ts";
-import { hentLareplan, hentOversikt, hentSkill, hentSkillReference, kallLoggHoring, kallOppdaterFagord, listFag, listKapitler, listSkills, stillSporsmal } from "../../mcp/src/tools.ts";
+import { hentLareplan, hentOversikt, hentSkill, hentSkillReference, kallLoggHoring, kallOppdaterFagord, listFag, listKapitler, listSkills, nesteHoring, stillSporsmal } from "../../mcp/src/tools.ts";
 
 function parse(res: { content: { type: "text"; text: string }[]; isError?: boolean }) {
   if (res.isError) return { error: res.content[0]?.text ?? "" };
@@ -63,35 +63,63 @@ test("hent_skill og referanse for markedsundersøkelser", () => {
   assert.equal(feilFag.isError, true);
 });
 
+test("neste_horing gir en kø med begrunnelse per tema", () => {
+  const data = parse(nesteHoring("male1", 3));
+  const ko = data.ko as Array<{ plass: number; temaId: string; grunn: string; moden: boolean }>;
+  assert.equal(data.fagId, "male1");
+  assert.ok(ko.length > 0 && ko.length <= 3);
+  assert.deepEqual(ko.map((r) => r.plass), ko.map((_, i) => i + 1));
+  for (const rad of ko) {
+    assert.ok(rad.grunn.length > 0, `mangler grunn for ${rad.temaId}`);
+  }
+});
+
+test("still_sporsmal begrunner hvilket tema det valgte", () => {
+  const data = parse(stillSporsmal("male1"));
+  assert.ok(typeof data.valgtFordi === "string" && (data.valgtFordi as string).length > 0);
+  const forste = (parse(nesteHoring("male1", 1)).ko as Array<{ temaId: string }>)[0];
+  assert.equal((data.tema as { id: string }).id, forste?.temaId);
+});
+
 test("still_sporsmal avviser tema fra annet fag", () => {
   const res = stillSporsmal("entrep1", "def");
   assert.equal(res.isError, true);
   assert.match(res.content[0]?.text ?? "", /tilhører male1|ikke entrep1/);
 });
 
+const GYLDIG_HORING = {
+  fagId: "male1",
+  temaId: "def",
+  karakter: 4,
+  riktig: "x",
+  mangler: "y",
+  sporsmal: "Hva er en markedsundersøkelse?",
+  svar: "En systematisk innsamling av data om markedet.",
+  modell: "Claude",
+  innsats: "hoy" as const,
+  promptId: "muntlig-horing",
+};
+
 test("logg_horing avvises uten proveniens og med kryss-fag", () => {
-  const uten = kallLoggHoring({
-    fagId: "male1",
-    temaId: "def",
-    karakter: 4,
-    riktig: "x",
-    mangler: "y",
-    modell: "",
-    innsats: "hoy",
-    promptId: "muntlig-horing",
-  });
+  const uten = kallLoggHoring({ ...GYLDIG_HORING, modell: "" });
   assert.equal(uten.isError, true);
-  const kryss = kallLoggHoring({
-    fagId: "entrep1",
-    temaId: "def",
-    karakter: 4,
-    riktig: "x",
-    mangler: "y",
-    modell: "Claude",
-    innsats: "hoy",
-    promptId: "muntlig-horing",
-  });
+  const kryss = kallLoggHoring({ ...GYLDIG_HORING, fagId: "entrep1" });
   assert.equal(kryss.isError, true);
+});
+
+test("logg_horing krever spørsmålet og svaret", () => {
+  const utenSvar = kallLoggHoring({ ...GYLDIG_HORING, svar: "   " });
+  assert.equal(utenSvar.isError, true);
+  assert.match(utenSvar.content[0]?.text ?? "", /svar er påkrevd/);
+  const utenSporsmal = kallLoggHoring({ ...GYLDIG_HORING, sporsmal: "" });
+  assert.equal(utenSporsmal.isError, true);
+  assert.match(utenSporsmal.content[0]?.text ?? "", /sporsmal er påkrevd/);
+});
+
+test("logg_horing avviser mål som ikke er koblet til temaet", () => {
+  const res = kallLoggHoring({ ...GYLDIG_HORING, maalIds: ["male1-01"] });
+  assert.equal(res.isError, true);
+  assert.match(res.content[0]?.text ?? "", /ikke koblet til temaet/);
 });
 
 test("oppdater_fagord avvises uten promptId", () => {

@@ -39,6 +39,8 @@ export function HoringForm({
   );
   const [dato, setDato] = useState(iDagIso);
   const [karakter, setKarakter] = useState<Karakter | null>(null);
+  const [sporsmal, setSporsmal] = useState("");
+  const [svar, setSvar] = useState("");
   const [riktig, setRiktig] = useState("");
   const [mangler, setMangler] = useState("");
   const [kilde, setKilde] = useState<Kilde>("selv");
@@ -67,6 +69,10 @@ export function HoringForm({
       return;
     }
     if (kilde === "ai") {
+      if (!sporsmal.trim() || !svar.trim()) {
+        setFeil("En KI-høring må ha både spørsmålet og svaret ditt.");
+        return;
+      }
       if (!modell.trim()) {
         setFeil("Oppgi hvilken modell som ble brukt.");
         return;
@@ -84,6 +90,8 @@ export function HoringForm({
       karakter,
       riktig: riktig.trim(),
       mangler: mangler.trim(),
+      ...(sporsmal.trim() ? { sporsmal: sporsmal.trim() } : {}),
+      ...(svar.trim() ? { svar: svar.trim() } : {}),
       kilde,
       ai:
         kilde === "ai"
@@ -168,6 +176,26 @@ export function HoringForm({
             })}
           </div>
         </fieldset>
+
+        <label className="mt-4 block text-sm font-medium">
+          Spørsmålet
+          <textarea
+            className="mt-1 min-h-16 w-full rounded-lg border border-[#191C1F]/15 px-3 py-2 text-sm"
+            value={sporsmal}
+            onChange={(e) => setSporsmal(e.target.value)}
+            placeholder="Spørsmålet du ble stilt"
+          />
+        </label>
+
+        <label className="mt-4 block text-sm font-medium">
+          Svaret ditt
+          <textarea
+            className="mt-1 min-h-24 w-full rounded-lg border border-[#191C1F]/15 px-3 py-2 text-sm"
+            value={svar}
+            onChange={(e) => setSvar(e.target.value)}
+            placeholder="Så ordrett du husker det. Da kan du ta samme spørsmål på nytt og se forskjellen."
+          />
+        </label>
 
         <label className="mt-4 block text-sm font-medium">
           Hva som satt

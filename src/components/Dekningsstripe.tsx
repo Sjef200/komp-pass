@@ -27,8 +27,17 @@ export function Dekningsstripe({
         <div
           key={s.temaId}
           className="h-full min-w-1 flex-1"
-          style={{ background: s.farge }}
-          title={`${s.navn}: ${s.karakter ?? "ikke hørt"}`}
+          style={{
+            background: s.farge,
+            opacity: s.karakter != null && s.moden ? 0.4 : 1,
+          }}
+          title={
+            s.karakter == null
+              ? `${s.navn}: ikke hørt`
+              : s.moden
+                ? `${s.navn}: ${s.karakter}, ikke hørt på ${s.dagerSiden} dager`
+                : `${s.navn}: ${s.karakter}`
+          }
         />
       ))}
     </div>

@@ -1,0 +1,15 @@
+{
+  "name": "komp-pass",
+  "description": "Øvingsplugin for markedsføring, entreprenørskap og norsk.",
+  "owner": {
+    "name": "Fokus digital"
+  },
+  "plugins": [
+    {
+      "name": "mfl",
+      "description": "Læreplanstyrt øving: lim inn fagstoff, bli hørt mot kompetansemål, få karakter med begrunnelse.",
+      "source": "./plugin",
+      "category": "productivity"
+    }
+  ]
+}

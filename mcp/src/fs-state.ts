@@ -4,7 +4,21 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { mergeTreLag } from "../../src/lib/ai-overlay.ts";
-import { krevFag, krevFagordIFag, krevProveniens, krevTemaIFag } from "../../src/lib/fag-validering.ts";
+import {
+  fagordHistorikk,
+  horingTilHendelse,
+  type FagordObservert,
+  type Hendelse,
+} from "../../src/lib/hendelser.ts";
+import { lesHendelser, lesKilder, skrivHendelse } from "./db.ts";
+import {
+  krevFag,
+  krevFagordIFag,
+  krevMaalITema,
+  krevProveniens,
+  krevSporsmalOgSvar,
+  krevTemaIFag,
+} from "../../src/lib/fag-validering.ts";
 import { nyId } from "../../src/lib/format.ts";
 import { byggSkillKatalog, hentSkillsFraUrl, parseSkillMarkdown } from "../../src/lib/skill-import.ts";
 import { erTillattSkillFil, normaliserSkillSti, parseSkillPack, skillGjelderFag } from "../../src/lib/skill-pack.ts";
@@ -50,7 +64,7 @@ export function atomicWrite(fil: string, innhold: string): void {
 
 export function lesAiOverlay(): AiOverlay {
   const fil = dataFil("ai-overlay.json");
-  if (!fs.existsSync(fil)) return { horinger: [], fagord: [] };
+  if (!fs.existsSync(fil)) return { horinger: [], fagord: [], hendelser: [] };
   return lesJson<AiOverlay>(fil);
 }
 
@@ -189,19 +203,28 @@ export function lesBaseState(): AppState {
     temaer: lesJson<Tema[]>(dataFil("temaer.json")),
     horinger: lesJson<Horing[]>(dataFil("horinger.json")),
     fagord: lesJson<Fagord[]>(dataFil("fagord.json")),
+    hendelser: [],
+    koblinger: [],
+    kilder: [],
     prompts: lesPrompterFraDisk(),
     skills: lesSkillsFraDisk(),
     innstillinger: { aktivtFag: "male1", visEmoji: true },
   };
 }
 
+/**
+ * Databasen er sannheten for alt som skjer. JSON-filene i src/data er
+ * utgangspunktet: læreplan, temaer og begrepsdefinisjoner.
+ */
 export function lastMcpState(): AppState {
-  const overlay = lesAiOverlay();
-  overlay.prompts = lesPrompterFraDisk();
-  return mergeTreLag(lesBaseState(), null, overlay);
+  return mergeTreLag(lesBaseState(), null, {
+    prompts: lesPrompterFraDisk(),
+    hendelser: lesHendelser(),
+    kilder: lesKilder(),
+  });
 }
 
-function proveniens(
+export function byggProveniens(
   modell: string,
   innsats: AiInnsats,
   promptId: string,
@@ -226,6 +249,10 @@ export function loggHoring(input: {
   karakter: Karakter;
   riktig: string;
   mangler: string;
+  sporsmal: string;
+  svar: string;
+  modellsvar?: string;
+  maalIds?: string[];
   dato?: string;
   modell: string;
   innsats: AiInnsats;
@@ -234,7 +261,9 @@ export function loggHoring(input: {
   const state = lastMcpState();
   const fag = krevFag(state, input.fagId);
   krevTemaIFag(state, fag.id, input.temaId);
-  const ai = proveniens(input.modell, input.innsats, input.promptId, state.prompts);
+  krevSporsmalOgSvar(input);
+  const maalIds = krevMaalITema(state, fag.id, input.temaId, input.maalIds);
+  const ai = byggProveniens(input.modell, input.innsats, input.promptId, state.prompts);
   const horing: Horing = {
     id: nyId("h-ai"),
     temaId: input.temaId,
@@ -242,12 +271,14 @@ export function loggHoring(input: {
     karakter: input.karakter,
     riktig: input.riktig,
     mangler: input.mangler,
+    sporsmal: input.sporsmal.trim(),
+    svar: input.svar.trim(),
+    ...(input.modellsvar?.trim() ? { modellsvar: input.modellsvar.trim() } : {}),
+    ...(maalIds.length > 0 ? { maalIds } : {}),
     kilde: "ai",
     ai,
   };
-  const overlay = lesAiOverlay();
-  overlay.horinger = [...(overlay.horinger ?? []), horing];
-  skrivAiOverlay(overlay);
+  skrivHendelse(horingTilHendelse(horing, fag.id));
   return horing;
 }
 
@@ -263,18 +294,35 @@ export function oppdaterFagord(input: {
   const state = lastMcpState();
   const fag = krevFag(state, input.fagId);
   const eksisterende = krevFagordIFag(state, fag.id, input.id);
-  const ai = proveniens(input.modell, input.innsats, input.promptId, state.prompts);
-  const oppdatert: Fagord = {
-    ...eksisterende,
+  const ai = byggProveniens(input.modell, input.innsats, input.promptId, state.prompts);
+  const observasjon: FagordObservert = {
+    id: nyId("fo-obs"),
+    type: "fagord-observert",
+    tid: new Date().toISOString(),
+    fagId: fag.id,
+    kilde: "ai",
+    ai,
+    fagordId: input.id,
     status: input.status,
-    sisteFeil: input.sisteFeil ?? eksisterende.sisteFeil,
+    ...(input.sisteFeil?.trim() ? { sisteFeil: input.sisteFeil.trim() } : {}),
+  };
+  skrivHendelse(observasjon);
+  return {
+    ...eksisterende,
+    status: observasjon.status,
+    sisteFeil: observasjon.sisteFeil ?? eksisterende.sisteFeil,
     ai,
   };
-  const overlay = lesAiOverlay();
-  const andre = (overlay.fagord ?? []).filter((f) => f.id !== input.id);
-  overlay.fagord = [...andre, oppdatert];
-  skrivAiOverlay(overlay);
-  return oppdatert;
+}
+
+/** Alle observasjoner på ett fagord, nyeste først. */
+export function lesFagordHistorikk(fagordId: string): FagordObservert[] {
+  return fagordHistorikk(lesHendelser(), fagordId);
+}
+
+/** Hendelser inn utenfra, for eksempel fra UI eller en importert eksportfil. */
+export function skrivHendelserFraKlient(hendelser: Hendelse[]): Hendelse[] {
+  return hendelser.map(skrivHendelse);
 }
 
 export async function importerPromptFraUrl(url: string): Promise<Prompt[]> {

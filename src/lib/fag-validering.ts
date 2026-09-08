@@ -43,6 +43,32 @@ export function krevFagordIFag(state: AppState, fagId: FagId, fagordId: string):
   return fagord;
 }
 
+export function krevMaalITema(
+  state: AppState,
+  fagId: FagId,
+  temaId: string,
+  maalIds: string[] | undefined,
+): string[] {
+  if (!maalIds || maalIds.length === 0) return [];
+  const tema = krevTemaIFag(state, fagId, temaId);
+  const ukjent = maalIds.filter((id) => !tema.maalIds.includes(id));
+  if (ukjent.length > 0) {
+    throw new Error(
+      `Målet ${ukjent.join(", ")} er ikke koblet til temaet «${tema.navn}». Gyldige mål: ${tema.maalIds.join(", ")}.`,
+    );
+  }
+  return [...maalIds];
+}
+
+export function krevSporsmalOgSvar(args: { sporsmal?: string; svar?: string }): void {
+  if (!args.sporsmal?.trim()) {
+    throw new Error("sporsmal er påkrevd. Skriv spørsmålet du faktisk stilte.");
+  }
+  if (!args.svar?.trim()) {
+    throw new Error("svar er påkrevd. Skriv elevens svar, ordrett nok til at det kan vurderes på nytt.");
+  }
+}
+
 export function krevProveniens(args: {
   modell?: string;
   innsats?: string;

@@ -19,6 +19,15 @@
       "fagIds": []
     },
     {
+      "id": "nytt-fagstoff",
+      "fil": "nytt-fagstoff/SKILL.md",
+      "navn": "Nytt fagstoff",
+      "beskrivelse": "Ta imot fagstoff i chatten, lagre det som kilde, koble det til temaer, og hør eleven i det med én gang.",
+      "kilde": "plattform",
+      "kategori": "plattform",
+      "fagIds": []
+    },
+    {
       "id": "lareplanstyrt-horing",
       "fil": "lareplanstyrt-horing/SKILL.md",
       "navn": "Læreplanstyrt høring",
@@ -61,7 +70,10 @@
       "beskrivelse": "Læringsmodus for markedsføring mot karakter 6: definisjon, begrunnelse, eksempel og avgrensning mot nabobegrep.",
       "kilde": "plattform",
       "kategori": "fag",
-      "fagIds": ["male1", "male2"],
+      "fagIds": [
+        "male1",
+        "male2"
+      ],
       "referanser": [
         {
           "id": "karakterkjennetegn",

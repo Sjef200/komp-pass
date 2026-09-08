@@ -1,0 +1,9 @@
+{
+  "mfl": {
+    "command": "${CLAUDE_PLUGIN_ROOT}/../node_modules/.bin/tsx",
+    "args": [
+      "${CLAUDE_PLUGIN_ROOT}/../mcp/src/server.ts"
+    ],
+    "cwd": "${CLAUDE_PLUGIN_ROOT}/.."
+  }
+}

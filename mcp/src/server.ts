@@ -2,6 +2,8 @@ import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { z } from "zod";
 import { lesSkillMarkdown, lesSkillsFraDisk } from "./fs-state.ts";
+import { lesChunks, lesKilder } from "./db.ts";
+import { chunksTilMarkdown } from "../../src/lib/kilder.ts";
 import {
   hentLareplan,
   hentOversikt,
@@ -18,7 +20,16 @@ import {
   listPrompts,
   listSkills,
   listTemaer,
+  nesteHoring,
   stillSporsmal,
+  finnBelegg,
+  foreslaKobling,
+  hentLaringslop,
+  leggInnKilde,
+  hentKilde,
+  listKilder,
+  listKoblinger,
+  sokKilder,
 } from "./tools.ts";
 
 const innsats = z.enum(["lav", "medium", "hoy", "maks"]);
@@ -118,13 +129,25 @@ export function createServer(): McpServer {
     {
       title: "Logg høring",
       description:
-        "Append-only. Krever fagId, temaId, karakter og full proveniens. Skriver src/data/ai-overlay.json.",
+        "Append-only. Krever fagId, temaId, karakter, spørsmålet du stilte, elevens svar og full proveniens. Skriver src/data/ai-overlay.json.",
       inputSchema: z.object({
         fagId: fagIdFelt,
         temaId: z.string(),
         karakter: z.number().int().min(1).max(6),
         riktig: z.string(),
         mangler: z.string(),
+        sporsmal: z.string().describe("Spørsmålet du faktisk stilte, ordrett."),
+        svar: z
+          .string()
+          .describe("Elevens svar, ordrett nok til at det kan vurderes på nytt senere."),
+        modellsvar: z
+          .string()
+          .optional()
+          .describe("Svaret som ville gitt 6, hvis du viste det."),
+        maalIds: z
+          .array(z.string())
+          .optional()
+          .describe("Målene svaret faktisk viste. Må være koblet til temaet."),
         dato: z.string().optional(),
         modell: z.string().describe("F.eks. Claude eller Cursor Grok 4.6"),
         innsats,
@@ -138,6 +161,10 @@ export function createServer(): McpServer {
         karakter: args.karakter,
         riktig: args.riktig,
         mangler: args.mangler,
+        sporsmal: args.sporsmal,
+        svar: args.svar,
+        modellsvar: args.modellsvar,
+        maalIds: args.maalIds,
         dato: args.dato,
         modell: args.modell,
         innsats: args.innsats,
@@ -231,17 +258,174 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
+    "neste_horing",
+    {
+      title: "Neste høring",
+      description:
+        "Køen over hva som bør høres nå: uhørt først, så svakt og modent. To temaer fra samme kapittel kommer aldri rett etter hverandre.",
+      inputSchema: z.object({
+        fagId: fagIdFelt.optional(),
+        antall: z.number().int().positive().max(20).optional(),
+      }),
+    },
+    async ({ fagId, antall }) => nesteHoring(fagId, antall),
+  );
+
+  server.registerTool(
     "still_sporsmal",
     {
       title: "Still spørsmål",
       description:
-        "Foreslår spørsmål fra svake eller uhørte temaer i faget. Modellen stiller ett spørsmål i chatten.",
+        "Foreslår spørsmål fra det temaet som står først i køen. Svarer med begrunnelsen for valget. Modellen stiller ett spørsmål i chatten.",
       inputSchema: z.object({
         fagId: fagIdFelt.optional(),
         temaId: z.string().optional(),
       }),
     },
     async ({ fagId, temaId }) => stillSporsmal(fagId, temaId),
+  );
+
+  server.registerTool(
+    "hent_laringslop",
+    {
+      title: "Hent læringsløp",
+      description:
+        "Hvor langt du er kommet: undervist, hørt og behersket per kompetansemål, og tidslinjen over hva som er gjennomgått når. Gapet undervist-ikke-hort er det mest presise stedet å begynne.",
+      inputSchema: z.object({ fagId: fagIdFelt.optional() }),
+    },
+    async ({ fagId }) => hentLaringslop(fagId),
+  );
+
+  server.registerTool(
+    "list_kilder",
+    {
+      title: "List kilder",
+      description:
+        "Forelesninger, bokkapitler og oppgaver som er lagt inn for faget. Innholdet ligger lokalt, ikke i repoet.",
+      inputSchema: z.object({
+        fagId: fagIdFelt.optional(),
+        type: z.enum(["forelesning", "bok", "oppgave", "notat"]).optional(),
+      }),
+    },
+    async ({ fagId, type }) => listKilder(fagId, type),
+  );
+
+  server.registerTool(
+    "legg_inn_kilde",
+    {
+      title: "Legg inn fagstoff",
+      description:
+        "Lagre fagstoff eleven gir deg i chatten som en kilde i faget: et bokkapittel, notater fra timen, en oppgavetekst. Teksten deles i biter og blir søkbar. Bruk den før du hører eleven i nytt stoff.",
+      inputSchema: z.object({
+        fagId: fagIdFelt,
+        tittel: z.string().describe("Kort navn eleven kjenner igjen, f.eks. «Kapittel 3: segmentering»."),
+        tekst: z.string().describe("Selve fagstoffet. Behold avsnittene; linjer som bare sier «s. 42» blir sidetall."),
+        type: z.enum(["forelesning", "bok", "oppgave", "notat"]).optional(),
+        kapittel: z.string().optional(),
+        dato: z.string().optional(),
+      }),
+    },
+    async (args) => leggInnKilde(args),
+  );
+
+  server.registerTool(
+    "sok_kilder",
+    {
+      title: "Søk i kilder",
+      description:
+        "Fulltekstsøk i forelesninger og bokstoff for faget. Gir tidsstempel tilbake til opptaket, så du kan sitere læreren ordrett.",
+      inputSchema: z.object({
+        fagId: fagIdFelt,
+        query: z.string().describe("Fritekst. Alle ordene teller, ingen må treffe eksakt."),
+        antall: z.number().int().positive().max(25).optional(),
+      }),
+    },
+    async ({ fagId, query, antall }) => sokKilder(fagId, query, antall),
+  );
+
+  server.registerTool(
+    "hent_kilde",
+    {
+      title: "Hent kilde",
+      description:
+        "Hele kilden, eller et utsnitt av opptaket. fraSekund og tilSekund avgrenser til en del av forelesningen.",
+      inputSchema: z.object({
+        kildeId: z.string(),
+        fraSekund: z.number().nonnegative().optional(),
+        tilSekund: z.number().nonnegative().optional(),
+      }),
+    },
+    async ({ kildeId, fraSekund, tilSekund }) => hentKilde(kildeId, fraSekund, tilSekund),
+  );
+
+  server.registerTool(
+    "finn_belegg",
+    {
+      title: "Finn belegg",
+      description:
+        "Hva i forelesningene og boka som dekker et kompetansemål eller tema. Bekreftede koblinger først, deretter kandidater fra søk. Tomt svar er selve gapet mellom undervist og hørt.",
+      inputSchema: z.object({
+        fagId: fagIdFelt,
+        maalId: z.string().optional(),
+        temaId: z.string().optional(),
+      }),
+    },
+    async ({ fagId, maalId, temaId }) => finnBelegg(fagId, maalId, temaId),
+  );
+
+  server.registerTool(
+    "foresla_kobling",
+    {
+      title: "Foreslå kobling",
+      description:
+        "Foreslå at en bit av en kilde dekker et tema eller kompetansemål. Forslaget teller ikke som dekning før eleven bekrefter det i UI.",
+      inputSchema: z.object({
+        fagId: fagIdFelt,
+        chunkId: z.string().describe("Fra sok_kilder eller hent_kilde."),
+        temaId: z.string().optional(),
+        maalId: z.string().optional(),
+        begrunnelse: z.string().optional().describe("Hvorfor denne biten treffer."),
+        modell: z.string(),
+        innsats,
+        promptId: z.string(),
+      }),
+    },
+    async (args) => foreslaKobling(args),
+  );
+
+  server.registerTool(
+    "list_koblinger",
+    {
+      title: "List koblinger",
+      description: "Koblinger mellom kilder og mål, med tilstand foreslatt, bekreftet eller avvist.",
+      inputSchema: z.object({
+        fagId: fagIdFelt.optional(),
+        tilstand: z.enum(["foreslatt", "bekreftet", "avvist"]).optional(),
+      }),
+    },
+    async ({ fagId, tilstand }) => listKoblinger(fagId, tilstand),
+  );
+
+  server.registerResource(
+    "kilder",
+    new ResourceTemplate("mfl://kilder/{kildeId}", {
+      list: async () => ({
+        resources: lesKilder().map((k) => ({
+          uri: `mfl://kilder/${k.id}`,
+          name: k.tittel,
+          description: `${k.type} · ${k.fagId} · ${k.dato}`,
+          mimeType: "text/markdown",
+        })),
+      }),
+    }),
+    { title: "Kilde", mimeType: "text/markdown" },
+    async (uri, vars) => {
+      const kildeId = String(vars.kildeId ?? "");
+      const kilde = lesKilder().find((k) => k.id === kildeId);
+      if (!kilde) throw new Error(`Fant ikke kilden: ${kildeId}`);
+      const tekst = chunksTilMarkdown(kilde.tittel, lesChunks(kildeId));
+      return { contents: [{ uri: uri.href, mimeType: "text/markdown", text: tekst }] };
+    },
   );
 
   server.registerResource(

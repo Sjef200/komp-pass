@@ -81,6 +81,18 @@ export function Horinger({
                   </div>
                   <KarakterTall karakter={h.karakter} size="md" />
                 </div>
+                {h.sporsmal ? (
+                  <p className="mt-2 text-sm">
+                    <span className="text-[#191C1F]/45">Spørsmål: </span>
+                    {h.sporsmal}
+                  </p>
+                ) : null}
+                {h.svar ? (
+                  <p className="mt-1 whitespace-pre-line rounded-lg bg-[#F6F5F1] px-3 py-2 text-sm">
+                    <span className="text-[#191C1F]/45">Svaret ditt: </span>
+                    {h.svar}
+                  </p>
+                ) : null}
                 {h.riktig ? (
                   <p className="mt-2 text-sm">
                     <span className="text-[#191C1F]/45">Satt: </span>
@@ -93,12 +105,21 @@ export function Horinger({
                     {h.mangler}
                   </p>
                 ) : null}
-                {!h.riktig && !h.mangler && (
+                {h.modellsvar ? (
+                  <details className="mt-2 text-sm">
+                    <summary className="cursor-pointer text-[#191C1F]/45">
+                      Svaret som ville gitt 6
+                    </summary>
+                    <p className="mt-1 whitespace-pre-line">{h.modellsvar}</p>
+                  </details>
+                ) : null}
+                {!h.riktig && !h.mangler && !h.sporsmal && !h.svar && (
                   <p className="mt-2 text-sm text-[#191C1F]/45">Uten notat.</p>
                 )}
                 <p className="mt-2 text-xs text-[#191C1F]/45">
                   {fag ? `${fag.kode} · ` : ""}
                   {kildeLinje(h)}
+                  {h.maalIds?.length ? ` · viste ${h.maalIds.join(", ")}` : ""}
                 </p>
               </li>
             );

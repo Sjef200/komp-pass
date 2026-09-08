@@ -1,5 +1,33 @@
 import type { Karakter, Kompetansemaal, MaalStatus, Tema, Horing } from "./types";
 import { karakterFarge } from "./colors";
+import { iDagIso } from "./format";
+
+/** Hele dager fra `dato` fram til `iDag`. Negativ hvis datoen ligger i framtiden. */
+export function dagerSiden(dato: string, iDag: string = iDagIso()): number {
+  const fra = Date.parse(`${dato.slice(0, 10)}T12:00:00Z`);
+  const til = Date.parse(`${iDag.slice(0, 10)}T12:00:00Z`);
+  if (Number.isNaN(fra) || Number.isNaN(til)) return 0;
+  return Math.round((til - fra) / 86400000);
+}
+
+/**
+ * Hvor lenge en karakter får stå før temaet bør høres igjen.
+ * Et svakt svar kommer raskt tilbake, en sekser holder en måned.
+ */
+export const MODNINGSDAGER: Record<Karakter, number> = {
+  1: 2,
+  2: 3,
+  3: 5,
+  4: 9,
+  5: 16,
+  6: 30,
+};
+
+/** Uhørt er alltid modent. Ellers avgjør karakteren hvor lenge den holder. */
+export function erModen(karakter: Karakter | null, dager: number | null): boolean {
+  if (karakter == null || dager == null) return true;
+  return dager >= MODNINGSDAGER[karakter];
+}
 
 export function horingerForTema(horinger: Horing[], temaId: string): Horing[] {
   return horinger
@@ -27,6 +55,8 @@ export type TemaSegment = {
   navn: string;
   karakter: Karakter | null;
   farge: string;
+  dagerSiden: number | null;
+  moden: boolean;
 };
 
 export type MaalDekning = {
@@ -36,6 +66,10 @@ export type MaalDekning = {
   segmenter: TemaSegment[];
   horteTemaer: number;
   totaltTemaer: number;
+  /** Dager siden siste høring på et av temaene. Null hvis målet aldri er hørt. */
+  dagerSiden: number | null;
+  /** Minst ett hørt tema har stått lenge nok til at det bør høres igjen. */
+  moden: boolean;
 };
 
 export function maalStatusFraSnitt(snitt: number | null): MaalStatus {
@@ -49,15 +83,20 @@ export function maalDekning(
   maal: Kompetansemaal,
   temaer: Tema[],
   horinger: Horing[],
+  iDag: string = iDagIso(),
 ): MaalDekning {
   const linked = temaer.filter((t) => t.maalIds.includes(maal.id));
   const segmenter: TemaSegment[] = linked.map((tema) => {
-    const karakter = sisteKarakter(horinger, tema.id);
+    const siste = sisteHoring(horinger, tema.id);
+    const karakter = siste?.karakter ?? null;
+    const dager = siste ? dagerSiden(siste.dato, iDag) : null;
     return {
       temaId: tema.id,
       navn: tema.navn,
       karakter,
       farge: karakterFarge(karakter),
+      dagerSiden: dager,
+      moden: erModen(karakter, dager),
     };
   });
   const horte = segmenter.filter((s) => s.karakter != null);
@@ -65,6 +104,9 @@ export function maalDekning(
     horte.length === 0
       ? null
       : horte.reduce((sum, s) => sum + (s.karakter as number), 0) / horte.length;
+  const dager = horte
+    .map((s) => s.dagerSiden)
+    .filter((d): d is number => d != null);
 
   return {
     maal,
@@ -73,6 +115,8 @@ export function maalDekning(
     segmenter,
     horteTemaer: horte.length,
     totaltTemaer: linked.length,
+    dagerSiden: dager.length === 0 ? null : Math.min(...dager),
+    moden: horte.some((s) => s.moden),
   };
 }
 

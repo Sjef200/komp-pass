@@ -24,3 +24,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Læringsdata og opptak. Lærerens stemme skal ikke i git.
+mfl-data/
+*.m4a
+*.mp3
+*.wav

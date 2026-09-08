@@ -1,7 +1,8 @@
 import { type ReactNode } from "react";
 import { karakterFarge } from "../lib/colors";
 import { formatSnitt, maalDekning, maalStatusLabel, snittSisteKarakter } from "../lib/dekning";
-import { grupperKapittel } from "../lib/kapittel";
+import { grupperKapittel, kapittelNavn } from "../lib/kapittel";
+import { nesteTemaer } from "../lib/planlegging";
 import { fagordIFag, maalIFag, temaerIFag, aktivtFag } from "../lib/store";
 import type { AppState } from "../lib/types";
 
@@ -20,6 +21,7 @@ export function Oversikt({ state }: { state: AppState }) {
   const dekning = maal.map((m) => maalDekning(m, temaer, state.horinger));
   const maalUdekket = dekning.filter((d) => d.status === "udekket").length;
   const maalSvake = dekning.filter((d) => d.status === "svak").length;
+  const ko = nesteTemaer(temaer, state.horinger, undefined, 4);
 
   return (
     <div className="space-y-6">
@@ -72,6 +74,42 @@ export function Oversikt({ state }: { state: AppState }) {
           )}
         </Kpi>
       </div>
+
+      {ko.length > 0 && (
+        <section>
+          <h2 className="mb-2 text-sm font-medium uppercase tracking-wide text-[#191C1F]/55">
+            Hør meg i dette nå
+          </h2>
+          <p className="mb-3 text-sm text-[#191C1F]/60">
+            Uhørt først, så det svake og det som har stått lenge. Rekkefølgen bytter kapittel
+            med vilje.
+          </p>
+          <ol className="space-y-2">
+            {ko.map((p) => (
+              <li
+                key={p.tema.id}
+                className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-medium">
+                    {state.innstillinger.visEmoji ? `${p.tema.emoji} ` : ""}
+                    {p.tema.navn}
+                  </p>
+                  <p className="text-xs text-[#191C1F]/55">
+                    {kapittelNavn(p.tema)} · {p.grunn}
+                  </p>
+                </div>
+                <p
+                  className="shrink-0 font-serif text-2xl font-semibold"
+                  style={{ color: karakterFarge(p.karakter) }}
+                >
+                  {p.karakter ?? "–"}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       <section>
         <h2 className="mb-2 text-sm font-medium uppercase tracking-wide text-[#191C1F]/55">
