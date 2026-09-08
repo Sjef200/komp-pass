@@ -64,6 +64,20 @@ export type Tema = {
   kapittel?: string;
 };
 
+/** Læreverkets kapittel. Ikke det samme som et kompetansemål. */
+export type Kapittel = {
+  id: string;
+  fagId: string;
+  nummer: number;
+  navn: string;
+  del?: string;
+  sider?: { fra: number; til: number };
+  seksjoner: string[];
+  temaIds: string[];
+};
+
+export type OvingType = "kontroll" | "oppgave";
+
 export type AiProveniens = {
   modell: string;
   innsats: AiInnsats;
@@ -87,6 +101,9 @@ export type Horing = {
   modellsvar?: string;
   /** Målene svaret faktisk viste, ikke alle målene temaet er koblet til. */
   maalIds?: string[];
+  /** Bokas øvingsspørsmål, når høringen kom derfra. */
+  ovingId?: string;
+  kapittelId?: string;
   ai?: AiProveniens;
 };
 
@@ -173,6 +190,7 @@ export type AppState = {
   fag: Fag[];
   kompetansemaal: Kompetansemaal[];
   temaer: Tema[];
+  kapitler: Kapittel[];
   horinger: Horing[];
   fagord: Fagord[];
   hendelser: Hendelse[];

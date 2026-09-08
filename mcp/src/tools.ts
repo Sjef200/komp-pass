@@ -5,17 +5,28 @@ import {
   sisteKarakter,
   snittSisteKarakter,
 } from "../../src/lib/dekning.ts";
-import { grupperKapittel, kapittelNavn } from "../../src/lib/kapittel.ts";
+import { grupperKapittel, kapitlerIFag, kapittelNavn, maalSomTrefferKapittel, temaerIKapittel } from "../../src/lib/kapittel.ts";
 import { nesteTemaer } from "../../src/lib/planlegging.ts";
 import { fagordIFag, horingerIFag, maalIFag, skillGjelderFag, temaerIFag } from "../../src/lib/fag-utvalg.ts";
-import { krevFag, krevTemaIFag } from "../../src/lib/fag-validering.ts";
-import type { AppState, FagId, FagordStatus, Karakter, Skill } from "../../src/lib/types.ts";
+import { krevFag, krevKapittelIFag, krevTemaIFag } from "../../src/lib/fag-validering.ts";
+import type { AppState, FagId, FagordStatus, Karakter, OvingType, Skill } from "../../src/lib/types.ts";
 import {
   bekreftedeKoblinger,
   fagordHistorikk,
   foldKoblinger,
+  type KapittelNotat,
+  type KapittelVedlegg,
   type KoblingForeslatt,
+  type OvingBesvart,
+  type OvingLagtInn,
 } from "../../src/lib/hendelser.ts";
+import {
+  kapittelArbeid,
+  kapittelHarLesing,
+  kapittelLesingTittel,
+  kapittelOvingTittel,
+  nesteUbesvarteOving,
+} from "../../src/lib/arbeidsbok.ts";
 import { erKildeType, tidsstempel, type Kildedokument } from "../../src/lib/kilder.ts";
 import { indekserTekst } from "./kilde-lagring.ts";
 import {
@@ -172,11 +183,51 @@ export async function listKapitler(fagId?: string) {
     const { state, fagId: id } = await medFag(fagId);
     const temaer = temaerIFag(state, id);
     const maal = maalIFag(state, id);
+    const egne = kapitlerIFag(state, id);
+    const merknad =
+      "Kapittel er læreverkets inndeling. Kompetansemål er Udir. Ikke behandle kapittelnavn som mål. Bruk hent_kapittel for notater og øving.";
+
+    if (egne.length > 0) {
+      return jsonText({
+        fagId: id,
+        merknad,
+        kapitler: egne.map((k) => {
+          const kTemaer = temaerIKapittel(k, temaer);
+          const arbeid = kapittelArbeid(state.hendelser, state.horinger, k.id);
+          const snitt = formatSnitt(snittSisteKarakter(kTemaer, state.horinger));
+          const horte = kTemaer.filter((t) => sisteKarakter(state.horinger, t.id) != null).length;
+          return {
+            id: k.id,
+            nummer: k.nummer,
+            navn: k.navn,
+            del: k.del ?? null,
+            sider: k.sider ?? null,
+            lesing: kapittelLesingTittel(k),
+            oving: kapittelOvingTittel(k),
+            seksjoner: k.seksjoner,
+            snitt,
+            temaerHort: `${horte}/${kTemaer.length}`,
+            harNotat: kapittelHarLesing(arbeid),
+            ovinger: {
+              antall: arbeid.ovinger.length,
+              ubesvart: arbeid.ovinger.filter((o) => !o.svar && !o.horing).length,
+            },
+            maalIds: [...new Set(kTemaer.flatMap((t) => t.maalIds))],
+            maal: maalSomTrefferKapittel(maal, kTemaer).map((m) => ({
+              id: m.id,
+              kortnavn: m.kortnavn,
+              udirKode: m.udirKode ?? null,
+            })),
+            temaer: kTemaer.map((t) => ({ id: t.id, navn: t.navn, maalIds: t.maalIds })),
+          };
+        }),
+      });
+    }
+
     const kapitler = grupperKapittel(temaer, state.horinger);
     return jsonText({
       fagId: id,
-      merknad:
-        "Kapittel er læreverkets inndeling. Kompetansemål er Udir. Ikke behandle kapittelnavn som mål.",
+      merknad,
       kapitler: kapitler.map((k) => ({
         id: k.id,
         navn: k.navn,
@@ -430,6 +481,8 @@ export async function kallLoggHoring(args: {
   svar: string;
   modellsvar?: string;
   maalIds?: string[];
+  ovingId?: string;
+  kapittelId?: string;
   dato?: string;
   modell: string;
   innsats: "lav" | "medium" | "hoy" | "maks";
@@ -802,6 +855,263 @@ export async function leggInnKilde(args: {
       temaer,
       merknad:
         "Stoffet er lagret. Foreslå nå koblinger til temaene det faktisk dekker med foresla_kobling, én per bit som treffer. Eleven bekrefter dem under fanen Kilder. Deretter kan du høre i det.",
+    });
+  });
+}
+
+export async function hentKapittel(fagId: string | undefined, kapittelId: string) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
+    const kapittel = krevKapittelIFag(state, id as FagId, kapittelId);
+    const temaer = temaerIKapittel(kapittel, temaerIFag(state, id));
+    const arbeid = kapittelArbeid(state.hendelser, state.horinger, kapittel.id);
+    const fagord = fagordIFag(state, id).filter((f) =>
+      f.temaIds.some((tid) => kapittel.temaIds.includes(tid)),
+    );
+    return jsonText({
+      fagId: id,
+      kapittel: {
+        id: kapittel.id,
+        nummer: kapittel.nummer,
+        navn: kapittel.navn,
+        del: kapittel.del ?? null,
+        sider: kapittel.sider ?? null,
+        lesing: kapittelLesingTittel(kapittel),
+        oving: kapittelOvingTittel(kapittel),
+        seksjoner: kapittel.seksjoner,
+      },
+      notat: arbeid.gjeldendeNotat
+        ? {
+            notatId: arbeid.gjeldendeNotat.notatId,
+            tekst: arbeid.gjeldendeNotat.tekst,
+            tid: arbeid.gjeldendeNotat.tid,
+          }
+        : null,
+      vedlegg: arbeid.vedlegg.map((v) => ({
+        vedleggId: v.vedleggId,
+        filnavn: v.filnavn,
+        mime: v.mime,
+        tid: v.tid,
+      })),
+      ovinger: arbeid.ovinger.map((o) => ({
+        ovingId: o.ovingId,
+        type: o.ovingType,
+        nummer: o.nummer ?? null,
+        tekst: o.tekst,
+        besvart: Boolean(o.svar || o.horing),
+        karakter: o.horing?.karakter ?? o.svar?.karakter ?? null,
+      })),
+      temaer: temaer.map((t) => ({
+        id: t.id,
+        navn: t.navn,
+        maalIds: t.maalIds,
+        sisteKarakter: sisteKarakter(state.horinger, t.id),
+      })),
+      fagord: fagord.map((f) => ({ id: f.id, term: f.term, status: f.status })),
+      merknad:
+        "Lesing er elevens egne notater, ikke bokas brødtekst. Øving er bokas kontrollspørsmål og oppgaver. Hør med neste_oving, ikke still_sporsmal, så lenge det finnes ubesvarte bokspørsmål.",
+    });
+  });
+}
+
+export async function lagreKapittelNotat(args: {
+  fagId: string;
+  kapittelId: string;
+  tekst: string;
+  seksjon?: string;
+}) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(args.fagId);
+    krevKapittelIFag(state, id as FagId, args.kapittelId);
+    const tekst = args.tekst.trim();
+    if (!tekst) return feil("tekst er påkrevd. Skriv notatet med egne ord.");
+    const notatId = nyId("notat");
+    const hendelse: KapittelNotat = {
+      id: nyId("k-notat"),
+      type: "kapittel-notat",
+      tid: new Date().toISOString(),
+      fagId: id,
+      kilde: "ai",
+      kapittelId: args.kapittelId,
+      notatId,
+      tekst,
+      ...(args.seksjon?.trim() ? { seksjon: args.seksjon.trim() } : {}),
+    };
+    await skrivHendelse(hendelse);
+    return jsonText({
+      fagId: id,
+      kapittelId: args.kapittelId,
+      notatId,
+      merknad: "Notatet er lagret som den rene digitale versjonen. Papirfoto legger du inn med legg_ved_bilde.",
+    });
+  });
+}
+
+export async function leggVedBilde(args: {
+  fagId: string;
+  kapittelId: string;
+  sti: string;
+  filnavn?: string;
+  notatId?: string;
+}) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(args.fagId);
+    krevKapittelIFag(state, id as FagId, args.kapittelId);
+    if (!args.sti.trim()) return feil("sti er påkrevd. Fila må ligge under ~/mfl-data.");
+    const { lagreVedleggFil } = await import("./vedlegg.ts");
+    const lagret = lagreVedleggFil({
+      kapittelId: args.kapittelId,
+      filnavn: args.filnavn?.trim() || args.sti,
+      kildeSti: args.sti.trim(),
+    });
+    const hendelse: KapittelVedlegg = {
+      id: nyId("k-vedlegg"),
+      type: "kapittel-vedlegg",
+      tid: new Date().toISOString(),
+      fagId: id,
+      kilde: "ai",
+      kapittelId: args.kapittelId,
+      vedleggId: lagret.vedleggId,
+      filnavn: lagret.filnavn,
+      sti: lagret.sti,
+      mime: lagret.mime,
+      ...(args.notatId?.trim() ? { notatId: args.notatId.trim() } : {}),
+    };
+    await skrivHendelse(hendelse);
+    return jsonText({
+      fagId: id,
+      kapittelId: args.kapittelId,
+      vedleggId: lagret.vedleggId,
+      filnavn: lagret.filnavn,
+      merknad: "Bildet ligger lokalt. Skriv den rene teksten med lagre_kapittelnotat — ikke en avskrift av boka.",
+    });
+  });
+}
+
+export async function leggInnOving(args: {
+  fagId: string;
+  kapittelId: string;
+  tekst: string;
+  type?: string;
+  nummer?: string;
+}) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(args.fagId);
+    krevKapittelIFag(state, id as FagId, args.kapittelId);
+    const tekst = args.tekst.trim();
+    if (!tekst) return feil("tekst er påkrevd. Lim inn ett spørsmål eller én oppgave fra boka.");
+    const ovingType: OvingType = args.type === "oppgave" ? "oppgave" : "kontroll";
+    const ovingId = nyId("oving");
+    const hendelse: OvingLagtInn = {
+      id: nyId("k-oving"),
+      type: "oving-lagt-inn",
+      tid: new Date().toISOString(),
+      fagId: id,
+      kilde: "ai",
+      kapittelId: args.kapittelId,
+      ovingId,
+      ovingType,
+      tekst,
+      ...(args.nummer?.trim() ? { nummer: args.nummer.trim() } : {}),
+    };
+    await skrivHendelse(hendelse);
+    return jsonText({
+      fagId: id,
+      kapittelId: args.kapittelId,
+      ovingId,
+      type: ovingType,
+      merknad: "Ett spørsmål er lagret. Hør eleven i det med neste_oving. Ikke lag en parallell spørsmålsbank.",
+    });
+  });
+}
+
+export async function nesteOving(fagId: string | undefined, kapittelId: string) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
+    const kapittel = krevKapittelIFag(state, id as FagId, kapittelId);
+    const arbeid = kapittelArbeid(state.hendelser, state.horinger, kapittel.id);
+    const neste = nesteUbesvarteOving(arbeid.ovinger);
+    const temaer = temaerIKapittel(kapittel, temaerIFag(state, id));
+    if (arbeid.ovinger.length === 0) {
+      return jsonText({
+        fagId: id,
+        kapittelId: kapittel.id,
+        ferdig: false,
+        oving: null,
+        merknad:
+          "Ingen bokspørsmål er limt inn ennå. Be eleven lime inn kontrollspørsmål først, så oppgaver, med legg_inn_oving. Ikke finn på egne spørsmål før den listen er tom.",
+      });
+    }
+    if (!neste) {
+      return jsonText({
+        fagId: id,
+        kapittelId: kapittel.id,
+        ferdig: true,
+        oving: null,
+        merknad:
+          "Alle innlimte bokspørsmål er besvart. Da kan du nøste opp hull, eller gå til muntlig-horing på temaene i kapittelet.",
+      });
+    }
+    return jsonText({
+      fagId: id,
+      kapittelId: kapittel.id,
+      ferdig: false,
+      oving: {
+        ovingId: neste.ovingId,
+        type: neste.ovingType,
+        nummer: neste.nummer ?? null,
+        tekst: neste.tekst,
+      },
+      temaer: temaer.map((t) => ({ id: t.id, navn: t.navn, maalIds: t.maalIds })),
+      merknad:
+        "Still nøyaktig dette spørsmålet. Ett om gangen. Glipper svaret: nøste opp (forklar X, hva er Y, hvorfor), så tilbake til bokspørsmålet. Logg med logg_horing og ovingId.",
+    });
+  });
+}
+
+export async function loggOving(args: {
+  fagId: string;
+  kapittelId: string;
+  ovingId: string;
+  svar: string;
+  karakter?: number;
+  riktig?: string;
+  mangler?: string;
+  temaId?: string;
+}) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(args.fagId);
+    krevKapittelIFag(state, id as FagId, args.kapittelId);
+    const arbeid = kapittelArbeid(state.hendelser, state.horinger, args.kapittelId);
+    const oving = arbeid.ovinger.find((o) => o.ovingId === args.ovingId);
+    if (!oving) return feil(`Ukjent ovingId i kapittelet: ${args.ovingId}`);
+    const svar = args.svar.trim();
+    if (!svar) return feil("svar er påkrevd.");
+    if (args.temaId) krevTemaIFag(state, id as FagId, args.temaId);
+    const karakter =
+      args.karakter != null ? (args.karakter as Karakter) : undefined;
+    const hendelse: OvingBesvart = {
+      id: nyId("k-osvar"),
+      type: "oving-besvart",
+      tid: new Date().toISOString(),
+      fagId: id,
+      kilde: "ai",
+      kapittelId: args.kapittelId,
+      ovingId: args.ovingId,
+      svar,
+      ...(karakter != null ? { karakter } : {}),
+      ...(args.riktig?.trim() ? { riktig: args.riktig.trim() } : {}),
+      ...(args.mangler?.trim() ? { mangler: args.mangler.trim() } : {}),
+      ...(args.temaId ? { temaId: args.temaId } : {}),
+    };
+    await skrivHendelse(hendelse);
+    return jsonText({
+      fagId: id,
+      kapittelId: args.kapittelId,
+      ovingId: args.ovingId,
+      merknad: args.temaId
+        ? "Besvarelsen er lagret. Logg også høring med logg_horing (samme ovingId og kapittelId) når temaet er hørt."
+        : "Besvarelsen er lagret. Kapittelet har kanskje ingen temaer ennå — da teller dette ikke mot kompetansemål.",
     });
   });
 }

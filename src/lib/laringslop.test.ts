@@ -17,6 +17,7 @@ function tilstand(over: Partial<AppState> = {}): AppState {
       { id: "t-1", fagId: "male1", navn: "tema 1", emoji: "🔍", maalIds: ["m-1"] },
       { id: "t-2", fagId: "male1", navn: "tema 2", emoji: "🎯", maalIds: ["m-2"] },
     ],
+    kapitler: [],
     horinger: [],
     fagord: [],
     hendelser: [],

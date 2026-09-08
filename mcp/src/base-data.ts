@@ -4,7 +4,7 @@
 // kjøre der det ikke finnes noen disk. Kjør npm run bygg:basedata når
 // noe i src/data endres.
 
-import type { Fag, Fagord, Horing, Kompetansemaal, Tema } from "../../src/lib/types.ts";
+import type { Fag, Fagord, Horing, Kapittel, Kompetansemaal, Tema } from "../../src/lib/types.ts";
 import type { PromptKatalogRad, SkillKatalogRad } from "../../src/lib/types.ts";
 
 export const FAG = [
@@ -221,6 +221,137 @@ export const TEMAER = [
   }
 ] as Tema[];
 
+export const KAPITLER = [
+  {
+    "id": "male1-k01",
+    "fagId": "male1",
+    "nummer": 1,
+    "navn": "Markedsføring og ledelse",
+    "del": "Perspektiv på markedsføring, samfunn og forbruker",
+    "sider": {
+      "fra": 7,
+      "til": 22
+    },
+    "seksjoner": [
+      "Hva er markedsføring?",
+      "Markedsføringens historie",
+      "Hva er ledelse?",
+      "Markedsføring og ledelse",
+      "Etikk",
+      "Samfunnsansvar og bærekraft"
+    ],
+    "temaIds": []
+  },
+  {
+    "id": "male1-k02",
+    "fagId": "male1",
+    "nummer": 2,
+    "navn": "Markedsføring og bærekraft",
+    "del": "Perspektiv på markedsføring, samfunn og forbruker",
+    "sider": {
+      "fra": 23,
+      "til": 39
+    },
+    "seksjoner": [
+      "Hva er virksomhetenes ansvar?",
+      "Hva menes med bærekraftig forretningsdrift?",
+      "Bærekraft og omdømme",
+      "Bærekraft blir viktigere",
+      "Bruk av konkurransemidlene og bærekraft"
+    ],
+    "temaIds": []
+  },
+  {
+    "id": "male1-k03",
+    "fagId": "male1",
+    "nummer": 3,
+    "navn": "Forbrukeratferd",
+    "del": "Perspektiv på markedsføring, samfunn og forbruker",
+    "sider": {
+      "fra": 40,
+      "til": 63
+    },
+    "seksjoner": [
+      "Hva er forbrukeratferd?",
+      "Hva påvirker forbrukeratferden?",
+      "Kjøpsprosessen",
+      "Forbrukeratferd i en digital verden"
+    ],
+    "temaIds": []
+  },
+  {
+    "id": "male1-k04",
+    "fagId": "male1",
+    "nummer": 4,
+    "navn": "Grunnleggende beslutninger i markedsføringsledelse",
+    "del": "Markedsføringens grunnpillarer",
+    "sider": {
+      "fra": 64,
+      "til": 86
+    },
+    "seksjoner": [
+      "Utvikling av forretningsidé",
+      "Mål og strategier",
+      "Markeder",
+      "Segmenter",
+      "Målgrupper"
+    ],
+    "temaIds": []
+  },
+  {
+    "id": "male1-k05",
+    "fagId": "male1",
+    "nummer": 5,
+    "navn": "Situasjonsanalyse",
+    "del": "Markedsføringens grunnpillarer",
+    "sider": {
+      "fra": 87,
+      "til": 115
+    },
+    "seksjoner": [
+      "Hva er situasjonsanalyse?",
+      "Beskrivelse av arbeidsbetingelsene",
+      "Analyse av arbeidsbetingelsene"
+    ],
+    "temaIds": []
+  },
+  {
+    "id": "male1-k06",
+    "fagId": "male1",
+    "nummer": 6,
+    "navn": "Markedsundersøkelser",
+    "del": "Markedsføringens grunnpillarer",
+    "sider": {
+      "fra": 117,
+      "til": 136
+    },
+    "seksjoner": [
+      "Vær kildekritisk",
+      "Markedsinformasjonssystemet",
+      "Hva er markedsundersøkelser?",
+      "Hovedtyper av markedsundersøkelser",
+      "Ulike undersøkelsesmetoder",
+      "Arbeidsfasene i en markedsundersøkelse",
+      "Utvalg og utvalgsmetode"
+    ],
+    "temaIds": [
+      "def",
+      "formaal",
+      "mis",
+      "hovedtyper",
+      "design",
+      "prosess",
+      "dybde",
+      "fokus",
+      "obs",
+      "eksperiment",
+      "survey",
+      "utvalg",
+      "validitet"
+    ]
+  }
+] as Kapittel[];
+
 export const FAGORD = [{"id":"fo-primaerdata","term":"Primærdata","forklaring":"Data du samler inn selv for denne undersøkelsen. Skilt mot sekundærdata, som allerede finnes og er samlet inn til et annet formål.","temaIds":["hovedtyper"],"status":"sitter"},{"id":"fo-sekundaerdata","term":"Sekundærdata","forklaring":"Data som allerede er samlet inn til et annet formål. Skilt mot primærdata, som du henter inn nå for akkurat denne undersøkelsen.","temaIds":["hovedtyper"],"status":"sitter"},{"id":"fo-kvalitativ","term":"Kvalitativ metode","forklaring":"Få enheter, dybde og åpne svar. Målet er å forstå hvorfor. Skilt mot kvantitativ, som teller og generaliserer.","temaIds":["hovedtyper","dybde","fokus"],"status":"usikker"},{"id":"fo-kvantitativ","term":"Kvantitativ metode","forklaring":"Mange enheter, tall og strukturerte spørsmål. Målet er å måle og generalisere. Skilt mot kvalitativ, som går i dybden hos få.","temaIds":["hovedtyper","survey"],"status":"usikker"},{"id":"fo-mis","term":"Markedsinformasjonssystem (MIS)","forklaring":"Et fast system for å samle, lagre og spre markedsinformasjon løpende. Skilt mot en markedsundersøkelse, som er et avgrenset prosjekt.","temaIds":["mis","def"],"status":"usikker"},{"id":"fo-undersokelse","term":"Markedsundersøkelse","forklaring":"Et avgrenset prosjekt for å hente inn data om marked og målgrupper. Skilt mot MIS, som er den løpende informasjonsflyten.","temaIds":["def","formaal"],"status":"usikker"},{"id":"fo-dybdeintervju","term":"Dybdeintervju","forklaring":"En-til-en-samtale med åpne spørsmål. Egnet for dybde og sensitive tema. Skilt mot fokusgruppe, der dataene kommer fra samspill i gruppe.","temaIds":["dybde"],"status":"ny"},{"id":"fo-fokusgruppe","term":"Fokusgruppe","forklaring":"Gruppeintervju der samspillet mellom deltakerne er en del av dataene. Skilt mot dybdeintervju, som er én og én.","temaIds":["fokus"],"status":"ny"},{"id":"fo-observasjon","term":"Observasjon","forklaring":"Du ser hva folk gjør, ikke hva de sier at de gjør. Skilt mot intervju og survey, og mot eksperiment der du griper inn og endrer noe.","temaIds":["obs"],"status":"usikker"},{"id":"fo-eksperiment","term":"Eksperiment","forklaring":"Du endrer én variabel og måler effekten, med kontroll over omgivelsene. Skilt mot observasjon, der du ikke manipulerer situasjonen.","temaIds":["eksperiment"],"status":"usikker"},{"id":"fo-survey","term":"Survey","forklaring":"Standardiserte spørsmål til mange respondenter. Skilt mot dybdeintervju, som er fleksibelt og treffer få.","temaIds":["survey"],"status":"usikker"},{"id":"fo-populasjon","term":"Populasjon","forklaring":"Alle du vil si noe om. Skilt mot utvalg, som er de du faktisk undersøker.","temaIds":["utvalg"],"status":"ny"},{"id":"fo-utvalg","term":"Utvalg","forklaring":"De som inngår i undersøkelsen. Skilt mot populasjon, som er hele gruppen funnene skal gjelde for.","temaIds":["utvalg"],"status":"ny"},{"id":"fo-validitet","term":"Validitet","forklaring":"Måler du det du tror du måler? Skilt mot reliabilitet, som handler om om du får samme resultat ved gjentakelse.","temaIds":["validitet"],"status":"ny"},{"id":"fo-reliabilitet","term":"Reliabilitet","forklaring":"Stabilitet i målingen: samme opplegg gir samme resultat. Skilt mot validitet, som handler om du treffer det rette fenomenet.","temaIds":["validitet"],"status":"ny"},{"id":"fo-design","term":"Undersøkelsesdesign","forklaring":"Helhetlig plan for hvordan undersøkelsen skal gjennomføres. Skilt mot metode (intervju, observasjon, survey), som er ett valg inni designet.","temaIds":["design","prosess"],"status":"ny"}] as Fagord[];
 
 export const HORINGER = [] as Horing[];
@@ -357,6 +488,15 @@ export const SKILL_INDEX = {
       "fagIds": []
     },
     {
+      "id": "kapittelarbeid",
+      "fil": "kapittelarbeid/SKILL.md",
+      "navn": "Kapittelarbeid",
+      "beskrivelse": "Les og noter med egne ord i et kapittel, øv på bokas kontrollspørsmål og oppgaver, nøste opp hull.",
+      "kilde": "plattform",
+      "kategori": "plattform",
+      "fagIds": []
+    },
+    {
       "id": "lareplanstyrt-horing",
       "fil": "lareplanstyrt-horing/SKILL.md",
       "navn": "Læreplanstyrt høring",
@@ -446,8 +586,9 @@ export const PROMPT_INDEX = {
 /** Sti under src/data/skills → innhold. */
 export const SKILL_FILER: Record<string, string> = {
   "velg-fag-forst/SKILL.md": "---\nname: velg-fag-forst\ndescription: \"Velg og bekreft fag før ethvert spørsmål, oppslag eller høring. Bruk ALLTID som første steg når eleven åpner en økt, bytter samtale, eller ber om hjelp uten å ha sagt hvilket fag. Trigger på 'hør meg', 'quiz', 'hva er', 'øve', 'hjelp meg', og på løsrevne fagord. Ikke anta Markedsføring og ledelse 1.\"\n---\n\n# Velg fag først\n\nDu jobber mot øvingsappens MCP. Fagene er adskilte kontekster. Bland aldri MFL, entreprenørskap og norsk i samme høring.\n\n## Trigger\n\nFørste melding i en økt, uklart fag, eller eleven har ikke bekreftet `fagId`.\n\n## Arbeidsflyt\n\n1. Kall `list_fag`. Vis fagene med fagkode og læreplan, ikke bare kallenavn.\n2. Be eleven bekrefte ett fag. Ikke gjett `male1`.\n3. Når `fagId` er valgt, kall `hent_lareplan` og `hent_oversikt` for akkurat det faget.\n4. Bruk det samme `fagId` i alle senere verktøykall i økten.\n5. Hvis eleven senere vil bytte fag, stopp og følg skillen `fagbytte`.\n\n## MCP-verktøy\n\n- `list_fag`\n- `hent_lareplan`\n- `hent_oversikt`\n- `list_skills` (etter at faget er valgt)\n\n## Ikke\n\n- Ikke still faglige spørsmål før `fagId` er bekreftet.\n- Ikke gjenbruk temaer, fagord eller kompetansemål fra et annet fag.\n- Ikke logg høring uten `fagId`.\n",
-  "kompetansemaal-mot-kapittel/SKILL.md": "---\nname: kompetansemaal-mot-kapittel\ndescription: \"Skille kompetansemål (Udir) fra kapittel (læreverk). Bruk ALLTID når eleven, læreren eller du selv blander 'mål', 'kapittel', 'tema', 'huke av læreplanen', eller spør hva som skal øves. Trigger på 'hva er forskjellen på kompetansemål og kapittel', 'er dette et mål', 'hvilket kapittel', 'huk av', 'læreplanen'.\"\n---\n\n# Kompetansemål mot kapittel\n\nDette er tre lag. Bland dem aldri.\n\n| Lag | Hva det er | Hvem eier det | Hva du gjør med det |\n|---|---|---|---|\n| Kompetansemål | Offisiell formulering av hva eleven skal kunne | Udir, via `hent_lareplan` | Vurder og dekk. Huk **ikke** av. |\n| Kapittel | Hvordan læreverket eller undervisningen deler opp året | Lokal `kapittel`-streng på temaene | Øv i rekkefølge, se snitt per kapittel. |\n| Tema | Det dere faktisk hører | Lokal `temaer.json` | Ett spørsmål, én karakter, append-only høring. |\n\n## Forskjellen som teller\n\nEt **kompetansemål** er et vurderingskrav. Sensor, eksamen og standpunkt forholder seg til Udir-teksten, ikke til kapittelnavnet i boka.\n\nEt **kapittel** er en arbeidsinndeling. «Markedsundersøkelser» er et kapittel. Målet det peker på, er for eksempel *bruke og utvikle markedsundersøkelser for å utforske og få innsikt i markeder og målgrupper* (`male1-04` / KM6175).\n\nEtt kapittel treffer ofte **flere** kompetansemål. Ett kompetansemål dekkes av **flere** temaer, gjerne spredt over kapitler senere.\n\nDekning på et mål er **avledet**: siste karakter per tema som er koblet til målet. Du huker aldri av et kompetansemål fordi kapittelet er «ferdig».\n\n## Arbeidsflyt\n\n1. Bekreft `fagId` (`velg-fag-forst`).\n2. Kall `hent_lareplan` når spørsmålet handler om hva som skal kunne.\n3. Kall `list_kapitler` når spørsmålet handler om hvor i boka dere er.\n4. Kall `list_temaer` for å høre. Hvert tema har `kapittel` og `maalIds`.\n5. Når du stiller spørsmål: si både kapittelet og kompetansemålet. Ikke bare kapittelnavnet.\n6. Logg på **temaet**, ikke på kapittelet og ikke på målet.\n\n## MCP-verktøy\n\n- `hent_lareplan` — kompetansemål\n- `list_kapitler` — kapitler med temaer og snitt\n- `list_temaer` — temaer med `kapittel` og `maalIds`\n- `still_sporsmal` — ett tema, med målene det treffer\n\n## Ikke\n\n- Ikke behandle et kapittelnavn som et kompetansemål.\n- Ikke si at et mål er dekket fordi kapittelet er lest.\n- Ikke finn på Udir-mål. Hent dem.\n- Ikke flytt en høring til et annet fag fordi kapitteltittelen ligner.\n",
-  "nytt-fagstoff/SKILL.md": "---\nname: nytt-fagstoff\ndescription: \"Ta imot fagstoff eleven limer inn i chatten, lagre det som kilde, koble det til temaer, og hør eleven i det med én gang. Bruk når eleven limer inn et bokkapittel, notater fra timen, en oppgavetekst eller sier «her er stoffet», «lær dette», «vi har hatt om dette», «hør meg i dette».\"\n---\n\n# Nytt fagstoff\n\nEleven gir deg stoff. Du lagrer det, kobler det til læreplanen, og hører hen i det. Ikke bare oppsummer — oppsummering er det svakeste du kan gjøre med et fagstoff.\n\n## Trigger\n\nEleven limer inn tekst, eller sier at dere har hatt om noe nytt.\n\n## Arbeidsflyt\n\n1. `fagId` må være satt. Ellers `velg-fag-forst`.\n2. Kall `legg_inn_kilde` med `fagId`, en tittel eleven kjenner igjen, og teksten **ordrett**. Ikke forkort den. Sett `type`: `bok`, `forelesning`, `oppgave` eller `notat`.\n3. Se på temalisten du får tilbake. For hver bit som faktisk dekker et tema, kall `foresla_kobling` med `chunkId`, `temaId` og en kort begrunnelse.\n   - Foreslå bare der stoffet virkelig treffer. Et forslag som ikke holder, koster eleven tid.\n   - Treffer stoffet ingen tema som finnes, si det. Da mangler temaet i `temaer.json`, og det er verdt å vite.\n4. Si kort hva du la inn: tittel, antall biter, og hvilke temaer du foreslo. Minn om at forslagene må bekreftes under fanen Kilder før de teller som dekning.\n5. Gå rett til høring: `neste_horing`, så `muntlig-horing`. Stoffet er ferskt nå — det er det beste tidspunktet.\n\n## Score\n\nNår eleven spør hvor mye hen kan:\n\n- Kall `hent_oversikt` for snittkarakter og hvor mange temaer som er hørt.\n- Kall `hent_laringslop` for gapet mellom gjennomgått og hørt.\n- Gi ett tall med én setnings begrunnelse, og **ett** konkret neste steg.\n\nSi aldri et snilt tall. Snittet er av siste karakter per tema, ikke av alle forsøk, så det stiger bare når du faktisk blir bedre.\n\n## MCP-verktøy\n\n- `legg_inn_kilde`\n- `foresla_kobling`\n- `neste_horing`, `still_sporsmal`\n- `hent_oversikt`, `hent_laringslop`\n\n## Ikke\n\n- Ikke lagre stoff i feil fag. Sjekk `fagId` først.\n- Ikke skriv om teksten før du lagrer den. Den skal kunne siteres tilbake til eleven som den sto.\n- Ikke behandle et koblingsforslag som dekning.\n- Ikke lever en oppsummering og stopp der. Poenget er å bli hørt i stoffet.\n",
+  "kompetansemaal-mot-kapittel/SKILL.md": "---\nname: kompetansemaal-mot-kapittel\ndescription: \"Skille kompetansemål (Udir) fra kapittel (læreverk). Bruk ALLTID når eleven, læreren eller du selv blander 'mål', 'kapittel', 'tema', 'huke av læreplanen', eller spør hva som skal øves. Trigger på 'hva er forskjellen på kompetansemål og kapittel', 'er dette et mål', 'hvilket kapittel', 'huk av', 'læreplanen'.\"\n---\n\n# Kompetansemål mot kapittel\n\nDette er tre lag. Bland dem aldri.\n\n| Lag | Hva det er | Hvem eier det | Hva du gjør med det |\n|---|---|---|---|\n| Kompetansemål | Offisiell formulering av hva eleven skal kunne | Udir, via `hent_lareplan` | Vurder og dekk. Huk **ikke** av. |\n| Kapittel | Hvordan læreverket deler opp året | Lokal `kapitler.json` og `kapittel` på temaene | Les, noter, øv i rekkefølge. Huk **ikke** av mål. |\n| Tema | Det dere faktisk hører | Lokal `temaer.json` | Ett spørsmål, én karakter, append-only høring. |\n\n## Forskjellen som teller\n\nEt **kompetansemål** er et vurderingskrav. Sensor, eksamen og standpunkt forholder seg til Udir-teksten, ikke til kapittelnavnet i boka.\n\nEt **kapittel** er en arbeidsinndeling. «Markedsundersøkelser» er et kapittel. Målet det peker på, er for eksempel *bruke og utvikle markedsundersøkelser for å utforske og få innsikt i markeder og målgrupper* (`male1-04` / KM6175).\n\nEtt kapittel treffer ofte **flere** kompetansemål. Ett kompetansemål dekkes av **flere** temaer, gjerne spredt over kapitler senere.\n\nDekning på et mål er **avledet**: siste karakter per tema som er koblet til målet. Du huker aldri av et kompetansemål fordi kapittelet er «ferdig».\n\n## Arbeidsflyt\n\n1. Bekreft `fagId` (`velg-fag-forst`).\n2. Kall `hent_lareplan` når spørsmålet handler om hva som skal kunne.\n3. Kall `list_kapitler` når spørsmålet handler om hvor i boka dere er.\n4. Kall `list_temaer` for å høre. Hvert tema har `kapittel` og `maalIds`.\n5. Når du stiller spørsmål: si både kapittelet og kompetansemålet. Ikke bare kapittelnavnet.\n6. Logg på **temaet**, ikke på kapittelet og ikke på målet.\n\n## MCP-verktøy\n\n- `hent_lareplan` — kompetansemål\n- `list_kapitler`, `hent_kapittel` — kapitler med notater, øving og temaer\n- `list_temaer` — temaer med `kapittel` og `maalIds`\n- `still_sporsmal` — ett tema, med målene det treffer\n\n## Ikke\n\n- Ikke behandle et kapittelnavn som et kompetansemål.\n- Ikke si at et mål er dekket fordi kapittelet er lest.\n- Ikke finn på Udir-mål. Hent dem.\n- Ikke flytt en høring til et annet fag fordi kapitteltittelen ligner.\n",
+  "nytt-fagstoff/SKILL.md": "---\nname: nytt-fagstoff\ndescription: \"Ta imot fagstoff eleven limer inn i chatten, lagre det som kilde, koble det til temaer, og hør eleven i det med én gang. Bruk når eleven limer inn et bokkapittel, notater fra timen, en oppgavetekst eller sier «her er stoffet», «lær dette», «vi har hatt om dette», «hør meg i dette».\"\n---\n\n# Nytt fagstoff\n\nEleven gir deg stoff. Du lagrer det, kobler det til læreplanen, og hører hen i det. Ikke bare oppsummer — oppsummering er det svakeste du kan gjøre med et fagstoff.\n\nEgne notater og innlimte øvingsspørsmål fra et kapittel hører hjemme i `kapittelarbeid`, ikke her. Ikke dump et bokkapittel som kilde.\n\n## Trigger\n\nEleven limer inn tekst, eller sier at dere har hatt om noe nytt.\n\n## Arbeidsflyt\n\n1. `fagId` må være satt. Ellers `velg-fag-forst`.\n2. Kall `legg_inn_kilde` med `fagId`, en tittel eleven kjenner igjen, og teksten **ordrett**. Ikke forkort den. Sett `type`: `bok`, `forelesning`, `oppgave` eller `notat`.\n3. Se på temalisten du får tilbake. For hver bit som faktisk dekker et tema, kall `foresla_kobling` med `chunkId`, `temaId` og en kort begrunnelse.\n   - Foreslå bare der stoffet virkelig treffer. Et forslag som ikke holder, koster eleven tid.\n   - Treffer stoffet ingen tema som finnes, si det. Da mangler temaet i `temaer.json`, og det er verdt å vite.\n4. Si kort hva du la inn: tittel, antall biter, og hvilke temaer du foreslo. Minn om at forslagene må bekreftes under fanen Kilder før de teller som dekning.\n5. Gå rett til høring: `neste_horing`, så `muntlig-horing`. Stoffet er ferskt nå — det er det beste tidspunktet.\n\n## Score\n\nNår eleven spør hvor mye hen kan:\n\n- Kall `hent_oversikt` for snittkarakter og hvor mange temaer som er hørt.\n- Kall `hent_laringslop` for gapet mellom gjennomgått og hørt.\n- Gi ett tall med én setnings begrunnelse, og **ett** konkret neste steg.\n\nSi aldri et snilt tall. Snittet er av siste karakter per tema, ikke av alle forsøk, så det stiger bare når du faktisk blir bedre.\n\n## MCP-verktøy\n\n- `legg_inn_kilde`\n- `foresla_kobling`\n- `neste_horing`, `still_sporsmal`\n- `hent_oversikt`, `hent_laringslop`\n\n## Ikke\n\n- Ikke lagre stoff i feil fag. Sjekk `fagId` først.\n- Ikke skriv om teksten før du lagrer den. Den skal kunne siteres tilbake til eleven som den sto.\n- Ikke behandle et koblingsforslag som dekning.\n- Ikke lever en oppsummering og stopp der. Poenget er å bli hørt i stoffet.\n",
+  "kapittelarbeid/SKILL.md": "---\nname: kapittelarbeid\ndescription: \"Kapittel som arbeidsbok: les og noter med egne ord, øv på bokas kontrollspørsmål og oppgaver, nøste opp hull. Bruk når eleven leser et kapittel, limer inn notater eller bilder av ark, ber om øving fra boka, eller sier 'kapittel 6', 'hør meg i kontrollspørsmålene', 'nøste opp'.\"\n---\n\n# Kapittelarbeid\n\nDu er lærer i praksis i ett kapittel av læreverket. Kompetansemålene eier Udir. Kapittelet er arbeidsrommet. Bland dem aldri.\n\n## Trigger\n\nEleven leser, noterer, limer inn kontrollspørsmål, viser et ark, eller vil øve i et konkret kapittel.\n\n## Arbeidsflyt\n\n1. `fagId` må være satt. Ellers `velg-fag-forst`.\n2. Kall `list_kapitler`. Bekreft kapittelet (`kapittelId`). Kall `hent_kapittel`.\n3. **Lesefase.** Eleven leser boka og noterer med egne ord. Ta imot notatet og lagre med `lagre_kapittelnotat`. Ikke oppsummer boka. Ikke skriv av brødtekst. Et foto av ark eller graf: be eleven legge fila under `~/mfl-data` eller laste opp i appen, så `legg_ved_bilde`. Skriv den rene digitale versjonen separat.\n4. Når eleven er ved sammendrag og øving: be om innliming av **bokas** kontrollspørsmål, så oppgavene. Ett om gangen med `legg_inn_oving`.\n5. Hør med `neste_oving`. Still **nøyaktig** det spørsmålet. Ett om gangen. Vent.\n6. Vurder som i `muntlig-horing`: hva som satt, hva som mangler for 6, karakter 1–6.\n7. Glipper det → **nøste opp**. Ett begrep: forklar X, hva er Y, hvorfor er det viktig. Ikke bytt til `still_sporsmal` så lenge bokspørsmålet er uløst. Når tråden sitter: tilbake til bokspørsmålet.\n8. Logg: `logg_oving`, og `logg_horing` med samme `ovingId` og `kapittelId` når kapittelet har temaer. `promptId` er `kapittelarbeid`.\n\n## Score i kapittelet\n\n`hent_kapittel` viser om notat og øving er påbegynt. `hent_laringslop` forteller om temaene er hørt. Et ferdiglest kapittel er ikke et avhuket kompetansemål.\n\n## MCP-verktøy\n\n- `list_kapitler`, `hent_kapittel`\n- `lagre_kapittelnotat`, `legg_ved_bilde`\n- `legg_inn_oving`, `neste_oving`, `logg_oving`\n- `logg_horing` (med `ovingId` og `kapittelId`)\n- `list_fagord` for ordbanken i kapittelet\n\n## Ikke\n\n- Ikke start med KI-genererte spørsmål. Bokas liste først.\n- Ikke lim inn eller lagre brødtekst fra læreverket.\n- Ikke huk av et kompetansemål fordi kapittelet er lest.\n- Ikke lever ti spørsmål med fasit.\n- Ikke bytt kapittel midt i en nøstetråd uten at eleven ber om det.\n",
   "lareplanstyrt-horing/SKILL.md": "---\nname: lareplanstyrt-horing\ndescription: \"Koble spørsmål og vurdering til konkrete kompetansemål i det valgte faget. Bruk når eleven skal høres, øve til prøve, eller når du vurderer et svar. Trigger på 'hør meg', 'knytt til læreplanen', 'kompetansemål', 'er dette godt nok', 'øve til eksamen'.\"\n---\n\n# Læreplanstyrt høring\n\nHvert spørsmål skal treffe minst ett kompetansemål i det aktive faget. Dekning kommer fra siste høring per tema, ikke fra avkryssing.\n\n## Trigger\n\nEleven vil øve, høres, eller få vurdert et svar etter at faget er valgt.\n\n## Arbeidsflyt\n\n1. Bekreft `fagId`. Hvis det mangler, følg `velg-fag-forst`.\n2. Kall `hent_lareplan` med `fagId`. Les målene. Ikke finn på egne.\n3. Kall `hent_laringslop`. Står noe som «gjennomgått, aldri hørt» på temanivå, begynn der — det er det mest presise stedet. Si når det ble gjennomgått.\n4. Kall `neste_horing` for å se hva som står for tur, og hvorfor. Kall `list_kapitler` hvis du trenger boka sin inndeling, eller `list_temaer` med filter `svake` eller `uhorte`.\n5. Kall `still_sporsmal` med både `fagId` og `temaId`. Still **ett** spørsmål i chatten. Si kapittel og kompetansemål, ikke bare kapittelnavnet.\n6. Kall `finn_belegg` med målet eller temaet. Fant du noe, still spørsmålet med lærerens egne ord og sitér med tidsstempel når du retter. Fant du ingenting, si det: målet er ikke gjennomgått, eller forelesningen er ikke lagt inn.\n7. Når du vurderer: vis hvilket kompetansemål svaret treffer, hva som satt, og hva som mangler for 6.\n8. Logg med `logg-etter-horing` når høringen er ferdig.\n\n## MCP-verktøy\n\n- `hent_lareplan`\n- `hent_laringslop`\n- `neste_horing`\n- `list_kapitler`\n- `list_temaer`\n- `still_sporsmal`\n- `finn_belegg` og `sok_kilder` når forelesninger eller bokstoff er lagt inn\n- `hent_skill` / `hent_skill_reference` når faget har en fagskill (for MFL: `markedsforingslaering`)\n\n## Ikke\n\n- Ikke spør om stoff som ikke ligger i læreplanen for dette `fagId`.\n- Ikke behandle et kapittelnavn som et kompetansemål. Les `kompetansemaal-mot-kapittel`.\n- Ikke behandle et koblingsforslag som dekning. Et forslag teller først når eleven har bekreftet det.\n- Ikke bland undervist og hørt. At noe er gjennomgått i en forelesning betyr ikke at eleven kan det.\n- Ikke bruk MFL-begreper i entreprenørskap eller norsk.\n- Ikke dump hele læreplanen i chatten. Hent den med verktøy og plukk det som trengs.\n",
   "muntlig-horing/SKILL.md": "---\nname: muntlig-horing\ndescription: \"Muntlig høring: ett spørsmål om gangen, krev begrepsskille, gi karaktergrunnlag. Bruk når eleven sier 'hør meg', 'quiz meg', 'muntlig', 'prøveøving' eller svarer på et høringsspørsmål.\"\n---\n\n# Muntlig høring\n\nDu er sensor, ikke fasitmaskin. Ett spørsmål. Vent. Vurder ærlig.\n\n## Trigger\n\nEleven ber om å bli hørt, eller du er midt i en høring.\n\n## Arbeidsflyt\n\n1. `fagId` må være satt. Ellers `velg-fag-forst`.\n2. Kall `still_sporsmal` med `fagId` og eventuelt `temaId`. Uten `temaId` velger den selv, og sier i `valgtFordi` hvorfor. Stol på køen — den setter uhørt først, så det svake og det som har stått lenge.\n3. Still **ett** av forslagene i chatten. Ikke lim inn listen.\n4. Krev at svaret skiller begrepet fra nabobegrepet.\n5. Når eleven har svart:\n   - Si først hva som satt.\n   - Si hva som mangler for 6.\n   - Sett karakter 1–6 med én setnings begrunnelse. Ikke gi et snilt 5.\n6. Vis kort det svaret som ville gitt 6, hvis det manglet begrunnelse, eksempel eller avgrensning.\n7. Gå til `logg-etter-horing`. Ta vare på spørsmålet du stilte og elevens svar ordrett — begge skal med i loggen.\n\nFor markedsføring: les `markedsforingslaering` og `references/karakterkjennetegn.md`.\n\n## MCP-verktøy\n\n- `still_sporsmal`\n- `neste_horing` (hele køen, hvis eleven spør hva som gjenstår)\n- `list_fagord` (begreper som glipper i temaet)\n- `list_horinger` (siste mangler på temaet)\n- `hent_skill_reference` ved behov\n\n## Ikke\n\n- Ikke lever ti spørsmål med fasit.\n- Ikke fortsett til neste tema før denne høringen er logget eller eleven avbryter.\n- Ikke bytt fag midt i en høring. Bruk `fagbytte` hvis eleven ber om det.\n",
   "logg-etter-horing/SKILL.md": "---\nname: logg-etter-horing\ndescription: \"Logg høring og oppdater bare relevante fagord, med full KI-proveniens. Bruk straks etter en ferdig muntlig høring. Trigger på 'logg', 'sett karakter', 'ferdig å høre', og når du selv har satt karakter.\"\n---\n\n# Logg etter høring\n\nHøringer er append-only. Første skriving på en id vinner. Du skriver bare `src/data/ai-overlay.json`.\n\n## Trigger\n\nHøringen i chatten er ferdig, og du har karakter, hva som satt, og hva som manglet.\n\n## Arbeidsflyt\n\n1. Kall `logg_horing` med:\n   - `fagId` (påkrevd)\n   - `temaId` som faktisk ble hørt\n   - `karakter` 1–6\n   - `sporsmal`: spørsmålet du stilte, ordrett\n   - `svar`: elevens svar, ordrett nok til at det kan vurderes på nytt senere\n   - `riktig` og `mangler`\n   - `modellsvar` hvis du viste svaret som ville gitt 6\n   - `maalIds`: målene svaret **faktisk** viste, ikke alle målene temaet er koblet til\n   - `modell`, `innsats` (`lav` | `medium` | `hoy` | `maks`) og `promptId`\n2. `promptId` skal være skillen du faktisk fulgte, for eksempel `muntlig-horing` eller `markedsforingslaering`.\n3. Kall `list_fagord` for samme `fagId`. Se på `historikk`: er begrepet blandet flere ganger før, hjelper det ikke å gjenta definisjonen — finn et nytt skille. Oppdater **bare** begrepene som ble brukt eller blandet.\n4. Kall `oppdater_fagord` per begrep med samme proveniens og samme `fagId`.\n   - `sitter` hvis skillet mot naboen var presist\n   - `usikker` hvis det nesten satt\n   - `ny` hvis begrepet manglet eller ble brukt feil\n   - `sisteFeil` = det eleven sa i stedet\n\n## MCP-verktøy\n\n- `logg_horing`\n- `list_fagord`\n- `oppdater_fagord`\n\n## Ikke\n\n- Ikke kall uten `fagId`, `sporsmal`, `svar`, modell, innsats og `promptId`. Serveren skal avvise det.\n- Ikke omskriv eller pynt på elevens svar. Det er beviset bak karakteren, og skal kunne leses om igjen.\n- Ikke sett `maalIds` til alle målene på temaet. Bare det svaret viste.\n- Ikke overskriv gamle høringer. Fagord overskrives heller ikke: hver `oppdater_fagord` legger til en observasjon, og hele feilhistorikken blir stående.\n- Ikke oppdater fagord i et annet fag.\n- Ikke skriv til `horinger.json`.\n",

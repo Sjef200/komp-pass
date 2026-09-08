@@ -67,6 +67,7 @@ type StoreApi = {
   /** Sant når verken sesjon eller lokal API finnes — da må du logge inn. */
   krevInnlogging: boolean;
   klar: boolean;
+  appendHendelser: (hendelser: Hendelse[]) => Promise<void>;
 };
 
 const StoreContext = createContext<StoreApi | null>(null);
@@ -322,6 +323,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       loggUt,
       krevInnlogging,
       klar,
+      appendHendelser: lagre,
     }),
     [
       state,
@@ -338,6 +340,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       loggUt,
       krevInnlogging,
       klar,
+      lagre,
     ],
   );
 

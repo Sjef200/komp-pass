@@ -1,6 +1,7 @@
-import type { AppState, Fag, FagId, Fagord, Tema } from "./types";
+import type { AppState, Fag, FagId, Fagord, Kapittel, Tema } from "./types";
 import { erFagId } from "./types";
 import { fagordIFag, temaerIFag } from "./fag-utvalg";
+import { kapitlerIFag } from "./kapittel";
 
 export function krevFag(state: AppState, fagId: string | undefined): Fag {
   if (!fagId || !fagId.trim()) {
@@ -29,6 +30,21 @@ export function krevTemaIFag(state: AppState, fagId: FagId, temaId: string): Tem
     throw new Error(`Temaet ${temaId} ligger ikke i faget ${fagId}.`);
   }
   return tema;
+}
+
+export function krevKapittelIFag(state: AppState, fagId: FagId, kapittelId: string): Kapittel {
+  const kapittel = state.kapitler.find((k) => k.id === kapittelId);
+  if (!kapittel) throw new Error(`Ukjent kapittel: ${kapittelId}. Kall list_kapitler.`);
+  if (kapittel.fagId !== fagId) {
+    throw new Error(
+      `Kapittelet «${kapittel.navn}» tilhører ${kapittel.fagId}, ikke ${fagId}. Bytt fag før du fortsetter.`,
+    );
+  }
+  const iFag = kapitlerIFag(state, fagId).some((k) => k.id === kapittelId);
+  if (!iFag) {
+    throw new Error(`Kapittelet ${kapittelId} ligger ikke i faget ${fagId}.`);
+  }
+  return kapittel;
 }
 
 export function krevFagordIFag(state: AppState, fagId: FagId, fagordId: string): Fagord {

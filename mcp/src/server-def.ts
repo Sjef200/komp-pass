@@ -24,10 +24,16 @@ import {
   finnBelegg,
   foreslaKobling,
   hentLaringslop,
+  hentKapittel,
+  lagreKapittelNotat,
   leggInnKilde,
+  leggInnOving,
+  leggVedBilde,
   hentKilde,
   listKilder,
   listKoblinger,
+  loggOving,
+  nesteOving,
   sokKilder,
 } from "./tools.ts";
 
@@ -81,6 +87,104 @@ export function createServer(): McpServer {
       inputSchema: z.object({ fagId: fagIdFelt.optional() }),
     },
     async ({ fagId }) => listKapitler(fagId),
+  );
+
+  server.registerTool(
+    "hent_kapittel",
+    {
+      title: "Hent kapittel",
+      description:
+        "Ett læreverkskapittel: seksjoner, dine notater, vedlegg, innlimte øvingsspørsmål og temaer. Ikke det samme som hent_lareplan.",
+      inputSchema: z.object({
+        fagId: fagIdFelt.optional(),
+        kapittelId: z.string(),
+      }),
+    },
+    async ({ fagId, kapittelId }) => hentKapittel(fagId, kapittelId),
+  );
+
+  server.registerTool(
+    "lagre_kapittelnotat",
+    {
+      title: "Lagre kapittelnotat",
+      description:
+        "Lagre den rene digitale versjonen av elevens egne notater til et kapittel. Ikke bokas brødtekst.",
+      inputSchema: z.object({
+        fagId: fagIdFelt,
+        kapittelId: z.string(),
+        tekst: z.string().describe("Elevens formulering, renskrevet."),
+        seksjon: z.string().optional(),
+      }),
+    },
+    async (args) => lagreKapittelNotat(args),
+  );
+
+  server.registerTool(
+    "legg_ved_bilde",
+    {
+      title: "Legg ved bilde",
+      description:
+        "Knytt et foto av ark eller graf til kapittelet. Fila må ligge under ~/mfl-data. Last opp i appen om den ikke gjør det.",
+      inputSchema: z.object({
+        fagId: fagIdFelt,
+        kapittelId: z.string(),
+        sti: z.string().describe("Absolutt sti under ~/mfl-data."),
+        filnavn: z.string().optional(),
+        notatId: z.string().optional(),
+      }),
+    },
+    async (args) => leggVedBilde(args),
+  );
+
+  server.registerTool(
+    "legg_inn_oving",
+    {
+      title: "Legg inn øving",
+      description:
+        "Lim inn ett kontrollspørsmål eller én oppgave fra boka. Ikke finn på egne spørsmål her.",
+      inputSchema: z.object({
+        fagId: fagIdFelt,
+        kapittelId: z.string(),
+        tekst: z.string(),
+        type: z.enum(["kontroll", "oppgave"]).optional(),
+        nummer: z.string().optional().describe("F.eks. 1.1 eller 4."),
+      }),
+    },
+    async (args) => leggInnOving(args),
+  );
+
+  server.registerTool(
+    "neste_oving",
+    {
+      title: "Neste øving",
+      description:
+        "Neste ubesvarte spørsmål fra boka i kapittelet. Bruk denne før still_sporsmal når eleven øver i et kapittel.",
+      inputSchema: z.object({
+        fagId: fagIdFelt.optional(),
+        kapittelId: z.string(),
+      }),
+    },
+    async ({ fagId, kapittelId }) => nesteOving(fagId, kapittelId),
+  );
+
+  server.registerTool(
+    "logg_oving",
+    {
+      title: "Logg øving",
+      description:
+        "Lagre et svar på et innlimt bokspørsmål. Har kapittelet temaer, logg også høring med logg_horing.",
+      inputSchema: z.object({
+        fagId: fagIdFelt,
+        kapittelId: z.string(),
+        ovingId: z.string(),
+        svar: z.string(),
+        karakter: z.number().int().min(1).max(6).optional(),
+        riktig: z.string().optional(),
+        mangler: z.string().optional(),
+        temaId: z.string().optional(),
+      }),
+    },
+    async (args) => loggOving(args),
   );
 
   server.registerTool(
@@ -147,6 +251,8 @@ export function createServer(): McpServer {
           .array(z.string())
           .optional()
           .describe("Målene svaret faktisk viste. Må være koblet til temaet."),
+        ovingId: z.string().optional().describe("Bokas øvingsspørsmål, når høringen kom derfra."),
+        kapittelId: z.string().optional(),
         dato: z.string().optional(),
         modell: z.string().describe("F.eks. Claude eller Cursor Grok 4.6"),
         innsats,
@@ -164,6 +270,8 @@ export function createServer(): McpServer {
         svar: args.svar,
         modellsvar: args.modellsvar,
         maalIds: args.maalIds,
+        ovingId: args.ovingId,
+        kapittelId: args.kapittelId,
         dato: args.dato,
         modell: args.modell,
         innsats: args.innsats,

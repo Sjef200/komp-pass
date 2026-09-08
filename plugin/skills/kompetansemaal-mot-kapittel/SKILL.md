@@ -10,7 +10,7 @@ Dette er tre lag. Bland dem aldri.
 | Lag | Hva det er | Hvem eier det | Hva du gjør med det |
 |---|---|---|---|
 | Kompetansemål | Offisiell formulering av hva eleven skal kunne | Udir, via `hent_lareplan` | Vurder og dekk. Huk **ikke** av. |
-| Kapittel | Hvordan læreverket eller undervisningen deler opp året | Lokal `kapittel`-streng på temaene | Øv i rekkefølge, se snitt per kapittel. |
+| Kapittel | Hvordan læreverket deler opp året | Lokal `kapitler.json` og `kapittel` på temaene | Les, noter, øv i rekkefølge. Huk **ikke** av mål. |
 | Tema | Det dere faktisk hører | Lokal `temaer.json` | Ett spørsmål, én karakter, append-only høring. |
 
 ## Forskjellen som teller
@@ -35,7 +35,7 @@ Dekning på et mål er **avledet**: siste karakter per tema som er koblet til m�
 ## MCP-verktøy
 
 - `hent_lareplan` — kompetansemål
-- `list_kapitler` — kapitler med temaer og snitt
+- `list_kapitler`, `hent_kapittel` — kapitler med notater, øving og temaer
 - `list_temaer` — temaer med `kapittel` og `maalIds`
 - `still_sporsmal` — ett tema, med målene det treffer
 

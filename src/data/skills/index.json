@@ -28,6 +28,15 @@
       "fagIds": []
     },
     {
+      "id": "kapittelarbeid",
+      "fil": "kapittelarbeid/SKILL.md",
+      "navn": "Kapittelarbeid",
+      "beskrivelse": "Les og noter med egne ord i et kapittel, øv på bokas kontrollspørsmål og oppgaver, nøste opp hull.",
+      "kilde": "plattform",
+      "kategori": "plattform",
+      "fagIds": []
+    },
+    {
       "id": "lareplanstyrt-horing",
       "fil": "lareplanstyrt-horing/SKILL.md",
       "navn": "Læreplanstyrt høring",

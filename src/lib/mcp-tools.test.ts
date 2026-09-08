@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { mergeHoringerAppendOnly } from "./ai-overlay.ts";
-import { hentLareplan, hentOversikt, hentSkill, hentSkillReference, kallLoggHoring, kallOppdaterFagord, listFag, listKapitler, listSkills, nesteHoring, stillSporsmal } from "../../mcp/src/tools.ts";
+import { hentKapittel, hentLareplan, hentOversikt, hentSkill, hentSkillReference, kallLoggHoring, kallOppdaterFagord, listFag, listKapitler, listSkills, nesteHoring, stillSporsmal } from "../../mcp/src/tools.ts";
 
 type Svar = { content: { type: "text"; text: string }[]; isError?: boolean };
 
@@ -45,16 +45,33 @@ test("list_skills(male1) inkluderer markedsforingslaering og kompetansemaal-mot-
   const skills = data.skills as Array<{ id: string }>;
   assert.ok(skills.some((s) => s.id === "markedsforingslaering"));
   assert.ok(skills.some((s) => s.id === "kompetansemaal-mot-kapittel"));
+  assert.ok(skills.some((s) => s.id === "kapittelarbeid"));
   assert.ok(skills.some((s) => s.id === "velg-fag-forst"));
 });
 
 test("list_kapitler er læreverk, ikke Udir-mål", async () => {
   const data = await parse(listKapitler("male1"));
-  const kapitler = data.kapitler as Array<{ navn: string; temaer: unknown[]; maal: Array<{ id: string }> }>;
-  assert.ok(kapitler.some((k) => k.navn === "Markedsundersøkelser"));
-  const undersokelse = kapitler.find((k) => k.navn === "Markedsundersøkelser");
+  const kapitler = data.kapitler as Array<{
+    id: string;
+    navn: string;
+    nummer?: number;
+    temaer: unknown[];
+    maal: Array<{ id: string }>;
+  }>;
+  const undersokelse = kapitler.find((k) => k.navn === "Markedsundersøkelser" || k.id === "male1-k06");
+  assert.ok(undersokelse);
   assert.ok((undersokelse?.temaer.length ?? 0) > 0);
   assert.ok(undersokelse?.maal.some((m) => m.id === "male1-04"));
+  assert.notEqual(undersokelse?.id, "male1-04");
+});
+
+test("hent_kapittel gir seksjoner og tomt elevarbeid for kapittel 6", async () => {
+  const data = await parse(hentKapittel("male1", "male1-k06"));
+  const kapittel = data.kapittel as { id: string; nummer: number; seksjoner: string[] };
+  assert.equal(kapittel.id, "male1-k06");
+  assert.equal(kapittel.nummer, 6);
+  assert.ok(kapittel.seksjoner.includes("Markedsinformasjonssystemet"));
+  assert.equal(data.notat, null);
 });
 
 test("hent_skill og referanse for markedsundersøkelser", async () => {

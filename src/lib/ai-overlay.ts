@@ -68,6 +68,7 @@ export function mergeTreLag(
     fag: mergeByIdSisteVinner([base.fag, local?.fag]),
     kompetansemaal: mergeByIdSisteVinner([base.kompetansemaal, local?.kompetansemaal]),
     temaer: mergeByIdSisteVinner([base.temaer, local?.temaer]),
+    kapitler: mergeByIdSisteVinner([base.kapitler, local?.kapitler]),
     horinger: folded.horinger,
     fagord: folded.fagord,
     hendelser,

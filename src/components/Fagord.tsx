@@ -20,14 +20,19 @@ const STATUS_FARGE: Record<FagordStatus, string> = {
 export function FagordListe({
   state,
   onStatus,
+  temaIds,
 }: {
   state: AppState;
   onStatus: (id: string, status: FagordStatus) => void;
+  /** Begrens ordbanken til temaene i et kapittel. */
+  temaIds?: string[];
 }) {
   const visEmoji = state.innstillinger.visEmoji;
   const fag = aktivtFag(state);
   const temaer = temaerIFag(state);
-  const fagord = fagordIFag(state);
+  const fagord = (temaIds
+    ? fagordIFag(state).filter((f) => f.temaIds.some((id) => temaIds.includes(id)))
+    : fagordIFag(state));
   const [temaFilter, setTemaFilter] = useState("alle");
   const [flashcard, setFlashcard] = useState(false);
   const [skjulte, setSkjulte] = useState<Set<string>>(new Set());

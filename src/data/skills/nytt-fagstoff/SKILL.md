@@ -7,6 +7,8 @@ description: "Ta imot fagstoff eleven limer inn i chatten, lagre det som kilde, 
 
 Eleven gir deg stoff. Du lagrer det, kobler det til læreplanen, og hører hen i det. Ikke bare oppsummer — oppsummering er det svakeste du kan gjøre med et fagstoff.
 
+Egne notater og innlimte øvingsspørsmål fra et kapittel hører hjemme i `kapittelarbeid`, ikke her. Ikke dump et bokkapittel som kilde.
+
 ## Trigger
 
 Eleven limer inn tekst, eller sier at dere har hatt om noe nytt.

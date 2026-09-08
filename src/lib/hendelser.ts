@@ -7,6 +7,7 @@ import type {
   Horing,
   Karakter,
   Kilde,
+  OvingType,
 } from "./types";
 
 /**
@@ -36,6 +37,8 @@ export type HoringLogget = HendelseBase & {
   svar?: string;
   modellsvar?: string;
   maalIds?: string[];
+  ovingId?: string;
+  kapittelId?: string;
 };
 
 export type FagordObservert = HendelseBase & {
@@ -61,7 +64,53 @@ export type KoblingAvgjort = HendelseBase & {
   bekreftet: boolean;
 };
 
-export type Hendelse = HoringLogget | FagordObservert | KoblingForeslatt | KoblingAvgjort;
+export type KapittelNotat = HendelseBase & {
+  type: "kapittel-notat";
+  kapittelId: string;
+  notatId: string;
+  tekst: string;
+  seksjon?: string;
+};
+
+export type KapittelVedlegg = HendelseBase & {
+  type: "kapittel-vedlegg";
+  kapittelId: string;
+  vedleggId: string;
+  filnavn: string;
+  sti: string;
+  mime: string;
+  notatId?: string;
+};
+
+export type OvingLagtInn = HendelseBase & {
+  type: "oving-lagt-inn";
+  kapittelId: string;
+  ovingId: string;
+  ovingType: OvingType;
+  tekst: string;
+  nummer?: string;
+};
+
+export type OvingBesvart = HendelseBase & {
+  type: "oving-besvart";
+  kapittelId: string;
+  ovingId: string;
+  svar: string;
+  karakter?: Karakter;
+  riktig?: string;
+  mangler?: string;
+  temaId?: string;
+};
+
+export type Hendelse =
+  | HoringLogget
+  | FagordObservert
+  | KoblingForeslatt
+  | KoblingAvgjort
+  | KapittelNotat
+  | KapittelVedlegg
+  | OvingLagtInn
+  | OvingBesvart;
 
 export type KoblingTilstand = "foreslatt" | "bekreftet" | "avvist";
 
@@ -82,6 +131,10 @@ const TYPER = new Set([
   "fagord-observert",
   "kobling-foreslatt",
   "kobling-avgjort",
+  "kapittel-notat",
+  "kapittel-vedlegg",
+  "oving-lagt-inn",
+  "oving-besvart",
 ]);
 
 export function erHendelse(value: unknown): value is Hendelse {
@@ -132,6 +185,8 @@ export function horingTilHendelse(horing: Horing, fagId: string): HoringLogget {
     svar: horing.svar,
     modellsvar: horing.modellsvar,
     maalIds: horing.maalIds,
+    ...(horing.ovingId ? { ovingId: horing.ovingId } : {}),
+    ...(horing.kapittelId ? { kapittelId: horing.kapittelId } : {}),
   };
 }
 
@@ -147,6 +202,8 @@ export function hendelseTilHoring(h: HoringLogget): Horing {
     ...(h.svar ? { svar: h.svar } : {}),
     ...(h.modellsvar ? { modellsvar: h.modellsvar } : {}),
     ...(h.maalIds?.length ? { maalIds: h.maalIds } : {}),
+    ...(h.ovingId ? { ovingId: h.ovingId } : {}),
+    ...(h.kapittelId ? { kapittelId: h.kapittelId } : {}),
     kilde: h.kilde,
     ...(h.ai ? { ai: h.ai } : {}),
   };

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "male1-k01",
+    "fagId": "male1",
+    "nummer": 1,
+    "navn": "Markedsføring og ledelse",
+    "del": "Perspektiv på markedsføring, samfunn og forbruker",
+    "sider": { "fra": 7, "til": 22 },
+    "seksjoner": [
+      "Hva er markedsføring?",
+      "Markedsføringens historie",
+      "Hva er ledelse?",
+      "Markedsføring og ledelse",
+      "Etikk",
+      "Samfunnsansvar og bærekraft"
+    ],
+    "temaIds": []
+  },
+  {
+    "id": "male1-k02",
+    "fagId": "male1",
+    "nummer": 2,
+    "navn": "Markedsføring og bærekraft",
+    "del": "Perspektiv på markedsføring, samfunn og forbruker",
+    "sider": { "fra": 23, "til": 39 },
+    "seksjoner": [
+      "Hva er virksomhetenes ansvar?",
+      "Hva menes med bærekraftig forretningsdrift?",
+      "Bærekraft og omdømme",
+      "Bærekraft blir viktigere",
+      "Bruk av konkurransemidlene og bærekraft"
+    ],
+    "temaIds": []
+  },
+  {
+    "id": "male1-k03",
+    "fagId": "male1",
+    "nummer": 3,
+    "navn": "Forbrukeratferd",
+    "del": "Perspektiv på markedsføring, samfunn og forbruker",
+    "sider": { "fra": 40, "til": 63 },
+    "seksjoner": [
+      "Hva er forbrukeratferd?",
+      "Hva påvirker forbrukeratferden?",
+      "Kjøpsprosessen",
+      "Forbrukeratferd i en digital verden"
+    ],
+    "temaIds": []
+  },
+  {
+    "id": "male1-k04",
+    "fagId": "male1",
+    "nummer": 4,
+    "navn": "Grunnleggende beslutninger i markedsføringsledelse",
+    "del": "Markedsføringens grunnpillarer",
+    "sider": { "fra": 64, "til": 86 },
+    "seksjoner": [
+      "Utvikling av forretningsidé",
+      "Mål og strategier",
+      "Markeder",
+      "Segmenter",
+      "Målgrupper"
+    ],
+    "temaIds": []
+  },
+  {
+    "id": "male1-k05",
+    "fagId": "male1",
+    "nummer": 5,
+    "navn": "Situasjonsanalyse",
+    "del": "Markedsføringens grunnpillarer",
+    "sider": { "fra": 87, "til": 115 },
+    "seksjoner": [
+      "Hva er situasjonsanalyse?",
+      "Beskrivelse av arbeidsbetingelsene",
+      "Analyse av arbeidsbetingelsene"
+    ],
+    "temaIds": []
+  },
+  {
+    "id": "male1-k06",
+    "fagId": "male1",
+    "nummer": 6,
+    "navn": "Markedsundersøkelser",
+    "del": "Markedsføringens grunnpillarer",
+    "sider": { "fra": 117, "til": 136 },
+    "seksjoner": [
+      "Vær kildekritisk",
+      "Markedsinformasjonssystemet",
+      "Hva er markedsundersøkelser?",
+      "Hovedtyper av markedsundersøkelser",
+      "Ulike undersøkelsesmetoder",
+      "Arbeidsfasene i en markedsundersøkelse",
+      "Utvalg og utvalgsmetode"
+    ],
+    "temaIds": [
+      "def",
+      "formaal",
+      "mis",
+      "hovedtyper",
+      "design",
+      "prosess",
+      "dybde",
+      "fokus",
+      "obs",
+      "eksperiment",
+      "survey",
+      "utvalg",
+      "validitet"
+    ]
+  }
+]

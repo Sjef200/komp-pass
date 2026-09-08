@@ -1,8 +1,10 @@
-import assert from "node:assert/strict";
 import { test } from "node:test";
-import { grupperKapittel } from "./kapittel.ts";
+import assert from "node:assert/strict";
+import { grupperKapittel, kapitlerIFag, temaerIKapittel } from "./kapittel.ts";
 import { maalDekning } from "./dekning.ts";
-import type { Horing, Kompetansemaal, Tema } from "./types.ts";
+import type { AppState, Horing, Kompetansemaal, Tema } from "./types.ts";
+import kapitlerJson from "../data/kapitler.json" with { type: "json" };
+import temaerJson from "../data/temaer.json" with { type: "json" };
 
 const temaer: Tema[] = [
   {
@@ -74,4 +76,21 @@ test("kompetansemål dekkes av temaer, ikke av at kapittelet finnes", () => {
   assert.equal(undersokelse.status, "sterk");
   assert.equal(pris.totaltTemaer, 0);
   assert.equal(pris.status, "udekket");
+});
+
+test("seedede kapitler 1–6 for male1, temaer henger på kapittel 6", () => {
+  const state = {
+    kapitler: kapitlerJson,
+    innstillinger: { aktivtFag: "male1", visEmoji: true },
+    temaer: temaerJson as Tema[],
+  } as AppState;
+  const kapitler = kapitlerIFag(state, "male1");
+  assert.equal(kapitler.length, 6);
+  assert.equal(kapitler[0]?.id, "male1-k01");
+  const k6 = kapitler.find((k) => k.nummer === 6);
+  assert.equal(k6?.navn, "Markedsundersøkelser");
+  assert.equal(k6?.sider?.fra, 117);
+  const temaerI6 = temaerIKapittel(k6!, temaerJson as Tema[]);
+  assert.equal(temaerI6.length, 13);
+  assert.ok(temaerI6.some((t) => t.id === "def"));
 });

@@ -27,6 +27,8 @@ dist-ssr
 
 # Læringsdata og opptak. Lærerens stemme skal ikke i git.
 mfl-data/
+.mfl-dev.db*
+/vedlegg/
 *.m4a
 *.mp3
 *.wav

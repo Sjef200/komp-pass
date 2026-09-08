@@ -21,6 +21,9 @@ type Props = {
   visEmoji: boolean;
   prompts?: Prompt[];
   forhåndsvalgtTemaId?: string;
+  forhåndsutfyltSporsmal?: string;
+  ovingId?: string;
+  kapittelId?: string;
   onLagre: (horing: Horing) => void;
   onAvbryt: () => void;
 };
@@ -30,6 +33,9 @@ export function HoringForm({
   visEmoji,
   prompts = [],
   forhåndsvalgtTemaId,
+  forhåndsutfyltSporsmal,
+  ovingId,
+  kapittelId,
   onLagre,
   onAvbryt,
 }: Props) {
@@ -39,7 +45,7 @@ export function HoringForm({
   );
   const [dato, setDato] = useState(iDagIso);
   const [karakter, setKarakter] = useState<Karakter | null>(null);
-  const [sporsmal, setSporsmal] = useState("");
+  const [sporsmal, setSporsmal] = useState(forhåndsutfyltSporsmal ?? "");
   const [svar, setSvar] = useState("");
   const [riktig, setRiktig] = useState("");
   const [mangler, setMangler] = useState("");
@@ -93,6 +99,8 @@ export function HoringForm({
       ...(sporsmal.trim() ? { sporsmal: sporsmal.trim() } : {}),
       ...(svar.trim() ? { svar: svar.trim() } : {}),
       kilde,
+      ...(ovingId ? { ovingId } : {}),
+      ...(kapittelId ? { kapittelId } : {}),
       ai:
         kilde === "ai"
           ? {

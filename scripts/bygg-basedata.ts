@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { repoRot } from "../mcp/src/fs-state.ts";
+import { fileURLToPath } from "node:url";
 
 /**
  * Genererer `mcp/src/base-data.ts` med læreplanen, temaene, fagordene og
@@ -16,7 +16,7 @@ import { repoRot } from "../mcp/src/fs-state.ts";
  * den for hånd.
  */
 
-const rot = repoRot();
+const rot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dataDir = path.join(rot, "src", "data");
 
 function les(...deler: string[]): string {
@@ -62,7 +62,7 @@ function main(): void {
     "// kjøre der det ikke finnes noen disk. Kjør npm run bygg:basedata når",
     "// noe i src/data endres.",
     "",
-    'import type { Fag, Fagord, Horing, Kompetansemaal, Tema } from "../../src/lib/types.ts";',
+    'import type { Fag, Fagord, Horing, Kapittel, Kompetansemaal, Tema } from "../../src/lib/types.ts";',
     'import type { PromptKatalogRad, SkillKatalogRad } from "../../src/lib/types.ts";',
     "",
     `export const FAG = ${JSON.stringify(json("fag.json"), null, 2)} as Fag[];`,
@@ -70,6 +70,8 @@ function main(): void {
     `export const KOMPETANSEMAAL = ${JSON.stringify(json("kompetansemaal.json"))} as Kompetansemaal[];`,
     "",
     `export const TEMAER = ${JSON.stringify(json("temaer.json"), null, 2)} as Tema[];`,
+    "",
+    `export const KAPITLER = ${JSON.stringify(json("kapitler.json"), null, 2)} as Kapittel[];`,
     "",
     `export const FAGORD = ${JSON.stringify(json("fagord.json"))} as Fagord[];`,
     "",
@@ -101,6 +103,7 @@ function main(): void {
   console.log(`  fag ${(json("fag.json") as unknown[]).length}`);
   console.log(`  kompetansemål ${(json("kompetansemaal.json") as unknown[]).length}`);
   console.log(`  temaer ${(json("temaer.json") as unknown[]).length}`);
+  console.log(`  kapitler ${(json("kapitler.json") as unknown[]).length}`);
   console.log(`  fagord ${(json("fagord.json") as unknown[]).length}`);
   console.log(`  skill-filer ${Object.keys(skillFiler).length}`);
   console.log(`  prompt-filer ${Object.keys(promptFiler).length}`);

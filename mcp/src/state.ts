@@ -33,6 +33,7 @@ import {
   FAG,
   FAGORD,
   HORINGER,
+  KAPITLER,
   KOMPETANSEMAAL,
   PROMPT_FILER,
   PROMPT_INDEX,
@@ -146,6 +147,7 @@ export function lesBaseState(): AppState {
     fag: FAG,
     kompetansemaal: KOMPETANSEMAAL,
     temaer: TEMAER,
+    kapitler: KAPITLER,
     horinger: HORINGER,
     fagord: FAGORD,
     hendelser: [],
@@ -200,6 +202,8 @@ export async function loggHoring(input: {
   svar: string;
   modellsvar?: string;
   maalIds?: string[];
+  ovingId?: string;
+  kapittelId?: string;
   dato?: string;
   modell: string;
   innsats: AiInnsats;
@@ -222,6 +226,8 @@ export async function loggHoring(input: {
     svar: input.svar.trim(),
     ...(input.modellsvar?.trim() ? { modellsvar: input.modellsvar.trim() } : {}),
     ...(maalIds.length > 0 ? { maalIds } : {}),
+    ...(input.ovingId?.trim() ? { ovingId: input.ovingId.trim() } : {}),
+    ...(input.kapittelId?.trim() ? { kapittelId: input.kapittelId.trim() } : {}),
     kilde: "ai",
     ai,
   };

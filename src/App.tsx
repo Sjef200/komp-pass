@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent } from "react";
+import { useState } from "react";
 import { FagordListe } from "./components/Fagord";
 import { Horinger } from "./components/Horinger";
 import { Kilder } from "./components/Kilder";
@@ -7,9 +7,8 @@ import { Samtykke } from "./components/Samtykke";
 import { Innlogging } from "./components/Innlogging";
 import { Oversikt } from "./components/Oversikt";
 import { KompetansemaalListe } from "./components/Kompetansemaal";
-import { Temaer } from "./components/Temaer";
+import { KapittelArbeidsbok } from "./components/KapittelArbeidsbok";
 import { Utvikling } from "./components/Utvikling";
-import { eksporterFilnavn } from "./lib/store";
 import { StoreProvider, useStore } from "./lib/store-context";
 import udirMetaJson from "./data/udir-meta.json";
 import { skillsSomPrompts } from "./lib/skill-katalog";
@@ -55,8 +54,6 @@ function Skall() {
     appendHoring,
     setFagordStatus,
     setInnstillinger,
-    importer,
-    eksporter,
     lagringsfeil,
     umigrert,
     koblingTekster,
@@ -65,12 +62,10 @@ function Skall() {
     loggUt,
     krevInnlogging,
     klar,
+    appendHendelser,
   } = useStore();
   const [side, setSide] = useState<Side>("oversikt");
-  const [importFeil, setImportFeil] = useState<string | null>(null);
-  const [importOk, setImportOk] = useState(false);
   const [horingPagar, setHoringPagar] = useState(false);
-  const filRef = useRef<HTMLInputElement>(null);
   const fag = state.fag.find((f) => f.id === state.innstillinger.aktivtFag);
   const visEmoji = state.innstillinger.visEmoji;
   const udir = udirMetaJson as {
@@ -82,40 +77,6 @@ function Skall() {
     ...skillsSomPrompts(state.skills),
     ...state.prompts.filter((p) => !state.skills.some((s) => s.id === p.id)),
   ];
-
-  function lastNed() {
-    const blob = new Blob([JSON.stringify(eksporter(), null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = eksporterFilnavn();
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  async function onImport(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    setImportOk(false);
-    try {
-      const text = await file.text();
-      const raw: unknown = JSON.parse(text);
-      await importer(raw);
-      setImportFeil(null);
-      setImportOk(true);
-    } catch (err) {
-      const melding =
-        err instanceof SyntaxError
-          ? "Filen er ikke gyldig JSON."
-          : err instanceof Error
-            ? err.message
-            : "Kunne ikke lese filen.";
-      setImportFeil(melding);
-    }
-  }
 
   function byttFag(neste: string) {
     if (neste === state.innstillinger.aktivtFag) return;
@@ -186,23 +147,6 @@ function Skall() {
                   </option>
                 ))}
               </select>
-              <button
-                type="button"
-                className={`rounded-lg px-2.5 py-1.5 text-sm ${
-                  visEmoji ? "bg-[#191C1F] text-white" : "bg-[#F6F5F1]"
-                }`}
-                aria-pressed={visEmoji}
-                onClick={() => setInnstillinger({ visEmoji: !visEmoji })}
-              >
-                Emoji
-              </button>
-              <button
-                type="button"
-                className="rounded-lg bg-[#F6F5F1] px-2.5 py-1.5 text-sm"
-                onClick={lastNed}
-              >
-                Eksporter
-              </button>
               {innlogget && (
                 <button
                   type="button"
@@ -213,20 +157,6 @@ function Skall() {
                   Logg ut
                 </button>
               )}
-              <button
-                type="button"
-                className="rounded-lg bg-[#F6F5F1] px-2.5 py-1.5 text-sm"
-                onClick={() => filRef.current?.click()}
-              >
-                Importer
-              </button>
-              <input
-                ref={filRef}
-                type="file"
-                accept="application/json,.json"
-                className="hidden"
-                onChange={onImport}
-              />
             </div>
           </div>
 
@@ -257,27 +187,9 @@ function Skall() {
         {umigrert && (
           <p className="mb-4 rounded-xl bg-[#B0770F]/10 px-4 py-3 text-sm text-[#191C1F]/80">
             Nettleseren har {(umigrert.horinger?.length ?? 0) + (umigrert.hendelser?.length ?? 0)}{" "}
-            rader fra før databasen ble tatt i bruk. De er ikke slettet. Trykk{" "}
-            <span className="font-medium">Eksporter</span> og kjør{" "}
-            <code className="rounded bg-[#F6F5F1] px-1">npm run migrer -- filen.json</code> for å få
-            dem inn.
-          </p>
-        )}
-        {importFeil && (
-          <p className="mb-4 rounded-xl bg-[#A63A2A]/10 px-4 py-3 text-sm text-[#A63A2A]" role="alert">
-            Import feilet: {importFeil}{" "}
-            <button type="button" className="underline" onClick={() => setImportFeil(null)}>
-              Lukk
-            </button>
-          </p>
-        )}
-        {importOk && !importFeil && (
-          <p className="mb-4 rounded-xl bg-[#2E6B4B]/10 px-4 py-3 text-sm text-[#2E6B4B]">
-            Tilstanden er lest inn. JSON-filene i repoet er fremdeles utgangspunktet; det du
-            importerte ligger i nettleseren.{" "}
-            <button type="button" className="underline" onClick={() => setImportOk(false)}>
-              Lukk
-            </button>
+            rader fra før databasen ble tatt i bruk. De er ikke slettet. Kjør{" "}
+            <code className="rounded bg-[#F6F5F1] px-1">npm run migrer -- filen.json</code> med en
+            eksportfil for å få dem inn.
           </p>
         )}
 
@@ -286,11 +198,12 @@ function Skall() {
           <KompetansemaalListe key={state.innstillinger.aktivtFag} state={state} />
         )}
         {side === "kapittel" && (
-          <Temaer
+          <KapittelArbeidsbok
             key={state.innstillinger.aktivtFag}
             state={state}
-            prompts={proveniensPrompts}
             onLagreHoring={appendHoring}
+            onHendelser={appendHendelser}
+            onFagordStatus={setFagordStatus}
             onHoringPagar={setHoringPagar}
           />
         )}

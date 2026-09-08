@@ -1,6 +1,7 @@
 import fagJson from "../data/fag.json";
 import kompetansemaalJson from "../data/kompetansemaal.json";
 import temaerJson from "../data/temaer.json";
+import kapitlerJson from "../data/kapitler.json";
 import horingerJson from "../data/horinger.json";
 import fagordJson from "../data/fagord.json";
 import aiOverlayJson from "../data/ai-overlay.json";
@@ -14,6 +15,7 @@ import type {
   Fagord,
   Horing,
   Innstillinger,
+  Kapittel,
   Kompetansemaal,
   PersistedState,
   Tema,
@@ -35,6 +37,7 @@ export function baseState(): AppState {
     fag: fagJson as Fag[],
     kompetansemaal: kompetansemaalJson as Kompetansemaal[],
     temaer: temaerJson as Tema[],
+    kapitler: kapitlerJson as Kapittel[],
     horinger: horingerJson as Horing[],
     fagord: fagordJson as Fagord[],
     hendelser: [],

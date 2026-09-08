@@ -2,8 +2,10 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import type { Plugin, ViteDevServer } from "vite";
 import { lesChunk, lesHendelser, lesKilder, sisteSeq } from "../mcp/src/db.ts";
-import { erHendelse, foldKoblinger, type Hendelse } from "../src/lib/hendelser.ts";
+import { erHendelse, foldKoblinger, type Hendelse, type KapittelVedlegg } from "../src/lib/hendelser.ts";
 import { tidsstempel } from "../src/lib/kilder.ts";
+import { nyId } from "../src/lib/format.ts";
+import { lagreVedleggFil, lesVedleggFil } from "../mcp/src/vedlegg.ts";
 import {
   lesPrompterFraDisk,
   lesSkillMarkdown,
@@ -241,6 +243,69 @@ export function mflLive(): Plugin {
               error: e instanceof Error ? e.message : "Kunne ikke lagre hendelsene.",
             });
           }
+          return;
+        }
+        if (url === "/api/vedlegg" && req.method === "POST") {
+          try {
+            const kapittelId = String(req.headers["x-kapittel-id"] ?? "").trim();
+            const fagId = String(req.headers["x-fag-id"] ?? "").trim();
+            const filnavnRaw = String(req.headers["x-filnavn"] ?? "bilde.jpg");
+            const filnavn = decodeURIComponent(filnavnRaw);
+            const mime = String(req.headers["content-type"] ?? "").split(";")[0]?.trim() ?? "";
+            if (!kapittelId || !fagId) {
+              apiJson(res, 400, { error: "Mangler kapittel eller fag." });
+              return;
+            }
+            const bytes = await lesBody(req);
+            const lagret = lagreVedleggFil({
+              kapittelId,
+              filnavn,
+              mime,
+              bytes,
+            });
+            const hendelse: KapittelVedlegg = {
+              id: nyId("k-vedlegg"),
+              type: "kapittel-vedlegg",
+              tid: new Date().toISOString(),
+              fagId,
+              kilde: "selv",
+              kapittelId,
+              vedleggId: lagret.vedleggId,
+              filnavn: lagret.filnavn,
+              sti: lagret.sti,
+              mime: lagret.mime,
+            };
+            await skrivHendelserFraKlient([hendelse]);
+            sett = await sisteSeq();
+            await sendLive(server);
+            apiJson(res, 200, { vedleggId: lagret.vedleggId, filnavn: lagret.filnavn });
+          } catch (e) {
+            apiJson(res, 400, {
+              error: e instanceof Error ? e.message : "Kunne ikke lagre bildet.",
+            });
+          }
+          return;
+        }
+        const vedleggGet = url.match(/^\/api\/vedlegg\/([^/]+)$/);
+        if (req.method === "GET" && vedleggGet) {
+          const vedleggId = decodeURIComponent(vedleggGet[1] ?? "");
+          const hendelser = await lesHendelser();
+          const treff = hendelser.find(
+            (h): h is KapittelVedlegg => h.type === "kapittel-vedlegg" && h.vedleggId === vedleggId,
+          );
+          if (!treff) {
+            apiJson(res, 404, { error: "Fant ikke vedlegget." });
+            return;
+          }
+          const fil = lesVedleggFil(treff.sti);
+          if (!fil) {
+            apiJson(res, 404, { error: "Fila ligger ikke på disk." });
+            return;
+          }
+          res.statusCode = 200;
+          res.setHeader("Content-Type", treff.mime);
+          res.setHeader("Cache-Control", "private, max-age=3600");
+          res.end(fil.bytes);
           return;
         }
         if (url === "/api/prompts" && req.method === "GET") {
