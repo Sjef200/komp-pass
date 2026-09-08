@@ -100,7 +100,26 @@ Verifikatoren må kaste `OAuthError`, ikke en vanlig `Error` — ellers svarer S
 
 1. **Gyldig token ende til ende.** Krever en innlogget bruker. `npm run logg-inn`, så en runde `tools/list` og `hent_oversikt` mot Postgres.
 2. **Deploy til en offentlig HTTPS-URL.** Vercel, Fly eller Supabase Edge Functions. `MFL_HTTP_URL` må være URL-en klienten ser, siden den går inn i metadataen.
-3. **OAuth-flyten mot claude.ai.** Connectors støtter OAuth med klient-ID og hemmelighet, ikke statiske tokens. Supabase Auth må enten fungere som autorisasjonsserver, eller så må serveren tilby et minimalt `/authorize` og `/token` som logger inn mot Supabase. Dette er den reelle gjenstående vanskeligheten.
+3. **OAuth-flyten mot claude.ai — undersøkt, og enklere enn fryktet.**
+
+   Supabase Auth **er** en fullverdig OAuth 2.1-autorisasjonsserver, og den er bygget for MCP. Den er bare slått av på prosjektet:
+
+   ```
+   /auth/v1/.well-known/oauth-authorization-server
+     → 404 {"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+   ```
+
+   Ruten finnes altså, den mangler bare et flagg. Prosjektets egen `openid-configuration` svarer allerede 200 og viser hva som kommer når den skrus på: `authorization_code` og `refresh_token`, PKCE med `S256`, `client_secret_basic`, og endepunktene `/auth/v1/oauth/authorize` og `/auth/v1/oauth/token`. JWKS er live med ES256.
+
+   **Det trengs derfor ingen egen `/authorize` og `/token`.** De 150 linjene jeg regnet med, faller bort.
+
+   **Å skru på:** Authentication → OAuth Server i dashbordet. Slå samtidig på **dynamic client registration**, så registrerer claude.ai seg selv — da slipper du å lime inn klient-ID og hemmelighet manuelt. Supabase advarer om at dynamisk registrering lar hvilken som helst klient registrere seg, så det er verdt å se over lista av registrerte klienter innimellom.
+
+   **Rettet underveis:** metadataen pekte på prosjektroten. Autorisasjonsserveren er `/auth/v1`, ikke roten. Endepunktene i `http.ts` er nå hentet fra prosjektets egen `openid-configuration`, ikke gjettet.
+
+   **Én ting å sjekke når den er på:** Supabase-dokumentasjonen sier at RLS-policyer må ta hensyn til MCP-klientens `client_id`. Våre policyer bruker `bruker = auth.uid()`. Om et OAuth-utstedt token fortsatt gir riktig `auth.uid()`, er det ingenting å gjøre — men det må verifiseres med et ekte token før vi stoler på det.
+
+   **Mulig forbedring:** verifikatoren spør Supabase per forespørsel med `auth.getUser()`. Med JWKS live kan tokenet verifiseres lokalt i stedet, og spare et nettverkskall per MCP-kall. Ikke nødvendig for å komme i gang.
 
 **Verifisering til slutt:** koble til fra claude.ai, kall `hent_oversikt`, se samme tall som lokalt.
 

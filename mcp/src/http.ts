@@ -53,7 +53,7 @@ export function supabaseVerifier(): OAuthTokenVerifier {
       return {
         token,
         clientId: data.user.id,
-        scopes: ["mfl"],
+        scopes: ["openid", "email"],
         extra: { epost: data.user.email },
       };
     },
@@ -73,17 +73,24 @@ export function lagFetchHandler(opts: HttpOpts) {
     resourceMetadataUrl,
   });
 
-  // Supabase Auth er autorisasjonsserveren. Claude finner den herfra.
+  // Supabase Auth er autorisasjonsserveren, og den ligger under /auth/v1 —
+  // ikke på prosjektroten. Endepunktene er hentet fra prosjektets egen
+  // openid-configuration, ikke gjettet.
+  const as = `${supabaseUrl()}/auth/v1`;
   const metadata = buildOAuthProtectedResourceMetadata({
     oauthMetadata: {
-      issuer: supabaseUrl(),
-      authorization_endpoint: `${supabaseUrl()}/auth/v1/authorize`,
-      token_endpoint: `${supabaseUrl()}/auth/v1/token`,
+      issuer: as,
+      authorization_endpoint: `${as}/oauth/authorize`,
+      token_endpoint: `${as}/oauth/token`,
+      registration_endpoint: `${as}/oauth/clients/register`,
       response_types_supported: ["code"],
+      grant_types_supported: ["authorization_code", "refresh_token"],
+      code_challenge_methods_supported: ["S256"],
+      token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post", "none"],
     },
     resourceServerUrl: opts.serverUrl,
     resourceName: "MFL øvingsapp",
-    scopesSupported: ["mfl"],
+    scopesSupported: ["openid", "email", "offline_access"],
   });
 
   return {
