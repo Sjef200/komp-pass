@@ -18,7 +18,8 @@
     "bygg:plugin": "tsx scripts/bygg-plugin.ts",
     "logg-inn": "tsx scripts/logg-inn.ts",
     "mcp:http": "tsx mcp/src/http-server.ts",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run bygg:basedata && npm run build && wrangler deploy",
+    "bygg:basedata": "tsx scripts/bygg-basedata.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",

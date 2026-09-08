@@ -18,7 +18,7 @@ import {
   type KoblingForeslatt,
 } from "../../src/lib/hendelser.ts";
 import { erKildeType, tidsstempel, type Kildedokument } from "../../src/lib/kilder.ts";
-import { indekserTekst } from "./kilde-inntak.ts";
+import { indekserTekst } from "./kilde-lagring.ts";
 import {
   GAP_TEKST,
   laringslop,
@@ -30,14 +30,13 @@ import { lesChunk, lesChunks, lesKilde, lesKilder, skrivHendelse, sokChunks, typ
 import { nyId } from "../../src/lib/format.ts";
 import {
   byggProveniens,
-  importerPromptFraUrl,
   lastMcpState,
   lesPrompterFraDisk,
   lesSkillsFraDisk,
   lesUdirMeta,
   loggHoring,
   oppdaterFagord,
-} from "./fs-state.ts";
+} from "./state.ts";
 
 function jsonText(data: unknown): { content: { type: "text"; text: string }[] } {
   return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
@@ -466,6 +465,8 @@ export async function kallOppdaterFagord(args: {
 
 export async function kallImporterPrompt(url: string) {
   try {
+    // Lastes lazy: den skriver til disk, og skal ikke havne i Worker-bundelen.
+    const { importerPromptFraUrl } = await import("./fs-state.ts");
     const prompts = await importerPromptFraUrl(url);
     return jsonText({
       antall: prompts.length,

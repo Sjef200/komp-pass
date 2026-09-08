@@ -3,44 +3,25 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { mergeTreLag } from "../../src/lib/ai-overlay.ts";
-import {
-  fagordHistorikk,
-  horingTilHendelse,
-  type FagordObservert,
-  type Hendelse,
-} from "../../src/lib/hendelser.ts";
-import { lesHendelser, lesKilder, skrivHendelse } from "./db.ts";
-import {
-  krevFag,
-  krevFagordIFag,
-  krevMaalITema,
-  krevProveniens,
-  krevSporsmalOgSvar,
-  krevTemaIFag,
-} from "../../src/lib/fag-validering.ts";
-import { nyId } from "../../src/lib/format.ts";
 import { byggSkillKatalog, hentSkillsFraUrl, parseSkillMarkdown } from "../../src/lib/skill-import.ts";
 import { erTillattSkillFil, normaliserSkillSti, parseSkillPack, skillGjelderFag } from "../../src/lib/skill-pack.ts";
 import type {
-  AiInnsats,
   AiOverlay,
-  AiProveniens,
-  AppState,
-  Fag,
   FagId,
-  Fagord,
-  FagordStatus,
-  Horing,
-  Karakter,
-  Kompetansemaal,
   Prompt,
   PromptKatalogRad,
   Skill,
   SkillKatalogRad,
   SkillReference,
-  Tema,
 } from "../../src/lib/types.ts";
+import { settKilder } from "./state.ts";
+
+/**
+ * Alt som trenger disk: overlay-fila, skill-import fra URL og zip, og
+ * lesing av skills slik de faktisk ligger i src/data. Importeres bare av
+ * lokale inngangspunkter — aldri av tools.ts, som må kunne kjøre på en
+ * Worker uten filsystem.
+ */
 
 const her = path.dirname(fileURLToPath(import.meta.url));
 
@@ -72,16 +53,6 @@ export function skrivAiOverlay(overlay: AiOverlay): void {
   atomicWrite(dataFil("ai-overlay.json"), `${JSON.stringify(overlay, null, 2)}\n`);
 }
 
-export function lesUdirMeta(): {
-  hentet?: string;
-  status?: string;
-  feilmelding?: string | null;
-  kilde?: string;
-} {
-  const fil = dataFil("udir-meta.json");
-  if (!fs.existsSync(fil)) return { status: "cache" };
-  return lesJson(fil);
-}
 
 function skillTilMarkdown(p: Prompt): string {
   const desc = JSON.stringify(p.beskrivelse);
@@ -110,7 +81,10 @@ function lesPromptKatalog(): Prompt[] {
   });
 }
 
-export function lesSkillsFraDisk(): Skill[] {
+
+
+/** Skills slik de ligger på disk. Vinner over bundelen når vi kjører lokalt. */
+function lesSkillsFraDiskDirekte(): Skill[] {
   const indexFil = dataFil("skills", "index.json");
   if (!fs.existsSync(indexFil)) return [];
   const index = lesJson<{ skills: SkillKatalogRad[] }>(indexFil);
@@ -142,8 +116,8 @@ export function lesSkillsFraDisk(): Skill[] {
   });
 }
 
-export function lesPrompterFraDisk(): Prompt[] {
-  const fraSkills = lesSkillsFraDisk().map((s) => ({
+function lesPrompterFraDiskDirekte(): Prompt[] {
+  const fraSkills = lesSkillsFraDiskDirekte().map((s) => ({
     id: s.id,
     navn: s.navn,
     beskrivelse: s.beskrivelse,
@@ -153,14 +127,13 @@ export function lesPrompterFraDisk(): Prompt[] {
     importert: s.importert,
     fagIds: s.fagIds,
   }));
-  const fraPrompts = lesPromptKatalog();
   const sett = new Map<string, Prompt>();
-  for (const p of [...fraSkills, ...fraPrompts]) sett.set(p.id, p);
+  for (const p of [...fraSkills, ...lesPromptKatalog()]) sett.set(p.id, p);
   return [...sett.values()];
 }
 
 export function skillKatalogForOrigin(origin: string) {
-  const prompts = lesPrompterFraDisk();
+  const prompts = lesPrompterFraDiskDirekte();
   return byggSkillKatalog(
     origin,
     prompts.map((p) => ({ id: p.id, navn: p.navn, beskrivelse: p.beskrivelse })),
@@ -191,142 +164,23 @@ export function lesSkillReferenceMarkdown(skillId: string, referenceId: string):
   if (!/^[a-z0-9][a-z0-9-]*$/.test(skillId) || !/^[a-z0-9][a-z0-9-]*$/.test(referenceId)) {
     return null;
   }
-  const skill = lesSkillsFraDisk().find((s) => s.id === skillId);
+  const skill = lesSkillsFraDiskDirekte().find((s) => s.id === skillId);
   const ref = skill?.referanser.find((r) => r.id === referenceId);
   return ref?.markdown ?? null;
 }
 
-export function lesBaseState(): AppState {
-  return {
-    fag: lesJson<Fag[]>(dataFil("fag.json")),
-    kompetansemaal: lesJson<Kompetansemaal[]>(dataFil("kompetansemaal.json")),
-    temaer: lesJson<Tema[]>(dataFil("temaer.json")),
-    horinger: lesJson<Horing[]>(dataFil("horinger.json")),
-    fagord: lesJson<Fagord[]>(dataFil("fagord.json")),
-    hendelser: [],
-    koblinger: [],
-    kilder: [],
-    prompts: lesPrompterFraDisk(),
-    skills: lesSkillsFraDisk(),
-    innstillinger: { aktivtFag: "male1", visEmoji: true },
-  };
-}
 
 /**
  * Databasen er sannheten for alt som skjer. JSON-filene i src/data er
  * utgangspunktet: læreplan, temaer og begrepsdefinisjoner.
  */
-export async function lastMcpState(): Promise<AppState> {
-  const [hendelser, kilder] = await Promise.all([lesHendelser(), lesKilder()]);
-  return mergeTreLag(lesBaseState(), null, {
-    prompts: lesPrompterFraDisk(),
-    hendelser,
-    kilder,
-  });
-}
 
-export function byggProveniens(
-  modell: string,
-  innsats: AiInnsats,
-  promptId: string,
-  prompts: Prompt[],
-): AiProveniens {
-  krevProveniens({ modell, innsats, promptId });
-  const prompt = prompts.find((p) => p.id === promptId);
-  if (!prompt) {
-    throw new Error(`Ukjent promptId: ${promptId}`);
-  }
-  return {
-    modell: modell.trim(),
-    innsats,
-    promptId,
-    promptNavn: prompt.navn,
-  };
-}
 
-export async function loggHoring(input: {
-  fagId: string;
-  temaId: string;
-  karakter: Karakter;
-  riktig: string;
-  mangler: string;
-  sporsmal: string;
-  svar: string;
-  modellsvar?: string;
-  maalIds?: string[];
-  dato?: string;
-  modell: string;
-  innsats: AiInnsats;
-  promptId: string;
-}): Promise<Horing> {
-  const state = await lastMcpState();
-  const fag = krevFag(state, input.fagId);
-  krevTemaIFag(state, fag.id, input.temaId);
-  krevSporsmalOgSvar(input);
-  const maalIds = krevMaalITema(state, fag.id, input.temaId, input.maalIds);
-  const ai = byggProveniens(input.modell, input.innsats, input.promptId, state.prompts);
-  const horing: Horing = {
-    id: nyId("h-ai"),
-    temaId: input.temaId,
-    dato: input.dato ?? new Date().toISOString().slice(0, 10),
-    karakter: input.karakter,
-    riktig: input.riktig,
-    mangler: input.mangler,
-    sporsmal: input.sporsmal.trim(),
-    svar: input.svar.trim(),
-    ...(input.modellsvar?.trim() ? { modellsvar: input.modellsvar.trim() } : {}),
-    ...(maalIds.length > 0 ? { maalIds } : {}),
-    kilde: "ai",
-    ai,
-  };
-  await skrivHendelse(horingTilHendelse(horing, fag.id));
-  return horing;
-}
 
-export async function oppdaterFagord(input: {
-  fagId: string;
-  id: string;
-  status: FagordStatus;
-  sisteFeil?: string;
-  modell: string;
-  innsats: AiInnsats;
-  promptId: string;
-}): Promise<Fagord> {
-  const state = await lastMcpState();
-  const fag = krevFag(state, input.fagId);
-  const eksisterende = krevFagordIFag(state, fag.id, input.id);
-  const ai = byggProveniens(input.modell, input.innsats, input.promptId, state.prompts);
-  const observasjon: FagordObservert = {
-    id: nyId("fo-obs"),
-    type: "fagord-observert",
-    tid: new Date().toISOString(),
-    fagId: fag.id,
-    kilde: "ai",
-    ai,
-    fagordId: input.id,
-    status: input.status,
-    ...(input.sisteFeil?.trim() ? { sisteFeil: input.sisteFeil.trim() } : {}),
-  };
-  await skrivHendelse(observasjon);
-  return {
-    ...eksisterende,
-    status: observasjon.status,
-    sisteFeil: observasjon.sisteFeil ?? eksisterende.sisteFeil,
-    ai,
-  };
-}
 
 /** Alle observasjoner på ett fagord, nyeste først. */
-export async function lesFagordHistorikk(fagordId: string): Promise<FagordObservert[]> {
-  return fagordHistorikk(await lesHendelser(), fagordId);
-}
 
 /** Hendelser inn utenfra, for eksempel fra UI eller en importert eksportfil. */
-export async function skrivHendelserFraKlient(hendelser: Hendelse[]): Promise<Hendelse[]> {
-  const ut: Hendelse[] = [];
-  for (const h of hendelser) ut.push(await skrivHendelse(h));
-  return ut;
-}
 
 export async function importerPromptFraUrl(url: string): Promise<Prompt[]> {
   const hentet = await hentSkillsFraUrl(url);
@@ -353,7 +207,7 @@ export async function importerPromptFraUrl(url: string): Promise<Prompt[]> {
     });
   }
   atomicWrite(indexFil, `${JSON.stringify(index, null, 2)}\n`);
-  return lesPrompterFraDisk();
+  return lesPrompterFraDiskDirekte();
 }
 
 export function pakkUtSkillZip(buffer: Buffer): { path: string; text: string }[] {
@@ -429,7 +283,26 @@ export function importerSkillPackFiler(
     });
   }
   atomicWrite(indexFil, `${JSON.stringify(index, null, 2)}\n`);
-  return lesSkillsFraDisk();
+  return lesSkillsFraDiskDirekte();
 }
 
+/**
+ * Skills og prompter fra disk vinner over bundelen når vi kjører lokalt.
+ * Da dukker en skill du importerer i farten opp uten at base-data må
+ * bygges på nytt. På en Worker skjer dette aldri — der finnes ingen disk.
+ */
+settKilder({ skills: lesSkillsFraDiskDirekte, prompts: lesPrompterFraDiskDirekte });
+
 export { skillGjelderFag };
+export {
+  byggProveniens,
+  lastMcpState,
+  lesBaseState,
+  lesFagordHistorikk,
+  lesPrompterFraDisk,
+  lesSkillsFraDisk,
+  lesUdirMeta,
+  loggHoring,
+  oppdaterFagord,
+  skrivHendelserFraKlient,
+} from "./state.ts";

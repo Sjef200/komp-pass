@@ -2,8 +2,8 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { skrivKilde } from "./db.ts";
 import { slugify } from "../../src/lib/skill-import.ts";
+import { lagreChunks } from "./kilde-lagring.ts";
 import {
   chunkSegmenter,
   chunkTekst,
@@ -140,37 +140,11 @@ export type InntakOpts = {
   id?: string;
 };
 
-async function lagreKilde(
-  chunks: Chunk[],
-  meta: { id: string; fagId: string; type: KildeType; tittel: string; dato?: string; kapittel?: string; sti?: string },
-): Promise<{ kilde: Kildedokument; antallBiter: number }> {
-  if (chunks.length === 0) throw new Error("Ingen tekst å legge inn.");
-  const kilde: Kildedokument = {
-    id: meta.id,
-    fagId: meta.fagId,
-    type: meta.type,
-    tittel: meta.tittel,
-    dato: meta.dato ?? new Date().toISOString().slice(0, 10),
-    ...(meta.sti ? { sti: meta.sti } : {}),
-    ...(meta.kapittel ? { kapittel: meta.kapittel } : {}),
-    lagtInn: new Date().toISOString(),
-  };
-  const antallBiter = await skrivKilde(kilde, chunks);
-
-  // En lesbar kopi ved siden av transkriptet, så du kan bla i det uten appen.
-  fs.mkdirSync(transkriptMappe(), { recursive: true });
-  fs.writeFileSync(
-    path.join(transkriptMappe(), `${meta.id}.md`),
-    chunksTilMarkdown(meta.tittel, chunks),
-    "utf8",
-  );
-  return { kilde, antallBiter };
-}
-
 export async function indekserFil(opts: InntakOpts): Promise<{ kilde: Kildedokument; antallBiter: number }> {
   if (!fs.existsSync(opts.fil)) throw new Error(`Fant ikke filen: ${opts.fil}`);
   const tittel = opts.tittel ?? path.basename(opts.fil, path.extname(opts.fil));
-  return await lagreKilde(bitesFraFil(opts.fil), {
+  const chunks = bitesFraFil(opts.fil);
+  const resultat = await lagreChunks(chunks, {
     id: opts.id ?? `${opts.fagId}-${slugify(tittel)}`,
     fagId: opts.fagId,
     type: opts.type,
@@ -179,30 +153,14 @@ export async function indekserFil(opts: InntakOpts): Promise<{ kilde: Kildedokum
     kapittel: opts.kapittel,
     sti: opts.fil,
   });
+
+  // En lesbar kopi ved siden av transkriptet, så du kan bla i det uten appen.
+  fs.mkdirSync(transkriptMappe(), { recursive: true });
+  fs.writeFileSync(
+    path.join(transkriptMappe(), `${resultat.kilde.id}.md`),
+    chunksTilMarkdown(tittel, chunks),
+    "utf8",
+  );
+  return resultat;
 }
 
-/**
- * Fagstoff limt inn i chatten. Samme lagring som en fil, men uten at teksten
- * må innom disk først — det er dette som gjør at du kan gi Claude et
- * bokkapittel direkte og bli hørt i det med én gang.
- */
-export async function indekserTekst(opts: {
-  tekst: string;
-  fagId: string;
-  tittel: string;
-  type?: KildeType;
-  dato?: string;
-  kapittel?: string;
-  id?: string;
-}): Promise<{ kilde: Kildedokument; antallBiter: number }> {
-  const tekst = opts.tekst.trim();
-  if (!tekst) throw new Error("Teksten er tom.");
-  return await lagreKilde(chunkTekst(tekst), {
-    id: opts.id ?? `${opts.fagId}-${slugify(opts.tittel)}`,
-    fagId: opts.fagId,
-    type: opts.type ?? "notat",
-    tittel: opts.tittel,
-    dato: opts.dato,
-    kapittel: opts.kapittel,
-  });
-}

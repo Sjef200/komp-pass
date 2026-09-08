@@ -12,9 +12,16 @@ let lest = false;
 export function lastEnv(): void {
   if (lest) return;
   lest = true;
-  const rot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-  const fil = path.join(rot, ".env.local");
-  if (!fs.existsSync(fil)) return;
+  // På en Worker finnes verken import.meta.url eller filsystem. Der kommer
+  // verdiene fra bindings, og denne funksjonen skal bare la være.
+  let fil: string;
+  try {
+    const rot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+    fil = path.join(rot, ".env.local");
+    if (!fs.existsSync(fil)) return;
+  } catch {
+    return;
+  }
   for (const linje of fs.readFileSync(fil, "utf8").split(/\r?\n/)) {
     const ren = linje.trim();
     if (!ren || ren.startsWith("#")) continue;

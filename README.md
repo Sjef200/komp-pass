@@ -39,7 +39,7 @@ Rekkefølgen `db.ts` velger etter: `MFL_DB` satt eksplisitt vinner alltid, så S
 
 ## Deploy
 
-Nettsiden ligger på Cloudflare Workers som statisk SPA:
+Nettsiden og MCP-serveren ligger på samme Cloudflare Worker:
 
 ```bash
 npm run deploy
@@ -47,13 +47,26 @@ npm run deploy
 
 https://mfl-ovingsapp.william-kiautomatisering.workers.dev
 
-`not_found_handling: single-page-application` gjør at `/oauth/consent` treffer appen i stedet for 404. Den publiserbare Supabase-nøkkelen bakes inn i bundelen — det er meningen; RLS beskytter radene.
+| Sti | Hva |
+|---|---|
+| `/` og `/oauth/consent` | Nettsiden, statiske filer fra `dist` |
+| `/mcp` | MCP over HTTP — dette er URL-en claude.ai kobler til |
+| `/.well-known/oauth-protected-resource` | Peker på Supabase som autorisasjonsserver |
+| `/helse` | Livstegn |
 
-**Hva som virker der i dag:** samtykkesiden i OAuth-flyten. Den trenger bare Supabase fra nettleseren.
+Samme domene for samtykkesiden og endepunktet er med vilje.
 
-**Hva som ikke virker ennå:** resten av appen viser bare JSON-grunnlaget. Læringsdataene går gjennom `/api/tilstand` i utviklingsserveren, som ikke finnes på Workers. UI-et må lese Supabase direkte — se `docs/plan-sky.md`, del C.
+### Hvordan den kjører uten disk
 
-MCP-serveren er ikke deployet. Den krever at basedata bundles i stedet for å leses fra disk, og at SQLite holdes utenfor bundelen.
+En Worker har ikke noe filsystem, så tre ting måtte flyttes:
+
+- **Basedata er bundlet.** `npm run bygg:basedata` genererer `mcp/src/base-data.ts` fra `src/data` — læreplan, temaer, fagord og skills, rundt 87 KB. JSON-filene er fortsatt kilden; den genererte fila er et resultat.
+- **`state.ts` er node-fri** og brukes av `tools.ts`. `fs-state.ts` har diskdelen og registrerer et overlay lokalt, så en skill du importerer i farten dukker opp uten at bundelen bygges på nytt.
+- **SQLite aliases bort.** `wrangler.jsonc` bytter `db-sqlite.ts` mot en stubb som gir en tydelig feil hvis noe skulle treffe den. På Workeren følger tokenet forespørselen, og lageret er alltid Postgres.
+
+Whisper og zip-import er lokale funksjoner og finnes ikke der.
+
+**Hva som ikke virker ennå:** appens egne sider viser bare JSON-grunnlaget. Læringsdataene går gjennom `/api/tilstand` i utviklingsserveren. UI-et må lese Supabase direkte — se `docs/plan-sky.md`, del C.
 
 ## MCP over HTTP
 

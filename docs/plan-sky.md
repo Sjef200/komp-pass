@@ -139,13 +139,16 @@ Samtykkesiden virker der nå — den trenger bare Supabase fra nettleseren. Det 
 
 Resten av appen viser bare JSON-grunnlaget, siden læringsdataene går gjennom `/api/tilstand` i utviklingsserveren. Neste steg er å la UI-et lese Supabase direkte.
 
-**MCP-serveren på Workers krever en egen refaktorering**, målt opp:
+**MCP-serveren er nå også deployet.** Refaktoreringen som måtte til:
 
-- `fs-state.ts` leser 14 ganger fra disk. Basedataene er 140K til sammen og må bundles som en generert modul i stedet.
-- `db-sqlite.ts` importerer `node:sqlite` statisk i `db.ts`. Den må lastes lazy, ellers havner den i Worker-bundelen.
-- `kilde-inntak.ts` bruker `execFileSync` til whisper og unzip. Rene lokalfunksjoner som må skilles ut.
-- `sesjon.ts` og `env.ts` leser filer. På Workers kommer tokenet fra forespørselen og konfigurasjonen fra bindings.
-- `AsyncLocalStorage` virker med `nodejs_compat`, så brukerkonteksten er grei.
+- `base-data.ts` genereres fra `src/data` (87 KB) og erstatter 14 disklesninger.
+- `state.ts` er node-fri og brukes av `tools.ts`; `fs-state.ts` beholder diskdelen og registrerer et overlay lokalt.
+- `kilde-lagring.ts` skilt ut fra `kilde-inntak.ts`, som drar inn `node:child_process` via whisper.
+- `db-sqlite.ts` aliases til en stubb i `wrangler.jsonc`.
+- `iSky()` sjekker `aktivBruker()` først — over HTTP finnes ingen sesjonsfil å slå opp i.
+- `env.ts` tåler at `import.meta.url` mangler. Det var den siste feilen: den krasjet ved modullasting.
+
+Verifisert mot den deployede adressen: `/helse` svarer, metadataen peker på Supabase, og `/mcp` uten token gir 401 med riktig `resource_metadata`.
 
 ---
 

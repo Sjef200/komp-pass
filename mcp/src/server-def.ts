@@ -1,6 +1,6 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
 import { z } from "zod";
-import { lesSkillMarkdown, lesSkillsFraDisk } from "./fs-state.ts";
+import { lesSkillMarkdown, lesSkillsFraDisk } from "./state.ts";
 import { lesChunks, lesKilder } from "./db.ts";
 import { chunksTilMarkdown } from "../../src/lib/kilder.ts";
 import {

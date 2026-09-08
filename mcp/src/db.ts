@@ -3,6 +3,7 @@ import type { Chunk, Kildedokument } from "../../src/lib/kilder.ts";
 import type { ChunkRad, Lager, Treff } from "./db-typer.ts";
 import * as sqlite from "./db-sqlite.ts";
 import { lastEnv } from "./env.ts";
+import { aktivBruker } from "./bruker-kontekst.ts";
 import { lesSesjon } from "./sesjon.ts";
 
 lastEnv();
@@ -34,6 +35,7 @@ const sqliteLager: Lager = {
 };
 
 let valgt: Lager | null = null;
+let pgLager: Lager | null = null;
 
 /**
  * Rekkefølgen er bevisst:
@@ -47,6 +49,9 @@ let valgt: Lager | null = null;
  * ingenting. Du mister ikke dataene dine av å legge inn en URL.
  */
 export function iSky(): boolean {
+  // Over HTTP følger tokenet forespørselen, og da finnes det ingen
+  // sesjonsfil å slå opp i. Dette er veien en Worker alltid tar.
+  if (aktivBruker()) return true;
   if (process.env.MFL_DB?.trim()) return false;
   if (!process.env.SUPABASE_URL?.trim()) return false;
   return lesSesjon() != null;
@@ -55,6 +60,12 @@ export function iSky(): boolean {
 let advart = false;
 
 function lager(): Lager {
+  // Bufres ikke når en bruker følger forespørselen: samme prosess kan
+  // betjene flere brukere, og valget må tas på nytt hver gang.
+  if (aktivBruker()) {
+    pgLager ??= (require("./db-postgres.ts") as { lager: Lager }).lager;
+    return pgLager;
+  }
   if (valgt) return valgt;
   if (!iSky()) {
     if (process.env.SUPABASE_URL?.trim() && !process.env.MFL_DB?.trim() && !advart) {

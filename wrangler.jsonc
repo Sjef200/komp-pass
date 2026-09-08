@@ -1,13 +1,29 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "mfl-ovingsapp",
+  "main": "mcp/src/worker.ts",
   "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
 
-  // Statisk SPA. Samtykkesiden i OAuth-flyten ligger på /oauth/consent,
-  // og single-page-application gjør at den ruta treffer index.html i
-  // stedet for 404.
+  // Nettsiden og MCP-serveren på samme domene. Statiske filer serveres av
+  // ASSETS; /mcp og OAuth-metadataen går til Workeren.
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/mcp", "/mcp/*", "/helse", "/.well-known/oauth-*"]
+  },
+
+  // SQLite finnes ikke på en Worker. Stubben gir en tydelig feil hvis noe
+  // skulle treffe den, i stedet for at node:sqlite bryter bygget.
+  "alias": {
+    "./db-sqlite.ts": "./mcp/src/db-sqlite-tom.ts"
+  },
+
+  // Den publiserbare nøkkelen er ment å være synlig; RLS beskytter radene.
+  "vars": {
+    "SUPABASE_URL": "https://fttxneqwowavmxzcscnv.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_OUkDfXoeCu1xwTSk80ND2Q_RIz4ZjHC",
+    "MFL_HTTP_URL": "https://mfl-ovingsapp.william-kiautomatisering.workers.dev"
   }
 }
