@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { harSupabase, supabase } from "../lib/supabase";
 
 /**
@@ -18,6 +18,22 @@ type Detaljer = {
   client: { name?: string; client_name?: string; client_uri?: string } | null;
   scope: string;
   redirect_uri?: string;
+  redirect_url?: string;
+};
+
+type OAuthApi = {
+  getAuthorizationDetails: (id: string) => Promise<{
+    data: Detaljer | null;
+    error: { message: string } | null;
+  }>;
+  approveAuthorization: (
+    id: string,
+    opts?: { skipBrowserRedirect?: boolean },
+  ) => Promise<{ data: { redirect_url?: string } | null; error: { message: string } | null }>;
+  denyAuthorization: (
+    id: string,
+    opts?: { skipBrowserRedirect?: boolean },
+  ) => Promise<{ data: { redirect_url?: string } | null; error: { message: string } | null }>;
 };
 
 const SCOPE_TEKST: Record<string, string> = {
@@ -28,6 +44,23 @@ const SCOPE_TEKST: Record<string, string> = {
   offline_access: "holde tilgangen ved like uten at du logger inn på nytt",
 };
 
+function oauth(): OAuthApi {
+  return (supabase().auth as unknown as { oauth: OAuthApi }).oauth;
+}
+
+function tilFeiltekst(melding: string): string {
+  if (/no longer pending|cannot be processed|not found/i.test(melding)) {
+    return "Forespørselen er allerede brukt eller utløpt. Gå tilbake til Claude og koble til på nytt.";
+  }
+  return melding;
+}
+
+function sendVidere(url: string | undefined): boolean {
+  if (!url) return false;
+  window.location.assign(url);
+  return true;
+}
+
 export function Samtykke({ authorizationId }: { authorizationId: string }) {
   const [detaljer, setDetaljer] = useState<Detaljer | null>(null);
   const [feil, setFeil] = useState<string | null>(null);
@@ -36,6 +69,8 @@ export function Samtykke({ authorizationId }: { authorizationId: string }) {
   const [innlogget, setInnlogget] = useState<string | null>(null);
   const [epost, setEpost] = useState("");
   const [passord, setPassord] = useState("");
+  const sender = useRef(false);
+  const utlopt = Boolean(feil && /allerede brukt eller utløpt/i.test(feil));
 
   // Setter ikke `laster` her: kallet skjer fra en effekt, og synkron
   // setState der utløser en runde ekstra. Den starter allerede som true.
@@ -50,15 +85,13 @@ export function Samtykke({ authorizationId }: { authorizationId: string }) {
       }
       setInnlogget(sesjon.session.user.email ?? "innlogget");
 
-      const oauth = (db.auth as unknown as {
-        oauth: { getAuthorizationDetails: (id: string) => Promise<{ data: Detaljer | null; error: { message: string } | null }> };
-      }).oauth;
-      const { data, error } = await oauth.getAuthorizationDetails(authorizationId);
+      const { data, error } = await oauth().getAuthorizationDetails(authorizationId);
       if (error) throw new Error(error.message);
+      if (sendVidere(data?.redirect_url)) return;
       setDetaljer(data);
       setFeil(null);
     } catch (e) {
-      setFeil(e instanceof Error ? e.message : "Kunne ikke hente forespørselen.");
+      setFeil(tilFeiltekst(e instanceof Error ? e.message : "Kunne ikke hente forespørselen."));
     } finally {
       setLaster(false);
     }
@@ -88,25 +121,21 @@ export function Samtykke({ authorizationId }: { authorizationId: string }) {
   }
 
   async function avgjor(godkjenn: boolean) {
+    if (sender.current) return;
+    sender.current = true;
     setJobber(true);
     try {
-      const oauth = (supabase().auth as unknown as {
-        oauth: {
-          approveAuthorization: (id: string) => Promise<{ data: { redirect_url?: string } | null; error: { message: string } | null }>;
-          denyAuthorization: (id: string) => Promise<{ data: { redirect_url?: string } | null; error: { message: string } | null }>;
-        };
-      }).oauth;
+      const api = oauth();
       const { data, error } = godkjenn
-        ? await oauth.approveAuthorization(authorizationId)
-        : await oauth.denyAuthorization(authorizationId);
+        ? await api.approveAuthorization(authorizationId, { skipBrowserRedirect: true })
+        : await api.denyAuthorization(authorizationId, { skipBrowserRedirect: true });
       if (error) throw new Error(error.message);
-      if (data?.redirect_url) {
-        window.location.href = data.redirect_url;
-        return;
-      }
+      if (sendVidere(data?.redirect_url)) return;
       setFeil("Supabase svarte uten redirect_url. Lukk vinduet og prøv på nytt.");
+      sender.current = false;
     } catch (e) {
-      setFeil(e instanceof Error ? e.message : "Kunne ikke svare på forespørselen.");
+      setFeil(tilFeiltekst(e instanceof Error ? e.message : "Kunne ikke svare på forespørselen."));
+      sender.current = false;
     } finally {
       setJobber(false);
     }
@@ -174,7 +203,7 @@ export function Samtykke({ authorizationId }: { authorizationId: string }) {
             </form>
           )}
 
-          {!laster && innlogget && detaljer && (
+          {!laster && innlogget && detaljer && !utlopt && (
             <>
               <p className="mt-4 text-sm leading-relaxed">
                 <span className="font-medium">{navn}</span> ber om tilgang til
