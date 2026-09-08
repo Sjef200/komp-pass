@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { FagordListe } from "./components/Fagord";
-import { Horinger } from "./components/Horinger";
-import { Kilder } from "./components/Kilder";
-import { Laringslop } from "./components/Laringslop";
+import { Prover } from "./components/Prover";
 import { Samtykke } from "./components/Samtykke";
 import { Innlogging } from "./components/Innlogging";
-import { Oversikt } from "./components/Oversikt";
 import { KompetansemaalListe } from "./components/Kompetansemaal";
 import { KapittelArbeidsbok } from "./components/KapittelArbeidsbok";
 import { Utvikling } from "./components/Utvikling";
@@ -13,24 +10,13 @@ import { StoreProvider, useStore } from "./lib/store-context";
 import udirMetaJson from "./data/udir-meta.json";
 import { skillsSomPrompts } from "./lib/skill-katalog";
 
-type Side =
-  | "oversikt"
-  | "kompetansemaal"
-  | "kapittel"
-  | "fagord"
-  | "kilder"
-  | "laringslop"
-  | "horinger"
-  | "utvikling";
+type Side = "kompetansemaal" | "kapittel" | "prover" | "ordbank" | "utvikling";
 
 const SIDER: { id: Side; label: string }[] = [
-  { id: "oversikt", label: "Oversikt" },
   { id: "kompetansemaal", label: "Kompetansemål" },
-  { id: "kapittel", label: "Kapittel" },
-  { id: "fagord", label: "Fagord" },
-  { id: "kilder", label: "Kilder" },
-  { id: "laringslop", label: "Læringsløp" },
-  { id: "horinger", label: "Høringer" },
+  { id: "kapittel", label: "Boka" },
+  { id: "prover", label: "Prøver" },
+  { id: "ordbank", label: "Ordbank" },
   { id: "utvikling", label: "Utvikling" },
 ];
 
@@ -56,15 +42,13 @@ function Skall() {
     setInnstillinger,
     lagringsfeil,
     umigrert,
-    koblingTekster,
-    avgjorKobling,
     innlogget,
     loggUt,
     krevInnlogging,
     klar,
     appendHendelser,
   } = useStore();
-  const [side, setSide] = useState<Side>("oversikt");
+  const [side, setSide] = useState<Side>("kompetansemaal");
   const [horingPagar, setHoringPagar] = useState(false);
   const fag = state.fag.find((f) => f.id === state.innstillinger.aktivtFag);
   const visEmoji = state.innstillinger.visEmoji;
@@ -193,7 +177,6 @@ function Skall() {
           </p>
         )}
 
-        {side === "oversikt" && <Oversikt state={state} />}
         {side === "kompetansemaal" && (
           <KompetansemaalListe key={state.innstillinger.aktivtFag} state={state} />
         )}
@@ -207,28 +190,17 @@ function Skall() {
             onHoringPagar={setHoringPagar}
           />
         )}
-        {side === "fagord" && (
-          <FagordListe key={state.innstillinger.aktivtFag} state={state} onStatus={setFagordStatus} />
-        )}
-        {side === "kilder" && (
-          <Kilder
-            key={state.innstillinger.aktivtFag}
-            state={state}
-            koblingTekster={koblingTekster}
-            onAvgjor={(id, bekreftet) => void avgjorKobling(id, bekreftet)}
-          />
-        )}
-        {side === "laringslop" && (
-          <Laringslop key={state.innstillinger.aktivtFag} state={state} />
-        )}
-        {side === "horinger" && (
-          <Horinger
+        {side === "prover" && (
+          <Prover
             key={state.innstillinger.aktivtFag}
             state={state}
             prompts={proveniensPrompts}
             onLagreHoring={appendHoring}
             onHoringPagar={setHoringPagar}
           />
+        )}
+        {side === "ordbank" && (
+          <FagordListe key={state.innstillinger.aktivtFag} state={state} onStatus={setFagordStatus} />
         )}
         {side === "utvikling" && <Utvikling key={state.innstillinger.aktivtFag} state={state} />}
       </main>

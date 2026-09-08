@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { kapitlerIFag, grupperFagordEtterKapittel } from "../lib/kapittel";
 import { aktivtFag, fagordIFag, temaerIFag } from "../lib/store";
 import { INNSATS_LABEL, KILDE_LABEL, formatDato } from "../lib/format";
 import { fagordHistorikk, type FagordObservert } from "../lib/hendelser";
@@ -30,17 +31,30 @@ export function FagordListe({
   const visEmoji = state.innstillinger.visEmoji;
   const fag = aktivtFag(state);
   const temaer = temaerIFag(state);
+  const kapitler = kapitlerIFag(state);
   const fagord = (temaIds
     ? fagordIFag(state).filter((f) => f.temaIds.some((id) => temaIds.includes(id)))
     : fagordIFag(state));
-  const [temaFilter, setTemaFilter] = useState("alle");
+  const kapittelFilter = temaIds == null;
+  const [filter, setFilter] = useState("alle");
   const [flashcard, setFlashcard] = useState(false);
   const [skjulte, setSkjulte] = useState<Set<string>>(new Set());
 
+  const grupper = useMemo(
+    () => grupperFagordEtterKapittel(fagord, kapitler),
+    [fagord, kapitler],
+  );
+
+  const visteGrupper = useMemo(() => {
+    if (!kapittelFilter || filter === "alle") return grupper;
+    return grupper.filter((g) => g.kapittel?.id === filter);
+  }, [grupper, kapittelFilter, filter]);
+
   const filtrert = useMemo(() => {
-    if (temaFilter === "alle") return fagord;
-    return fagord.filter((f) => f.temaIds.includes(temaFilter));
-  }, [fagord, temaFilter]);
+    if (kapittelFilter) return visteGrupper.flatMap((g) => g.fagord);
+    if (filter === "alle") return fagord;
+    return fagord.filter((f) => f.temaIds.includes(filter));
+  }, [kapittelFilter, visteGrupper, fagord, filter]);
 
   function visForklaring(id: string): boolean {
     const manueltSkjult = skjulte.has(id);
@@ -60,11 +74,13 @@ export function FagordListe({
   if (temaer.length === 0) {
     return (
       <TomtFag
-        tittel="Ingen fagord å vise"
-        tekst="Fagord er knyttet til temaer. Når temaene for dette faget ligger i JSON, dukker begrepene opp her."
+        tittel="Ingen ordbank å vise"
+        tekst="Begrepene er knyttet til temaer. Når temaene for dette faget ligger i JSON, dukker de opp her."
       />
     );
   }
+
+  const visKapittelGrupper = kapittelFilter && (filter === "alle" || visteGrupper.length > 1);
 
   return (
     <div>
@@ -72,21 +88,35 @@ export function FagordListe({
         <p className="text-sm text-[#191C1F]/60">
           {fag ? `${fag.navn} · ${fag.kode}` : "Fag"}
           {fag?.laereplanKode ? ` · ${fag.laereplanKode}` : ""}
+          {kapittelFilter ? ` · ${fagord.length} totalt` : ""}
         </p>
         <label className="text-sm">
-          <span className="sr-only">Filter på tema</span>
+          <span className="sr-only">{kapittelFilter ? "Filter på kapittel" : "Filter på tema"}</span>
           <select
             className="rounded-lg border border-[#191C1F]/15 bg-white px-3 py-2 text-sm"
-            value={temaFilter}
-            onChange={(e) => setTemaFilter(e.target.value)}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
           >
-            <option value="alle">Alle temaer</option>
-            {temaer.map((t) => (
-              <option key={t.id} value={t.id}>
-                {visEmoji ? `${t.emoji} ` : ""}
-                {t.navn}
-              </option>
-            ))}
+            {kapittelFilter ? (
+              <>
+                <option value="alle">Alle</option>
+                {kapitler.map((k) => (
+                  <option key={k.id} value={k.id}>
+                    Kapittel {k.nummer}. {k.navn}
+                  </option>
+                ))}
+              </>
+            ) : (
+              <>
+                <option value="alle">Alle temaer</option>
+                {temaer.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {visEmoji ? `${t.emoji} ` : ""}
+                    {t.navn}
+                  </option>
+                ))}
+              </>
+            )}
           </select>
         </label>
         <button
@@ -106,8 +136,36 @@ export function FagordListe({
 
       {filtrert.length === 0 ? (
         <p className="rounded-2xl bg-white px-4 py-8 text-center text-sm text-[#191C1F]/60">
-          Ingen fagord for dette filteret.
+          Ingen begreper for dette filteret.
         </p>
+      ) : visKapittelGrupper ? (
+        <div className="space-y-6">
+          {visteGrupper.map((g) => (
+            <section key={g.kapittel?.id ?? "uten"}>
+              <h2 className="mb-2 text-sm font-medium uppercase tracking-wide text-[#191C1F]/55">
+                {g.kapittel
+                  ? `Kapittel ${g.kapittel.nummer}. ${g.kapittel.navn}`
+                  : "Uten kapittel"}
+                <span className="ml-1 font-normal normal-case tracking-normal text-[#191C1F]/40">
+                  · {g.fagord.length}
+                </span>
+              </h2>
+              <ul className="space-y-2">
+                {g.fagord.map((f) => (
+                  <FagordKort
+                    key={f.id}
+                    fagord={f}
+                    historikk={fagordHistorikk(state.hendelser, f.id)}
+                    visForklaring={visForklaring(f.id)}
+                    flashcard={flashcard}
+                    onToggle={() => toggle(f.id)}
+                    onStatus={(status) => onStatus(f.id, status)}
+                  />
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
       ) : (
         <ul className="space-y-2">
           {filtrert.map((f) => (

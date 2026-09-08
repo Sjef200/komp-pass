@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { grupperKapittel, kapitlerIFag, temaerIKapittel } from "./kapittel.ts";
+import { grupperKapittel, grupperFagordEtterKapittel, kapitlerIFag, temaerIKapittel } from "./kapittel.ts";
 import { maalDekning } from "./dekning.ts";
 import type { AppState, Horing, Kompetansemaal, Tema } from "./types.ts";
 import kapitlerJson from "../data/kapitler.json" with { type: "json" };
@@ -93,4 +93,23 @@ test("seedede kapitler 1–6 for male1, temaer henger på kapittel 6", () => {
   const temaerI6 = temaerIKapittel(k6!, temaerJson as Tema[]);
   assert.equal(temaerI6.length, 13);
   assert.ok(temaerI6.some((t) => t.id === "def"));
+});
+
+test("ordbank grupperes per kapittel og totalt", () => {
+  const kapitler = [
+    { id: "k1", fagId: "male1" as const, nummer: 1, navn: "Ett", seksjoner: [], temaIds: ["t1"] },
+    { id: "k2", fagId: "male1" as const, nummer: 2, navn: "To", seksjoner: [], temaIds: ["t2"] },
+  ];
+  const fagord = [
+    { id: "fo-a", term: "A", forklaring: "", temaIds: ["t1"], status: "ny" as const },
+    { id: "fo-b", term: "B", forklaring: "", temaIds: ["t2"], status: "ny" as const },
+    { id: "fo-c", term: "C", forklaring: "", temaIds: ["t9"], status: "ny" as const },
+  ];
+  const grupper = grupperFagordEtterKapittel(fagord, kapitler);
+  assert.equal(grupper.length, 3);
+  assert.equal(grupper[0]?.kapittel?.id, "k1");
+  assert.deepEqual(grupper[0]?.fagord.map((f) => f.id), ["fo-a"]);
+  assert.equal(grupper[1]?.kapittel?.id, "k2");
+  assert.equal(grupper[2]?.kapittel, null);
+  assert.deepEqual(grupper[2]?.fagord.map((f) => f.id), ["fo-c"]);
 });

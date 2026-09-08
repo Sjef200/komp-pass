@@ -20,7 +20,7 @@ Eleven vil øve, høres, eller få vurdert et svar etter at faget er valgt.
 5. Kall `still_sporsmal` med både `fagId` og `temaId`. Still **ett** spørsmål i chatten. Si kapittel og kompetansemål, ikke bare kapittelnavnet.
 6. Kall `finn_belegg` med målet eller temaet. Fant du noe, still spørsmålet med lærerens egne ord og sitér med tidsstempel når du retter. Fant du ingenting, si det: målet er ikke gjennomgått, eller forelesningen er ikke lagt inn.
 7. Når du vurderer: vis hvilket kompetansemål svaret treffer, hva som satt, og hva som mangler for 6.
-8. Logg med `logg-etter-horing` når høringen er ferdig.
+8. Logg med `logg-etter-horing` når høringen er ferdig. Eleven ser resultatet under fanen Prøver.
 
 ## MCP-verktøy
 

@@ -24,6 +24,8 @@ type Props = {
   forhåndsutfyltSporsmal?: string;
   ovingId?: string;
   kapittelId?: string;
+  tittel?: string;
+  ingress?: string;
   onLagre: (horing: Horing) => void;
   onAvbryt: () => void;
 };
@@ -36,6 +38,8 @@ export function HoringForm({
   forhåndsutfyltSporsmal,
   ovingId,
   kapittelId,
+  tittel = "Ny høring",
+  ingress = "Høringer er append-only. Karakteren på temaet blir den siste du logger.",
   onLagre,
   onAvbryt,
 }: Props) {
@@ -126,10 +130,10 @@ export function HoringForm({
         aria-labelledby={headingId}
       >
         <h2 id={headingId} className="text-lg font-medium">
-          Ny høring
+          {tittel}
         </h2>
         <p className="mt-1 text-sm text-[#191C1F]/65">
-          Høringer er append-only. Karakteren på temaet blir den siste du logger.
+          {ingress}
         </p>
 
         <label className="mt-5 block text-sm font-medium">

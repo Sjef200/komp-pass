@@ -42,8 +42,23 @@ const fagIdFelt = z
   .string()
   .describe("male1 | male2 | entrep1 | entrep2 | norsk-hovedmal | norsk-muntlig");
 
+const INSTRUKSJONER = `Øvingsapp for markedsføring, entreprenørskap og norsk.
+
+Fagene er adskilte kontekster. Kall list_fag og bekreft fagId før neste verktøy. Bland aldri fag i samme høring.
+
+Appen eleven ser har fem faner:
+- Kompetansemål — Udirs krav. Hukes ikke av. Dekning kommer fra høringer på temaer.
+- Boka — læreverkets kapitler: lesing, bokas øvinger, ordbank per kapittel. Bruk list_kapitler og skillen kapittelarbeid.
+- Prøver — resultattavlen. Live høring skjer i denne chatten. Kall logg_horing når høringen er ferdig, så dukker resultatet opp under Prøver.
+- Ordbank — alle fagbegrep, kapittelvis og totalt. Verktøyene heter list_fagord og oppdater_fagord.
+- Utvikling — karakter over tid.
+
+Etter hver høring: logg_horing med spørsmål, svar, karakter og proveniens (modell, innsats, promptId). Oppdater ordbanken med oppdater_fagord for begrepene som ble brukt eller blandet.
+
+Kompetansemål er ikke kapittel. Et ferdiglest kapittel er ikke et avhuket mål.`;
+
 export function createServer(): McpServer {
-  const server = new McpServer({ name: "mfl", version: "0.2.0" });
+  const server = new McpServer({ name: "mfl", version: "0.2.0" }, { instructions: INSTRUKSJONER });
 
   server.registerTool(
     "list_fag",
@@ -83,7 +98,7 @@ export function createServer(): McpServer {
     {
       title: "List kapitler",
       description:
-        "Læreverkets kapitler i faget, med temaer og hvilke kompetansemål de treffer. Ikke det samme som hent_lareplan.",
+        "Kapitlene i Boka: læreverkets inndeling med temaer og hvilke kompetansemål de treffer. Ikke det samme som hent_lareplan.",
       inputSchema: z.object({ fagId: fagIdFelt.optional() }),
     },
     async ({ fagId }) => listKapitler(fagId),
@@ -204,7 +219,7 @@ export function createServer(): McpServer {
     "list_fagord",
     {
       title: "List fagord",
-      description: "Fagbegrep i faget med status og skillet mot nabobegrepet.",
+      description: "Ordbanken i faget: fagbegrep med status og skillet mot nabobegrepet. Eleven ser dem under fanen Ordbank.",
       inputSchema: z.object({
         fagId: fagIdFelt.optional(),
         status: z.enum(["ny", "usikker", "sitter"]).optional(),
@@ -216,8 +231,9 @@ export function createServer(): McpServer {
   server.registerTool(
     "list_horinger",
     {
-      title: "List høringer",
-      description: "Høringer i faget, nyeste først. Inkluderer KI-proveniens når den finnes.",
+      title: "List prøver",
+      description:
+        "Prøver i faget, nyeste først: Claude-høringer og skriftlige svar. Det eleven ser under fanen Prøver.",
       inputSchema: z.object({
         fagId: fagIdFelt.optional(),
         temaId: z.string().optional(),
@@ -232,7 +248,7 @@ export function createServer(): McpServer {
     {
       title: "Logg høring",
       description:
-        "Append-only. Krever fagId, temaId, karakter, spørsmålet du stilte, elevens svar og full proveniens. Skriver src/data/ai-overlay.json.",
+        "Append-only. Krever fagId, temaId, karakter, spørsmålet du stilte, elevens svar og full proveniens. Resultatet vises under fanen Prøver.",
       inputSchema: z.object({
         fagId: fagIdFelt,
         temaId: z.string(),

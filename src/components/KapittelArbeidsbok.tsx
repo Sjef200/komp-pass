@@ -54,7 +54,7 @@ export function KapittelArbeidsbok({
     <div className="flex flex-col gap-4 md:flex-row md:items-start">
       <nav
         className="w-full shrink-0 rounded-2xl bg-white p-2 md:w-64"
-        aria-label="Kapitler"
+        aria-label="Kapitler i boka"
       >
         {kapitler.map((k) => {
           const arbeid = kapittelArbeid(state.hendelser, state.horinger, k.id);

@@ -22,7 +22,7 @@ Eleven ber om å bli hørt, eller du er midt i en høring.
    - Si hva som mangler for 6.
    - Sett karakter 1–6 med én setnings begrunnelse. Ikke gi et snilt 5.
 6. Vis kort det svaret som ville gitt 6, hvis det manglet begrunnelse, eksempel eller avgrensning.
-7. Gå til `logg-etter-horing`. Ta vare på spørsmålet du stilte og elevens svar ordrett — begge skal med i loggen.
+7. Gå til `logg-etter-horing`. Ta vare på spørsmålet du stilte og elevens svar ordrett — begge skal med i loggen. Eleven ser høringen under fanen Prøver når den er logget.
 
 For markedsføring: les `markedsforingslaering` og `references/karakterkjennetegn.md`.
 
@@ -30,8 +30,8 @@ For markedsføring: les `markedsforingslaering` og `references/karakterkjenneteg
 
 - `still_sporsmal`
 - `neste_horing` (hele køen, hvis eleven spør hva som gjenstår)
-- `list_fagord` (begreper som glipper i temaet)
-- `list_horinger` (siste mangler på temaet)
+- `list_fagord` (ordbanken i temaet)
+- `list_horinger` (siste prøver på temaet, vises under fanen Prøver)
 - `hent_skill_reference` ved behov
 
 ## Ikke

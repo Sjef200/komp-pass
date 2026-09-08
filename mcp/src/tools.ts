@@ -718,7 +718,7 @@ export async function foreslaKobling(args: {
       koblingId: hendelse.koblingId,
       tilstand: "foreslatt",
       merknad:
-        "Forslaget står som foreslått til eleven bekrefter det under fanen Kilder. Et forslag teller ikke som dekning.",
+        "Forslaget står som foreslått til eleven bekrefter det. Et forslag teller ikke som dekning.",
     });
   });
 }
@@ -854,7 +854,7 @@ export async function leggInnKilde(args: {
       chunkIds: Array.from({ length: antallBiter }, (_, i) => `${kilde.id}#${i}`),
       temaer,
       merknad:
-        "Stoffet er lagret. Foreslå nå koblinger til temaene det faktisk dekker med foresla_kobling, én per bit som treffer. Eleven bekrefter dem under fanen Kilder. Deretter kan du høre i det.",
+        "Stoffet er lagret. Foreslå nå koblinger til temaene det faktisk dekker med foresla_kobling, én per bit som treffer. Et forslag teller ikke som dekning før det er bekreftet. Deretter kan du høre i det.",
     });
   });
 }

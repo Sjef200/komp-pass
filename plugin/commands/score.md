@@ -4,7 +4,7 @@ description: Hvor langt er jeg kommet — snitt, dekning og gapet mellom gjennom
 
 Hvor mye kan jeg nå?
 
-1. `hent_oversikt` for snittkarakter, temaer hørt og fagord som glipper.
+1. `hent_oversikt` for snittkarakter, temaer hørt og begreper i ordbanken som glipper.
 2. `hent_laringslop` for gapet mellom gjennomgått og hørt.
 3. `list_fagord` med status `ny` og `usikker` hvis noe skiller seg ut.
 

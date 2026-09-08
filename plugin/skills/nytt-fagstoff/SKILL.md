@@ -20,7 +20,7 @@ Eleven limer inn tekst, eller sier at dere har hatt om noe nytt.
 3. Se på temalisten du får tilbake. For hver bit som faktisk dekker et tema, kall `foresla_kobling` med `chunkId`, `temaId` og en kort begrunnelse.
    - Foreslå bare der stoffet virkelig treffer. Et forslag som ikke holder, koster eleven tid.
    - Treffer stoffet ingen tema som finnes, si det. Da mangler temaet i `temaer.json`, og det er verdt å vite.
-4. Si kort hva du la inn: tittel, antall biter, og hvilke temaer du foreslo. Minn om at forslagene må bekreftes under fanen Kilder før de teller som dekning.
+4. Si kort hva du la inn: tittel, antall biter, og hvilke temaer du foreslo. Minn om at et forslag ikke teller som dekning før det er bekreftet.
 5. Gå rett til høring: `neste_horing`, så `muntlig-horing`. Stoffet er ferskt nå — det er det beste tidspunktet.
 
 ## Score

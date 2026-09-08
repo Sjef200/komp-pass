@@ -169,7 +169,7 @@ Fant ikke skriptet whisper? `brew install whisper-cpp` og last ned en modell til
 
 `finn_belegg` svarer på hva i forelesningene og boka som dekker et kompetansemål. Fordi Udirs ordlyd er abstrakt og læreren sier «survey» og «kontrollgruppe», søker den på temanavnene og fagordene som hører til målet, ikke på målteksten alene.
 
-Claude kan foreslå at en bit dekker et tema med `foresla_kobling`. **Et forslag er ikke dekning.** Det står som foreslått til du bekrefter det under fanen Kilder. Foreslått, bekreftet og avvist er tre tilstander, og de slås aldri sammen.
+Claude kan foreslå at en bit dekker et tema med `foresla_kobling`. **Et forslag er ikke dekning.** Det står som foreslått til du bekrefter det. Foreslått, bekreftet og avvist er tre tilstander, og de slås aldri sammen.
 
 Et tomt svar fra `finn_belegg` er ikke en feil. Det er gapet: målet er ikke undervist, eller forelesningen er ikke lagt inn ennå.
 
@@ -185,7 +185,7 @@ Avstanden mellom det første og det andre er tallet som ellers ikke finnes noe s
 
 Tallet regnes både per tema og per kompetansemål, og **temanivået er det du handler på**. Et kompetansemål henger ofte på et helt kapittel, så gapet på målnivå lukkes så snart ett av kapittelets temaer er hørt. Bare en kobling direkte til temaet gjør temaet undervist; en kobling på målnivå sier ingenting om hvilket tema som faktisk ble gjennomgått.
 
-Fanen Læringsløp viser tidslinjen over hva som er gjennomgått når, og hvor mange høringer som kom etterpå. `hent_laringslop` gir Claude det samme, slik at den kan si «dette ble gjennomgått 2. september, du er aldri hørt i det».
+`hent_laringslop` gir Claude tidslinjen over hva som er gjennomgått når, og hvor mange høringer som kom etterpå, slik at den kan si «dette ble gjennomgått 2. september, du er aldri hørt i det».
 
 ## MCP
 
@@ -236,12 +236,14 @@ Bruk **absolutte stier** til `tsx` og serverfilen. Bytt ut `REPO` med der du klo
 
 Start alltid med `list_fag` og bekreft `fagId` før spørsmål eller høring.
 
+Appen har fem faner: Kompetansemål, Boka, Prøver, Ordbank og Utvikling. Live høring skjer i Claude; `logg_horing` gjør at resultatet dukker opp under Prøver. Ordbanken er `list_fagord`.
+
 ### Lære med Claude
 
 Flyten er:
 
 1. **Lim inn fagstoffet i chatten** — et bokkapittel, notater fra timen, en oppgavetekst. Claude kaller `legg_inn_kilde`, som deler det i biter og gjør det søkbart.
-2. **Claude foreslår koblinger** til temaene stoffet dekker. Du bekrefter dem under fanen Kilder. Først da teller de som dekning.
+2. **Claude foreslår koblinger** til temaene stoffet dekker. Du bekrefter dem før de teller som dekning.
 3. **Claude hører deg** — ett spørsmål om gangen, med lærerens eller bokas egne ord som grunnlag.
 4. **Høringen logges** med karakter, spørsmål, svar og hvilken modell som hørte deg.
 5. **Spør «hvor mye kan jeg?»** — Claude henter snitt, temaer hørt, fagord som glipper, og gapet mellom gjennomgått og hørt.

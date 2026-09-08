@@ -1,6 +1,6 @@
 import { slugify } from "./skill-import";
 import { formatSnitt, snittSisteKarakter, sisteKarakter } from "./dekning";
-import type { AppState, Horing, Kapittel, Kompetansemaal, Tema } from "./types";
+import type { AppState, Fagord, Horing, Kapittel, Kompetansemaal, Tema } from "./types";
 
 export type KapittelGruppe = {
   id: string;
@@ -69,4 +69,25 @@ export function maalSomTrefferKapittel(
 
 export function formatKapittelSnitt(snitt: number | null): string {
   return formatSnitt(snitt);
+}
+
+export type FagordKapittelGruppe = {
+  kapittel: Kapittel | null;
+  fagord: Fagord[];
+};
+
+/** Ordbank per kapittel. Et begrep kan ligge i flere kapitler hvis temaene gjør det. */
+export function grupperFagordEtterKapittel(
+  fagord: Fagord[],
+  kapitler: Kapittel[],
+): FagordKapittelGruppe[] {
+  const sortert = [...kapitler].sort((a, b) => a.nummer - b.nummer);
+  const grupper: FagordKapittelGruppe[] = sortert.map((kapittel) => ({
+    kapittel,
+    fagord: fagord.filter((f) => f.temaIds.some((id) => kapittel.temaIds.includes(id))),
+  }));
+  const temaIKapittel = new Set(sortert.flatMap((k) => k.temaIds));
+  const uten = fagord.filter((f) => !f.temaIds.some((id) => temaIKapittel.has(id)));
+  if (uten.length > 0) grupper.push({ kapittel: null, fagord: uten });
+  return grupper.filter((g) => g.fagord.length > 0);
 }

@@ -13,4 +13,4 @@ Følg denne rekkefølgen:
 4. Ellers `neste_horing`, og ta det øverste.
 5. Kall `still_sporsmal`, og still **ett** spørsmål i chatten. Ikke lim inn listen.
 6. Vent på svaret mitt. Så: hva som satt, hva som mangler for 6, og karakter med én setnings begrunnelse. Ikke gi et snilt 5.
-7. Logg med `logg_horing`. Spørsmålet og svaret mitt skal med ordrett.
+7. Logg med `logg_horing`. Spørsmålet og svaret mitt skal med ordrett. Resultatet vises under fanen Prøver.

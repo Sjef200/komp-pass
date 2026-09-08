@@ -23,7 +23,7 @@ Høringen i chatten er ferdig, og du har karakter, hva som satt, og hva som mang
    - `modellsvar` hvis du viste svaret som ville gitt 6
    - `maalIds`: målene svaret **faktisk** viste, ikke alle målene temaet er koblet til
    - `modell`, `innsats` (`lav` | `medium` | `hoy` | `maks`) og `promptId`
-2. `promptId` skal være skillen du faktisk fulgte, for eksempel `muntlig-horing` eller `markedsforingslaering`.
+2. `promptId` skal være skillen du faktisk fulgte, for eksempel `muntlig-horing` eller `markedsforingslaering`. Eleven ser raden under fanen Prøver.
 3. Kall `list_fagord` for samme `fagId`. Se på `historikk`: er begrepet blandet flere ganger før, hjelper det ikke å gjenta definisjonen — finn et nytt skille. Oppdater **bare** begrepene som ble brukt eller blandet.
 4. Kall `oppdater_fagord` per begrep med samme proveniens og samme `fagId`.
    - `sitter` hvis skillet mot naboen var presist

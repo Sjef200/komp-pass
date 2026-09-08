@@ -6,7 +6,7 @@ import { HoringForm } from "./HoringForm";
 import { KarakterTall } from "./KarakterTall";
 import { TomtFag } from "./Temaer";
 
-export function Horinger({
+export function Prover({
   state,
   onLagreHoring,
   prompts,
@@ -31,8 +31,8 @@ export function Horinger({
   if (temaer.length === 0) {
     return (
       <TomtFag
-        tittel="Ingen temaer å høre i dette faget"
-        tekst="Bytt til Markedsføring og ledelse 1, eller legg inn temaer før du logger høringer."
+        tittel="Ingen temaer å prøves i dette faget"
+        tekst="Bytt til Markedsføring og ledelse 1, eller legg inn temaer før du logger prøver."
       />
     );
   }
@@ -41,8 +41,8 @@ export function Horinger({
     <div>
       <div className="mb-4 flex items-center justify-between gap-3">
         <p className="text-sm text-[#191C1F]/60">
-          {fag ? `${fag.navn} · ${fag.kode}` : "Fag"} · {horinger.length} høring
-          {horinger.length === 1 ? "" : "er"} · nyeste først
+          {fag ? `${fag.navn} · ${fag.kode}` : "Fag"} · {horinger.length}{" "}
+          {horinger.length === 1 ? "resultat" : "resultater"} · nyeste først
         </p>
         <button
           type="button"
@@ -52,24 +52,27 @@ export function Horinger({
           }}
           className="rounded-lg bg-[#191C1F] px-3 py-2 text-sm text-white"
         >
-          Ny høring
+          Svar på spørsmål
         </button>
       </div>
 
       {horinger.length === 0 ? (
         <p className="rounded-2xl bg-white px-4 py-8 text-center text-sm text-[#191C1F]/60">
-          Ingen høringer i dette faget ennå. Logg den første, så får temaet karakter og
-          kompetansemålene dekning.
+          Ingen prøver i dette faget ennå. Svar på et spørsmål her, eller hør med Claude — resultatet
+          dukker opp når det er logget.
         </p>
       ) : (
         <ol className="space-y-2">
           {horinger.map((h) => {
             const tema = temaById[h.temaId];
+            const type = h.kilde === "selv" ? "Svar" : "Høring";
             return (
               <li key={h.id} className="rounded-2xl bg-white px-4 py-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-xs text-[#191C1F]/50">{formatDato(h.dato)}</p>
+                    <p className="text-xs text-[#191C1F]/50">
+                      {type} · {formatDato(h.dato)}
+                    </p>
                     <p className="mt-0.5 flex items-center gap-2 font-medium">
                       {visEmoji && tema && (
                         <span aria-hidden>{tema.emoji}</span>
@@ -132,6 +135,8 @@ export function Horinger({
           temaer={temaer}
           visEmoji={visEmoji}
           prompts={prompts ?? state.prompts}
+          tittel="Svar på spørsmål"
+          ingress="Skriv svaret ditt. Karakteren på temaet blir den siste du logger. Høring med Claude dukker opp her når den er logget."
           onLagre={(h) => {
             onLagreHoring(h);
             setSkjema(false);
