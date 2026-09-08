@@ -25,6 +25,8 @@ import {
   type KoblingAvgjort,
 } from "./hendelser";
 import { nyId } from "./format";
+import { harSupabase, supabase } from "./supabase";
+import { lesTilstand as lesSkyTilstand, skrivHendelser as skrivSkyHendelser } from "./supabase-data";
 import {
   baseState,
   erGyldigTilstand,
@@ -61,6 +63,12 @@ type StoreApi = {
   /** Tekstbitene koblingene peker på, slik at forslag kan vurderes i UI. */
   koblingTekster: Record<string, KoblingTekst>;
   avgjorKobling: (koblingId: string, bekreftet: boolean) => Promise<void>;
+  /** E-posten til den innloggede, eller null. */
+  innlogget: string | null;
+  loggUt: () => Promise<void>;
+  /** Sant når verken sesjon eller lokal API finnes — da må du logge inn. */
+  krevInnlogging: boolean;
+  klar: boolean;
 };
 
 const StoreContext = createContext<StoreApi | null>(null);
@@ -89,6 +97,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [lagringsfeil, setLagringsfeil] = useState<string | null>(null);
   const [umigrert] = useState<PersistedState | null>(() => lesUmigrertTilstand());
   const [koblingTekster, setKoblingTekster] = useState<Record<string, KoblingTekst>>({});
+  const [innlogget, setInnlogget] = useState<string | null>(null);
+  // null = ennå ukjent. Avgjør om vi kan falle tilbake til lokal drift.
+  const [harApi, setHarApi] = useState<boolean | null>(null);
+  const [klar, setKlar] = useState(false);
   const skills = useRef<Skill[] | null>(null);
 
   useEffect(() => {
@@ -123,41 +135,97 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, [byggPaNytt]);
 
+  const lastFraSky = useCallback(async () => {
+    const { hendelser, kilder, koblingTekster: tekster } = await lesSkyTilstand();
+    setKoblingTekster(tekster);
+    byggPaNytt({ hendelser, kilder });
+  }, [byggPaNytt]);
+
+  const lastFraApi = useCallback(async (): Promise<boolean> => {
+    const res = await fetch("/api/tilstand").catch(() => null);
+    if (!res?.ok) return false;
+    // Utplassert svarer SPA-fallbacken 200 med HTML på ukjente stier. Uten
+    // denne sjekken ville json() kastet, og appen blitt stående på «Laster».
+    if (!res.headers.get("content-type")?.includes("application/json")) return false;
+    const data = (await res.json()) as HmrPayload & {
+      hendelser?: Hendelse[];
+      kilder?: AiOverlay["kilder"];
+    };
+    if (data.koblingTekster) setKoblingTekster(data.koblingTekster);
+    byggPaNytt(
+      {
+        hendelser: data.hendelser ?? [],
+        kilder: data.overlay?.kilder ?? data.kilder,
+        prompts: data.prompts,
+      },
+      Array.isArray(data.skills) ? data.skills : undefined,
+    );
+    return true;
+  }, [byggPaNytt]);
+
+  /**
+   * Sesjon vinner over lokal API. Uten begge deler må du logge inn — det er
+   * derfor den utplasserte siden ikke er åpen for alle.
+   */
   useEffect(() => {
     let avbrutt = false;
-    fetch("/api/tilstand")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: (HmrPayload & { hendelser?: Hendelse[] }) | null) => {
-        if (avbrutt || !data) return;
-        if (data.koblingTekster) setKoblingTekster(data.koblingTekster);
-        byggPaNytt(
-          {
-            hendelser: data.hendelser ?? [],
-            kilder: data.overlay?.kilder ?? (data as { kilder?: AiOverlay["kilder"] }).kilder,
-            prompts: data.prompts,
-          },
-          Array.isArray(data.skills) ? data.skills : undefined,
-        );
-      })
-      .catch(() => {
-        /* bygg uten server: appen viser JSON-grunnlaget */
-      });
+
+    async function start() {
+      let epost: string | null = null;
+      if (harSupabase()) {
+        const { data } = await supabase().auth.getSession();
+        epost = data.session?.user.email ?? null;
+      }
+      if (avbrutt) return;
+      setInnlogget(epost);
+
+      if (epost) {
+        await lastFraSky().catch(() => undefined);
+        if (!avbrutt) {
+          setHarApi(true);
+          setKlar(true);
+        }
+        return;
+      }
+      const svarte = await lastFraApi();
+      if (avbrutt) return;
+      setHarApi(svarte);
+      setKlar(true);
+    }
+
+    // Uansett hva som feiler skal porten vises, ikke en evig lasteskjerm.
+    void start().catch(() => {
+      if (!avbrutt) setKlar(true);
+    });
+
+    if (!harSupabase()) return () => { avbrutt = true; };
+    const { data: lytter } = supabase().auth.onAuthStateChange((_h, sesjon) => {
+      const epost = sesjon?.user.email ?? null;
+      setInnlogget(epost);
+      if (epost) void lastFraSky().catch(() => undefined);
+    });
     return () => {
       avbrutt = true;
+      lytter.subscription.unsubscribe();
     };
-  }, [byggPaNytt]);
+  }, [lastFraApi, lastFraSky]);
 
   const lagre = useCallback(
     async (hendelser: Hendelse[]) => {
       try {
-        const alle = await postHendelser(hendelser);
+        if (innlogget) {
+          await skrivSkyHendelser(hendelser);
+          await lastFraSky();
+        } else {
+          const alle = await postHendelser(hendelser);
+          byggPaNytt({ ...aiOverlay, hendelser: alle });
+        }
         setLagringsfeil(null);
-        byggPaNytt({ ...aiOverlay, hendelser: alle });
       } catch (e) {
         setLagringsfeil(e instanceof Error ? e.message : LAGRINGSFEIL);
       }
     },
-    [aiOverlay, byggPaNytt],
+    [aiOverlay, byggPaNytt, innlogget, lastFraSky],
   );
 
   const appendHoring = useCallback(
@@ -240,7 +308,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [aiOverlay, byggPaNytt],
   );
 
+  const loggUt = useCallback(async () => {
+    if (harSupabase()) await supabase().auth.signOut();
+    setInnlogget(null);
+    setKoblingTekster({});
+    byggPaNytt({ hendelser: [], kilder: [] });
+  }, [byggPaNytt]);
+
   const eksporter = useCallback(() => state, [state]);
+
+  const krevInnlogging = harSupabase() && !innlogget && harApi === false;
 
   const value = useMemo(
     () => ({
@@ -256,6 +333,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       umigrert,
       koblingTekster,
       avgjorKobling,
+      innlogget,
+      loggUt,
+      krevInnlogging,
+      klar,
     }),
     [
       state,
@@ -270,6 +351,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       umigrert,
       koblingTekster,
       avgjorKobling,
+      innlogget,
+      loggUt,
+      krevInnlogging,
+      klar,
     ],
   );
 

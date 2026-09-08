@@ -66,7 +66,21 @@ En Worker har ikke noe filsystem, så tre ting måtte flyttes:
 
 Whisper og zip-import er lokale funksjoner og finnes ikke der.
 
-**Hva som ikke virker ennå:** appens egne sider viser bare JSON-grunnlaget. Læringsdataene går gjennom `/api/tilstand` i utviklingsserveren. UI-et må lese Supabase direkte — se `docs/plan-sky.md`, del C.
+### Innlogging
+
+Den utplasserte siden er ikke åpen. Uten sesjon får du innloggingsskjermen, og med sesjon leser appen Supabase direkte — RLS gjør at du bare ser dine egne rader.
+
+Rekkefølgen appen velger etter:
+
+| Situasjon | Datakilde |
+|---|---|
+| Innlogget | Supabase, direkte fra nettleseren |
+| Ikke innlogget, `/api/tilstand` svarer | Lokal utviklingsserver |
+| Ingen av delene | Innloggingsskjerm |
+
+Lokalt betyr det at ingenting er endret: dev-serveren svarer, og du jobber som før uten å logge inn. Utplassert finnes ingen slik server, og da må du logge inn.
+
+Oversettelsen mellom Postgres-rader og appens former ligger i `src/lib/supabase-rader.ts` og deles av MCP-serveren og nettleseren, så snake_case-kartleggingen bare finnes ett sted.
 
 ## MCP over HTTP
 

@@ -2,6 +2,18 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Hendelse } from "../../src/lib/hendelser.ts";
 import { sokeord, type Chunk, type Kildedokument } from "../../src/lib/kilder.ts";
 import type { ChunkRad, Lager, Treff } from "./db-typer.ts";
+import {
+  chunkTilRad,
+  hendelseTilRad as tilRad,
+  radTilChunk as tilChunk,
+  radTilHendelse as tilHendelse,
+  radTilKilde as tilKilde,
+  CHUNK_FELT,
+  KILDE_FELT,
+  type ChunkPgRad,
+  type HendelseRad,
+  type KildeRad,
+} from "../../src/lib/supabase-rader.ts";
 import { aktivBruker } from "./bruker-kontekst.ts";
 import { lesSesjon } from "./sesjon.ts";
 
@@ -60,11 +72,6 @@ function krev<T>(data: T | null, feil: { message: string } | null, hva: string):
 
 // ── Hendelser ──────────────────────────────────────────────────────────────
 
-type HendelseRad = { seq: number; data: Hendelse };
-
-function tilHendelse(rad: HendelseRad): Hendelse {
-  return { ...rad.data, seq: rad.seq };
-}
 
 export async function lesHendelser(): Promise<Hendelse[]> {
   const { data, error } = await hentKlient()
@@ -77,17 +84,6 @@ export async function lesHendelser(): Promise<Hendelse[]> {
   );
 }
 
-function tilRad(hendelse: Hendelse) {
-  const { seq: _ignorert, ...uten } = hendelse;
-  return {
-    id: hendelse.id,
-    type: hendelse.type,
-    tid: hendelse.tid,
-    fag_id: hendelse.fagId,
-    kilde: hendelse.kilde,
-    data: uten,
-  };
-}
 
 /** Append-only: en id som finnes fra før røres ikke, og raden leses tilbake. */
 export async function skrivHendelse(hendelse: Hendelse): Promise<Hendelse> {
@@ -137,31 +133,6 @@ export async function sisteSeq(): Promise<number> {
 
 // ── Kilder ─────────────────────────────────────────────────────────────────
 
-type KildeRad = {
-  id: string;
-  fag_id: string;
-  type: string;
-  tittel: string;
-  dato: string;
-  sti: string | null;
-  kapittel: string | null;
-  lagt_inn: string;
-};
-
-const KILDE_FELT = "id, fag_id, type, tittel, dato, sti, kapittel, lagt_inn";
-
-function tilKilde(rad: KildeRad): Kildedokument {
-  return {
-    id: rad.id,
-    fagId: rad.fag_id,
-    type: rad.type as Kildedokument["type"],
-    tittel: rad.tittel,
-    dato: rad.dato.slice(0, 10),
-    ...(rad.sti ? { sti: rad.sti } : {}),
-    ...(rad.kapittel ? { kapittel: rad.kapittel } : {}),
-    lagtInn: rad.lagt_inn,
-  };
-}
 
 export async function lesKilder(fagId?: string, type?: string): Promise<Kildedokument[]> {
   let q = hentKlient().from("kilde").select(KILDE_FELT);
@@ -181,29 +152,6 @@ export async function lesKilde(id: string): Promise<Kildedokument | null> {
   return data ? tilKilde(data as KildeRad) : null;
 }
 
-type ChunkPgRad = {
-  id: string;
-  kilde_id: string;
-  ord: number;
-  start_sek: number | null;
-  slutt_sek: number | null;
-  side: number | null;
-  tekst: string;
-};
-
-const CHUNK_FELT = "id, kilde_id, ord, start_sek, slutt_sek, side, tekst";
-
-function tilChunk(rad: ChunkPgRad): ChunkRad {
-  return {
-    id: rad.id,
-    kildeId: rad.kilde_id,
-    ord: rad.ord,
-    ...(rad.start_sek != null ? { start: rad.start_sek } : {}),
-    ...(rad.slutt_sek != null ? { slutt: rad.slutt_sek } : {}),
-    ...(rad.side != null ? { side: rad.side } : {}),
-    tekst: rad.tekst,
-  };
-}
 
 export async function lesChunks(
   kildeId: string,
@@ -252,17 +200,9 @@ export async function skrivKilde(kilde: Kildedokument, chunks: Chunk[]): Promise
   if (kildeFeil) throw new Error(`Kunne ikke skrive kilden: ${kildeFeil.message}`);
 
   if (chunks.length === 0) return 0;
-  const { error: chunkFeil } = await db.from("kilde_chunk").insert(
-    chunks.map((c) => ({
-      id: `${kilde.id}#${c.ord}`,
-      kilde_id: kilde.id,
-      ord: c.ord,
-      start_sek: c.start ?? null,
-      slutt_sek: c.slutt ?? null,
-      side: c.side ?? null,
-      tekst: c.tekst,
-    })),
-  );
+  const { error: chunkFeil } = await db
+    .from("kilde_chunk")
+    .insert(chunks.map((c) => chunkTilRad(kilde.id, c)));
   if (chunkFeil) throw new Error(`Kunne ikke skrive bitene: ${chunkFeil.message}`);
   return chunks.length;
 }

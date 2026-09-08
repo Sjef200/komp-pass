@@ -4,6 +4,7 @@ import { Horinger } from "./components/Horinger";
 import { Kilder } from "./components/Kilder";
 import { Laringslop } from "./components/Laringslop";
 import { Samtykke } from "./components/Samtykke";
+import { Innlogging } from "./components/Innlogging";
 import { Oversikt } from "./components/Oversikt";
 import { Promptbibliotek } from "./components/Promptbibliotek";
 import { KompetansemaalListe } from "./components/Kompetansemaal";
@@ -64,6 +65,10 @@ function Skall() {
     umigrert,
     koblingTekster,
     avgjorKobling,
+    innlogget,
+    loggUt,
+    krevInnlogging,
+    klar,
   } = useStore();
   const [side, setSide] = useState<Side>("oversikt");
   const [importFeil, setImportFeil] = useState<string | null>(null);
@@ -126,6 +131,17 @@ function Skall() {
       setHoringPagar(false);
     }
     setInnstillinger({ aktivtFag: neste });
+  }
+
+  if (!klar) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-bg text-sm text-[#191C1F]/50">
+        Laster …
+      </div>
+    );
+  }
+  if (krevInnlogging) {
+    return <Innlogging onInnlogget={() => undefined} />;
   }
 
   const udirStatus =
@@ -191,6 +207,16 @@ function Skall() {
               >
                 Eksporter
               </button>
+              {innlogget && (
+                <button
+                  type="button"
+                  className="rounded-lg bg-[#F6F5F1] px-2.5 py-1.5 text-sm"
+                  title={`Innlogget som ${innlogget}`}
+                  onClick={() => void loggUt()}
+                >
+                  Logg ut
+                </button>
+              )}
               <button
                 type="button"
                 className="rounded-lg bg-[#F6F5F1] px-2.5 py-1.5 text-sm"
