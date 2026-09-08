@@ -410,7 +410,7 @@ export function createServer(): McpServer {
     "kilder",
     new ResourceTemplate("mfl://kilder/{kildeId}", {
       list: async () => ({
-        resources: lesKilder().map((k) => ({
+        resources: (await lesKilder()).map((k) => ({
           uri: `mfl://kilder/${k.id}`,
           name: k.tittel,
           description: `${k.type} · ${k.fagId} · ${k.dato}`,
@@ -421,9 +421,9 @@ export function createServer(): McpServer {
     { title: "Kilde", mimeType: "text/markdown" },
     async (uri, vars) => {
       const kildeId = String(vars.kildeId ?? "");
-      const kilde = lesKilder().find((k) => k.id === kildeId);
+      const kilde = (await lesKilder()).find((k) => k.id === kildeId);
       if (!kilde) throw new Error(`Fant ikke kilden: ${kildeId}`);
-      const tekst = chunksTilMarkdown(kilde.tittel, lesChunks(kildeId));
+      const tekst = chunksTilMarkdown(kilde.tittel, await lesChunks(kildeId));
       return { contents: [{ uri: uri.href, mimeType: "text/markdown", text: tekst }] };
     },
   );

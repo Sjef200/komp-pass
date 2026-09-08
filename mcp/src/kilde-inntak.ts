@@ -140,10 +140,10 @@ export type InntakOpts = {
   id?: string;
 };
 
-function lagreKilde(
+async function lagreKilde(
   chunks: Chunk[],
   meta: { id: string; fagId: string; type: KildeType; tittel: string; dato?: string; kapittel?: string; sti?: string },
-): { kilde: Kildedokument; antallBiter: number } {
+): Promise<{ kilde: Kildedokument; antallBiter: number }> {
   if (chunks.length === 0) throw new Error("Ingen tekst å legge inn.");
   const kilde: Kildedokument = {
     id: meta.id,
@@ -155,7 +155,7 @@ function lagreKilde(
     ...(meta.kapittel ? { kapittel: meta.kapittel } : {}),
     lagtInn: new Date().toISOString(),
   };
-  const antallBiter = skrivKilde(kilde, chunks);
+  const antallBiter = await skrivKilde(kilde, chunks);
 
   // En lesbar kopi ved siden av transkriptet, så du kan bla i det uten appen.
   fs.mkdirSync(transkriptMappe(), { recursive: true });
@@ -167,10 +167,10 @@ function lagreKilde(
   return { kilde, antallBiter };
 }
 
-export function indekserFil(opts: InntakOpts): { kilde: Kildedokument; antallBiter: number } {
+export async function indekserFil(opts: InntakOpts): Promise<{ kilde: Kildedokument; antallBiter: number }> {
   if (!fs.existsSync(opts.fil)) throw new Error(`Fant ikke filen: ${opts.fil}`);
   const tittel = opts.tittel ?? path.basename(opts.fil, path.extname(opts.fil));
-  return lagreKilde(bitesFraFil(opts.fil), {
+  return await lagreKilde(bitesFraFil(opts.fil), {
     id: opts.id ?? `${opts.fagId}-${slugify(tittel)}`,
     fagId: opts.fagId,
     type: opts.type,
@@ -186,7 +186,7 @@ export function indekserFil(opts: InntakOpts): { kilde: Kildedokument; antallBit
  * må innom disk først — det er dette som gjør at du kan gi Claude et
  * bokkapittel direkte og bli hørt i det med én gang.
  */
-export function indekserTekst(opts: {
+export async function indekserTekst(opts: {
   tekst: string;
   fagId: string;
   tittel: string;
@@ -194,10 +194,10 @@ export function indekserTekst(opts: {
   dato?: string;
   kapittel?: string;
   id?: string;
-}): { kilde: Kildedokument; antallBiter: number } {
+}): Promise<{ kilde: Kildedokument; antallBiter: number }> {
   const tekst = opts.tekst.trim();
   if (!tekst) throw new Error("Teksten er tom.");
-  return lagreKilde(chunkTekst(tekst), {
+  return await lagreKilde(chunkTekst(tekst), {
     id: opts.id ?? `${opts.fagId}-${slugify(opts.tittel)}`,
     fagId: opts.fagId,
     type: opts.type ?? "notat",

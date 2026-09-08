@@ -1,351 +1,97 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { DatabaseSync } from "node:sqlite";
 import type { Hendelse } from "../../src/lib/hendelser.ts";
-import { sokeord } from "../../src/lib/kilder.ts";
 import type { Chunk, Kildedokument } from "../../src/lib/kilder.ts";
+import type { ChunkRad, Lager, Treff } from "./db-typer.ts";
+import * as sqlite from "./db-sqlite.ts";
+import { lastEnv } from "./env.ts";
+import { lesSesjon } from "./sesjon.ts";
+
+lastEnv();
+
+export type { ChunkRad, Treff } from "./db-typer.ts";
+export { dbSti, lukkDb } from "./db-sqlite.ts";
 
 /**
- * Én databasefil, to prosesser. MCP-serveren og Vite-middlewaren åpner samme
- * fil i WAL-modus i stedet for å snakke gjennom en ekstra daemon. Det er
- * dette som gjør at UI og KI endelig ser de samme dataene.
+ * Ett grensesnitt, to lagre. SQLite på disk når du jobber lokalt, Postgres
+ * i Supabase når SUPABASE_URL er satt. Resten av koden ser ingen forskjell.
  *
- * Filen ligger utenfor repoet, så læringsdataene dine ikke havner i git.
+ * SQLite er synkron og Postgres er over nettet, så fasaden er asynkron for
+ * begge. Det er prisen for at det samme skal virke overalt.
  */
-export function dbSti(): string {
-  const fra = process.env.MFL_DB?.trim();
-  if (fra) return fra;
-  return path.join(os.homedir(), "mfl-data", "mfl.db");
-}
-
-const SKJEMA = `
-CREATE TABLE IF NOT EXISTS hendelse (
-  seq   INTEGER PRIMARY KEY AUTOINCREMENT,
-  id    TEXT NOT NULL UNIQUE,
-  type  TEXT NOT NULL,
-  tid   TEXT NOT NULL,
-  fagId TEXT NOT NULL,
-  kilde TEXT NOT NULL,
-  data  TEXT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS hendelse_type ON hendelse (type);
-CREATE INDEX IF NOT EXISTS hendelse_fag ON hendelse (fagId, tid);
-
-CREATE TABLE IF NOT EXISTS kilde (
-  id       TEXT PRIMARY KEY,
-  fagId    TEXT NOT NULL,
-  type     TEXT NOT NULL,
-  tittel   TEXT NOT NULL,
-  dato     TEXT NOT NULL,
-  sti      TEXT,
-  kapittel TEXT,
-  lagtInn  TEXT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS kilde_fag ON kilde (fagId, dato);
-
-CREATE TABLE IF NOT EXISTS kilde_chunk (
-  id      TEXT PRIMARY KEY,
-  kildeId TEXT NOT NULL REFERENCES kilde(id) ON DELETE CASCADE,
-  ord     INTEGER NOT NULL,
-  start   REAL,
-  slutt   REAL,
-  side    INTEGER,
-  tekst   TEXT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS chunk_kilde ON kilde_chunk (kildeId, ord);
-
-CREATE VIRTUAL TABLE IF NOT EXISTS chunk_fts USING fts5(
-  chunkId UNINDEXED,
-  kildeId UNINDEXED,
-  tekst,
-  tokenize = "unicode61 remove_diacritics 0"
-);
-`;
-
-let apen: { sti: string; db: DatabaseSync } | null = null;
-
-export function apneDb(): DatabaseSync {
-  const sti = dbSti();
-  if (apen && apen.sti === sti) return apen.db;
-  if (apen) apen.db.close();
-
-  fs.mkdirSync(path.dirname(sti), { recursive: true });
-  const db = new DatabaseSync(sti);
-  db.exec("PRAGMA journal_mode = WAL");
-  db.exec("PRAGMA busy_timeout = 4000");
-  db.exec(SKJEMA);
-  apen = { sti, db };
-  return db;
-}
-
-export function lukkDb(): void {
-  apen?.db.close();
-  apen = null;
-}
-
-type Rad = { seq: number; data: string };
-
-function tilHendelse(rad: Rad): Hendelse {
-  return { ...(JSON.parse(rad.data) as Hendelse), seq: rad.seq };
-}
-
-/** Hele loggen, kronologisk. `seq` bryter lik tid, så rekkefølgen er entydig. */
-export function lesHendelser(): Hendelse[] {
-  const rader = apneDb()
-    .prepare("SELECT seq, data FROM hendelse ORDER BY tid, seq")
-    .all() as unknown as Rad[];
-  return rader.map(tilHendelse);
-}
-
-export function lesHendelserForFag(fagId: string): Hendelse[] {
-  const rader = apneDb()
-    .prepare("SELECT seq, data FROM hendelse WHERE fagId = ? ORDER BY tid, seq")
-    .all(fagId) as unknown as Rad[];
-  return rader.map(tilHendelse);
-}
-
-/** Append-only: en id som allerede finnes røres ikke. Returnerer raden slik den ligger. */
-export function skrivHendelse(hendelse: Hendelse): Hendelse {
-  const db = apneDb();
-  const { seq: _ignorert, ...uten } = hendelse;
-  db.prepare(
-    "INSERT OR IGNORE INTO hendelse (id, type, tid, fagId, kilde, data) VALUES (?, ?, ?, ?, ?, ?)",
-  ).run(
-    hendelse.id,
-    hendelse.type,
-    hendelse.tid,
-    hendelse.fagId,
-    hendelse.kilde,
-    JSON.stringify(uten),
-  );
-  const rad = db
-    .prepare("SELECT seq, data FROM hendelse WHERE id = ?")
-    .get(hendelse.id) as unknown as Rad | undefined;
-  return rad ? tilHendelse(rad) : hendelse;
-}
-
-export function skrivHendelser(hendelser: Hendelse[]): number {
-  const db = apneDb();
-  const for_ = antallHendelser();
-  db.exec("BEGIN");
-  try {
-    for (const h of hendelser) skrivHendelse(h);
-    db.exec("COMMIT");
-  } catch (e) {
-    db.exec("ROLLBACK");
-    throw e;
-  }
-  return antallHendelser() - for_;
-}
-
-export function antallHendelser(): number {
-  const rad = apneDb().prepare("SELECT COUNT(*) AS n FROM hendelse").get() as
-    | { n: number }
-    | undefined;
-  return rad?.n ?? 0;
-}
-
-/** Høyeste sekvensnummer. Brukes til å oppdage at en annen prosess har skrevet. */
-export function sisteSeq(): number {
-  const rad = apneDb().prepare("SELECT MAX(seq) AS s FROM hendelse").get() as
-    | { s: number | null }
-    | undefined;
-  return rad?.s ?? 0;
-}
-
-// ── Kilder: forelesninger, bok, oppgaver ────────────────────────────────────
-
-type KildeRad = {
-  id: string;
-  fagId: string;
-  type: string;
-  tittel: string;
-  dato: string;
-  sti: string | null;
-  kapittel: string | null;
-  lagtInn: string;
+const sqliteLager: Lager = {
+  lesHendelser: async () => sqlite.lesHendelser(),
+  skrivHendelse: async (h) => sqlite.skrivHendelse(h),
+  skrivHendelser: async (h) => sqlite.skrivHendelser(h),
+  antallHendelser: async () => sqlite.antallHendelser(),
+  sisteSeq: async () => sqlite.sisteSeq(),
+  lesKilder: async (fagId, type) => sqlite.lesKilder(fagId, type),
+  lesKilde: async (id) => sqlite.lesKilde(id),
+  lesChunks: async (kildeId, fra, til) => sqlite.lesChunks(kildeId, fra, til),
+  lesChunk: async (id) => sqlite.lesChunk(id),
+  skrivKilde: async (kilde, chunks) => sqlite.skrivKilde(kilde, chunks),
+  slettKilde: async (id) => sqlite.slettKilde(id),
+  sokChunks: async (q, fagId, antall) => sqlite.sokChunks(q, fagId, antall),
+  beskrivelse: () => `SQLite ${sqlite.dbSti()}`,
 };
 
-function tilKilde(rad: KildeRad): Kildedokument {
-  return {
-    id: rad.id,
-    fagId: rad.fagId,
-    type: rad.type as Kildedokument["type"],
-    tittel: rad.tittel,
-    dato: rad.dato,
-    ...(rad.sti ? { sti: rad.sti } : {}),
-    ...(rad.kapittel ? { kapittel: rad.kapittel } : {}),
-    lagtInn: rad.lagtInn,
-  };
+let valgt: Lager | null = null;
+
+/**
+ * Rekkefølgen er bevisst:
+ *
+ *   1. MFL_DB satt eksplisitt  → SQLite. Peker du på en fil, mener du fila.
+ *      Det er dette som holder testene på den lokale basen.
+ *   2. SUPABASE_URL og innlogget → Postgres.
+ *   3. Ellers                    → SQLite.
+ *
+ * Nøkler uten innlogging faller tilbake til lokal base i stedet for å vise
+ * ingenting. Du mister ikke dataene dine av å legge inn en URL.
+ */
+export function iSky(): boolean {
+  if (process.env.MFL_DB?.trim()) return false;
+  if (!process.env.SUPABASE_URL?.trim()) return false;
+  return lesSesjon() != null;
 }
 
-export function lesKilder(fagId?: string, type?: string): Kildedokument[] {
-  const db = apneDb();
-  const betingelser: string[] = [];
-  const args: string[] = [];
-  if (fagId) {
-    betingelser.push("fagId = ?");
-    args.push(fagId);
-  }
-  if (type) {
-    betingelser.push("type = ?");
-    args.push(type);
-  }
-  const hvor = betingelser.length ? `WHERE ${betingelser.join(" AND ")}` : "";
-  const rader = db
-    .prepare(`SELECT * FROM kilde ${hvor} ORDER BY dato DESC, id`)
-    .all(...args) as unknown as KildeRad[];
-  return rader.map(tilKilde);
-}
+let advart = false;
 
-export function lesKilde(id: string): Kildedokument | null {
-  const rad = apneDb().prepare("SELECT * FROM kilde WHERE id = ?").get(id) as
-    | unknown as KildeRad
-    | undefined;
-  return rad ? tilKilde(rad) : null;
-}
-
-export type ChunkRad = Chunk & { id: string; kildeId: string };
-
-function tilChunk(rad: Record<string, unknown>): ChunkRad {
-  return {
-    id: String(rad.id),
-    kildeId: String(rad.kildeId),
-    ord: Number(rad.ord),
-    ...(rad.start != null ? { start: Number(rad.start) } : {}),
-    ...(rad.slutt != null ? { slutt: Number(rad.slutt) } : {}),
-    ...(rad.side != null ? { side: Number(rad.side) } : {}),
-    tekst: String(rad.tekst),
-  };
-}
-
-export function lesChunks(kildeId: string, fra?: number, til?: number): ChunkRad[] {
-  const db = apneDb();
-  const betingelser = ["kildeId = ?"];
-  const args: (string | number)[] = [kildeId];
-  if (fra != null) {
-    betingelser.push("(slutt IS NULL OR slutt >= ?)");
-    args.push(fra);
-  }
-  if (til != null) {
-    betingelser.push("(start IS NULL OR start <= ?)");
-    args.push(til);
-  }
-  const rader = db
-    .prepare(`SELECT * FROM kilde_chunk WHERE ${betingelser.join(" AND ")} ORDER BY ord`)
-    .all(...args) as unknown as Record<string, unknown>[];
-  return rader.map(tilChunk);
-}
-
-export function lesChunk(id: string): ChunkRad | null {
-  const rad = apneDb().prepare("SELECT * FROM kilde_chunk WHERE id = ?").get(id) as
-    | Record<string, unknown>
-    | undefined;
-  return rad ? tilChunk(rad) : null;
-}
-
-/** Skriver kilde og biter i én transaksjon. En kilde som finnes fra før erstattes. */
-export function skrivKilde(kilde: Kildedokument, chunks: Chunk[]): number {
-  const db = apneDb();
-  db.exec("BEGIN");
-  try {
-    db.prepare("DELETE FROM chunk_fts WHERE kildeId = ?").run(kilde.id);
-    db.prepare("DELETE FROM kilde_chunk WHERE kildeId = ?").run(kilde.id);
-    db.prepare(
-      `INSERT INTO kilde (id, fagId, type, tittel, dato, sti, kapittel, lagtInn)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-       ON CONFLICT(id) DO UPDATE SET
-         fagId = excluded.fagId, type = excluded.type, tittel = excluded.tittel,
-         dato = excluded.dato, sti = excluded.sti, kapittel = excluded.kapittel`,
-    ).run(
-      kilde.id,
-      kilde.fagId,
-      kilde.type,
-      kilde.tittel,
-      kilde.dato,
-      kilde.sti ?? null,
-      kilde.kapittel ?? null,
-      kilde.lagtInn,
-    );
-    const settChunk = db.prepare(
-      "INSERT INTO kilde_chunk (id, kildeId, ord, start, slutt, side, tekst) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    );
-    const settFts = db.prepare("INSERT INTO chunk_fts (chunkId, kildeId, tekst) VALUES (?, ?, ?)");
-    for (const c of chunks) {
-      const chunkId = `${kilde.id}#${c.ord}`;
-      settChunk.run(
-        chunkId,
-        kilde.id,
-        c.ord,
-        c.start ?? null,
-        c.slutt ?? null,
-        c.side ?? null,
-        c.tekst,
-      );
-      settFts.run(chunkId, kilde.id, c.tekst);
+function lager(): Lager {
+  if (valgt) return valgt;
+  if (!iSky()) {
+    if (process.env.SUPABASE_URL?.trim() && !process.env.MFL_DB?.trim() && !advart) {
+      advart = true;
+      console.error("[mfl] Supabase er satt opp, men du er ikke logget inn. Bruker lokal base. Kjør: npm run logg-inn");
     }
-    db.exec("COMMIT");
-  } catch (e) {
-    db.exec("ROLLBACK");
-    throw e;
+    valgt = sqliteLager;
+    return valgt;
   }
-  return chunks.length;
+  // Lastes bare når skyen faktisk brukes, så lokal drift ikke krever nøkler.
+  const pg = require("./db-postgres.ts") as { lager: Lager };
+  valgt = pg.lager;
+  return valgt;
 }
 
-export function slettKilde(id: string): boolean {
-  const db = apneDb();
-  db.exec("BEGIN");
-  try {
-    db.prepare("DELETE FROM chunk_fts WHERE kildeId = ?").run(id);
-    db.prepare("DELETE FROM kilde_chunk WHERE kildeId = ?").run(id);
-    const res = db.prepare("DELETE FROM kilde WHERE id = ?").run(id);
-    db.exec("COMMIT");
-    return Number(res.changes) > 0;
-  } catch (e) {
-    db.exec("ROLLBACK");
-    throw e;
-  }
+/** Tvinger nytt valg, for eksempel etter innlogging eller i tester. */
+export function glemLager(): void {
+  valgt = null;
 }
 
-export type Treff = ChunkRad & { kilde: Kildedokument; utdrag: string };
-
-/** Fritekst til FTS5-uttrykk. Fyllord er luket bort, lange ord får prefikstreff. */
-export function ftsUttrykk(query: string): string {
-  const ord = sokeord(query);
-  if (ord.length === 0) return "";
-  return ord
-    .map((o) => {
-      const rent = o.replaceAll('"', "");
-      return o.length >= 6 ? `"${rent}"*` : `"${rent}"`;
-    })
-    .join(" OR ");
+export function beskrivLager(): string {
+  return lager().beskrivelse();
 }
 
-export function sokChunks(query: string, fagId?: string, antall = 8): Treff[] {
-  const uttrykk = ftsUttrykk(query);
-  if (!uttrykk) return [];
-  const db = apneDb();
-  const args: (string | number)[] = [uttrykk];
-  let hvor = "chunk_fts MATCH ?";
-  if (fagId) {
-    hvor += " AND k.fagId = ?";
-    args.push(fagId);
-  }
-  args.push(antall);
-  const rader = db
-    .prepare(
-      `SELECT c.*, snippet(chunk_fts, 2, '«', '»', ' … ', 18) AS utdrag
-       FROM chunk_fts
-       JOIN kilde_chunk c ON c.id = chunk_fts.chunkId
-       JOIN kilde k ON k.id = c.kildeId
-       WHERE ${hvor}
-       ORDER BY bm25(chunk_fts) LIMIT ?`,
-    )
-    .all(...args) as unknown as Record<string, unknown>[];
-  return rader.flatMap((rad) => {
-    const kilde = lesKilde(String(rad.kildeId));
-    if (!kilde) return [];
-    return [{ ...tilChunk(rad), kilde, utdrag: String(rad.utdrag ?? "") }];
-  });
-}
+export const lesHendelser = (): Promise<Hendelse[]> => lager().lesHendelser();
+export const skrivHendelse = (h: Hendelse): Promise<Hendelse> => lager().skrivHendelse(h);
+export const skrivHendelser = (h: Hendelse[]): Promise<number> => lager().skrivHendelser(h);
+export const antallHendelser = (): Promise<number> => lager().antallHendelser();
+export const sisteSeq = (): Promise<number> => lager().sisteSeq();
+export const lesKilder = (fagId?: string, type?: string): Promise<Kildedokument[]> =>
+  lager().lesKilder(fagId, type);
+export const lesKilde = (id: string): Promise<Kildedokument | null> => lager().lesKilde(id);
+export const lesChunks = (kildeId: string, fra?: number, til?: number): Promise<ChunkRad[]> =>
+  lager().lesChunks(kildeId, fra, til);
+export const lesChunk = (id: string): Promise<ChunkRad | null> => lager().lesChunk(id);
+export const skrivKilde = (kilde: Kildedokument, chunks: Chunk[]): Promise<number> =>
+  lager().skrivKilde(kilde, chunks);
+export const slettKilde = (id: string): Promise<boolean> => lager().slettKilde(id);
+export const sokChunks = (q: string, fagId?: string, antall?: number): Promise<Treff[]> =>
+  lager().sokChunks(q, fagId, antall);

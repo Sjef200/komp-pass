@@ -17,7 +17,7 @@ import {
   foldKoblinger,
   type KoblingForeslatt,
 } from "../../src/lib/hendelser.ts";
-import { erKildeType, tidsstempel } from "../../src/lib/kilder.ts";
+import { erKildeType, tidsstempel, type Kildedokument } from "../../src/lib/kilder.ts";
 import { indekserTekst } from "./kilde-inntak.ts";
 import {
   GAP_TEKST,
@@ -47,8 +47,8 @@ function feil(melding: string): { content: { type: "text"; text: string }[]; isE
   return { content: [{ type: "text", text: melding }], isError: true };
 }
 
-function medFag(fagId: string | undefined): { state: AppState; fagId: string } {
-  const state = lastMcpState();
+async function medFag(fagId: string | undefined): Promise<{ state: AppState; fagId: string }> {
+  const state = await lastMcpState();
   const fag = krevFag(state, fagId ?? state.innstillinger.aktivtFag);
   return {
     state: { ...state, innstillinger: { ...state.innstillinger, aktivtFag: fag.id } },
@@ -56,16 +56,16 @@ function medFag(fagId: string | undefined): { state: AppState; fagId: string } {
   };
 }
 
-function wrap<T>(fn: () => T): T | ReturnType<typeof feil> {
+async function wrap<T>(fn: () => Promise<T>): Promise<T | ReturnType<typeof feil>> {
   try {
-    return fn();
+    return await fn();
   } catch (e) {
     return feil(e instanceof Error ? e.message : "Ukjent feil.");
   }
 }
 
-export function listFag() {
-  const state = lastMcpState();
+export async function listFag() {
+  const state = await lastMcpState();
   const meta = lesUdirMeta();
   return jsonText({
     udir: {
@@ -87,9 +87,9 @@ export function listFag() {
   });
 }
 
-export function hentLareplan(fagId: string) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function hentLareplan(fagId: string) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     const fag = krevFag(state, id);
     const maal = maalIFag(state, id);
     return jsonText({
@@ -112,9 +112,9 @@ export function hentLareplan(fagId: string) {
   });
 }
 
-export function hentOversikt(fagId?: string) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function hentOversikt(fagId?: string) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     const fag = krevFag(state, id);
     const temaer = temaerIFag(state, id);
     const maal = maalIFag(state, id);
@@ -142,9 +142,9 @@ export function hentOversikt(fagId?: string) {
   });
 }
 
-export function listTemaer(fagId?: string, filter?: "alle" | "svake" | "uhorte") {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function listTemaer(fagId?: string, filter?: "alle" | "svake" | "uhorte") {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     const temaer = temaerIFag(state, id).filter((t) => {
       const k = sisteKarakter(state.horinger, t.id);
       if (filter === "uhorte") return k == null;
@@ -169,9 +169,9 @@ export function listTemaer(fagId?: string, filter?: "alle" | "svake" | "uhorte")
   });
 }
 
-export function listKapitler(fagId?: string) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function listKapitler(fagId?: string) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     const temaer = temaerIFag(state, id);
     const maal = maalIFag(state, id);
     const kapitler = grupperKapittel(temaer, state.horinger);
@@ -194,9 +194,9 @@ export function listKapitler(fagId?: string) {
   });
 }
 
-export function listFagord(fagId?: string, status?: FagordStatus) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function listFagord(fagId?: string, status?: FagordStatus) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     let liste = fagordIFag(state, id);
     if (status) liste = liste.filter((f) => f.status === status);
     return jsonText({
@@ -226,9 +226,9 @@ export function listFagord(fagId?: string, status?: FagordStatus) {
   });
 }
 
-export function listHoringer(fagId?: string, temaId?: string, limit?: number) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function listHoringer(fagId?: string, temaId?: string, limit?: number) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     let liste = [...horingerIFag(state, id)].sort((a, b) => b.dato.localeCompare(a.dato));
     if (temaId) liste = liste.filter((h) => h.temaId === temaId);
     if (limit && limit > 0) liste = liste.slice(0, limit);
@@ -236,7 +236,7 @@ export function listHoringer(fagId?: string, temaId?: string, limit?: number) {
   });
 }
 
-export function listPrompts() {
+export async function listPrompts() {
   return jsonText(
     lesPrompterFraDisk().map((p) => ({
       id: p.id,
@@ -261,9 +261,9 @@ function skillKort(s: Skill) {
   };
 }
 
-export function listSkills(fagId?: string) {
-  return wrap(() => {
-    if (fagId) krevFag(lastMcpState(), fagId);
+export async function listSkills(fagId?: string) {
+  return wrap(async () => {
+    if (fagId) krevFag(await lastMcpState(), fagId);
     const skills = lesSkillsFraDisk().filter((s) => skillGjelderFag(s, fagId));
     return jsonText({
       fagId: fagId ?? null,
@@ -273,8 +273,8 @@ export function listSkills(fagId?: string) {
   });
 }
 
-export function hentSkill(skillId: string, fagId?: string) {
-  return wrap(() => {
+export async function hentSkill(skillId: string, fagId?: string) {
+  return wrap(async () => {
     const skill = lesSkillsFraDisk().find((s) => s.id === skillId);
     if (!skill) {
       const prompt = lesPrompterFraDisk().find((p) => p.id === skillId);
@@ -314,8 +314,8 @@ export function hentSkill(skillId: string, fagId?: string) {
   });
 }
 
-export function hentSkillReference(skillId: string, referenceId: string) {
-  return wrap(() => {
+export async function hentSkillReference(skillId: string, referenceId: string) {
+  return wrap(async () => {
     const skill = lesSkillsFraDisk().find((s) => s.id === skillId);
     if (!skill) return feil(`Ukjent skill: ${skillId}`);
     const ref = skill.referanser.find((r) => r.id === referenceId);
@@ -330,7 +330,7 @@ export function hentSkillReference(skillId: string, referenceId: string) {
   });
 }
 
-export function hentPrompt(id: string) {
+export async function hentPrompt(id: string) {
   const p = lesPrompterFraDisk().find((x) => x.id === id);
   if (!p) return feil(`Ukjent prompt: ${id}`);
   return jsonText({
@@ -340,9 +340,9 @@ export function hentPrompt(id: string) {
   });
 }
 
-export function stillSporsmal(fagId?: string, temaId?: string) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function stillSporsmal(fagId?: string, temaId?: string) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     const fag = krevFag(state, id);
     const temaer = temaerIFag(state, id);
     const ko = nesteTemaer(temaer, state.horinger);
@@ -398,9 +398,9 @@ export function stillSporsmal(fagId?: string, temaId?: string) {
   });
 }
 
-export function nesteHoring(fagId?: string, antall?: number) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function nesteHoring(fagId?: string, antall?: number) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     const temaer = temaerIFag(state, id);
     const ko = nesteTemaer(temaer, state.horinger, undefined, antall ?? 5);
     return jsonText({
@@ -422,7 +422,7 @@ export function nesteHoring(fagId?: string, antall?: number) {
   });
 }
 
-export function kallLoggHoring(args: {
+export async function kallLoggHoring(args: {
   fagId: string;
   temaId: string;
   karakter: number;
@@ -438,7 +438,7 @@ export function kallLoggHoring(args: {
   promptId: string;
 }) {
   try {
-    const h = loggHoring({
+    const h = await loggHoring({
       ...args,
       karakter: args.karakter as Karakter,
     });
@@ -448,7 +448,7 @@ export function kallLoggHoring(args: {
   }
 }
 
-export function kallOppdaterFagord(args: {
+export async function kallOppdaterFagord(args: {
   fagId: string;
   id: string;
   status: FagordStatus;
@@ -458,7 +458,7 @@ export function kallOppdaterFagord(args: {
   promptId: string;
 }) {
   try {
-    return jsonText({ fagId: args.fagId, fagord: oppdaterFagord(args) });
+    return jsonText({ fagId: args.fagId, fagord: await oppdaterFagord(args) });
   } catch (e) {
     return feil(e instanceof Error ? e.message : "Kunne ikke oppdatere fagord.");
   }
@@ -480,7 +480,7 @@ export async function kallImporterPrompt(url: string) {
 
 // ── Kilder ─────────────────────────────────────────────────────────────────
 
-function kildeKort(k: ReturnType<typeof lesKilder>[number]) {
+function kildeKort(k: Kildedokument) {
   return {
     id: k.id,
     fagId: k.fagId,
@@ -508,10 +508,10 @@ function treffRad(t: Treff) {
   };
 }
 
-export function listKilder(fagId?: string, type?: string) {
-  return wrap(() => {
-    if (fagId) krevFag(lastMcpState(), fagId);
-    const kilder = lesKilder(fagId, type);
+export async function listKilder(fagId?: string, type?: string) {
+  return wrap(async () => {
+    if (fagId) krevFag(await lastMcpState(), fagId);
+    const kilder = await lesKilder(fagId, type);
     return jsonText({
       fagId: fagId ?? null,
       antall: kilder.length,
@@ -524,10 +524,10 @@ export function listKilder(fagId?: string, type?: string) {
   });
 }
 
-export function sokKilder(fagId: string, query: string, antall?: number) {
-  return wrap(() => {
-    const { fagId: id } = medFag(fagId);
-    const treff = sokChunks(query, id, antall ?? 8);
+export async function sokKilder(fagId: string, query: string, antall?: number) {
+  return wrap(async () => {
+    const { fagId: id } = await medFag(fagId);
+    const treff = await sokChunks(query, id, antall ?? 8);
     return jsonText({
       fagId: id,
       query,
@@ -539,11 +539,11 @@ export function sokKilder(fagId: string, query: string, antall?: number) {
   });
 }
 
-export function hentKilde(kildeId: string, fraSekund?: number, tilSekund?: number) {
-  return wrap(() => {
-    const kilde = lesKilde(kildeId);
+export async function hentKilde(kildeId: string, fraSekund?: number, tilSekund?: number) {
+  return wrap(async () => {
+    const kilde = await lesKilde(kildeId);
     if (!kilde) return feil(`Ukjent kilde: ${kildeId}`);
-    const chunks = lesChunks(kildeId, fraSekund, tilSekund);
+    const chunks = await lesChunks(kildeId, fraSekund, tilSekund);
     return jsonText({
       ...kildeKort(kilde),
       antallBiter: chunks.length,
@@ -557,9 +557,9 @@ export function hentKilde(kildeId: string, fraSekund?: number, tilSekund?: numbe
   });
 }
 
-export function finnBelegg(fagId: string, maalId?: string, temaId?: string) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function finnBelegg(fagId: string, maalId?: string, temaId?: string) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     if (!maalId && !temaId) return feil("Oppgi maalId eller temaId.");
 
     const maal = maalId ? maalIFag(state, id).find((m) => m.id === maalId) : undefined;
@@ -570,22 +570,21 @@ export function finnBelegg(fagId: string, maalId?: string, temaId?: string) {
     const bekreftet = bekreftedeKoblinger(state.hendelser).filter(
       (k) => (maalId ? k.maalId === maalId : true) && (temaId ? k.temaId === temaId : true),
     );
-    const bekreftedeBiter = bekreftet.flatMap((k) => {
-      const chunk = lesChunk(k.chunkId);
-      if (!chunk) return [];
-      const kilde = lesKilde(chunk.kildeId);
-      if (!kilde) return [];
-      return [
-        {
-          chunkId: chunk.id,
-          kilde: kilde.tittel,
-          ...(chunk.start != null ? { tid: tidsstempel(chunk.start) } : {}),
-          ...(chunk.side != null ? { side: chunk.side } : {}),
-          tekst: chunk.tekst,
-          begrunnelse: k.begrunnelse ?? "",
-        },
-      ];
-    });
+    const bekreftedeBiter: Array<Record<string, unknown>> = [];
+    for (const k of bekreftet) {
+      const chunk = await lesChunk(k.chunkId);
+      if (!chunk) continue;
+      const kilde = await lesKilde(chunk.kildeId);
+      if (!kilde) continue;
+      bekreftedeBiter.push({
+        chunkId: chunk.id,
+        kilde: kilde.tittel,
+        ...(chunk.start != null ? { tid: tidsstempel(chunk.start) } : {}),
+        ...(chunk.side != null ? { side: chunk.side } : {}),
+        tekst: chunk.tekst,
+        begrunnelse: k.begrunnelse ?? "",
+      });
+    }
 
     // Udirs ordlyd er abstrakt; læreren sier «survey» og «kontrollgruppe».
     // Temaene og fagordene er broen mellom målet og det som faktisk blir sagt.
@@ -603,7 +602,7 @@ export function finnBelegg(fagId: string, maalId?: string, temaId?: string) {
     ]
       .join(" ")
       .trim();
-    const kandidater = sokChunks(query, id, 6).filter(
+    const kandidater = (await sokChunks(query, id, 6)).filter(
       (t) => !bekreftet.some((k) => k.chunkId === t.id),
     );
 
@@ -622,7 +621,7 @@ export function finnBelegg(fagId: string, maalId?: string, temaId?: string) {
   });
 }
 
-export function foreslaKobling(args: {
+export async function foreslaKobling(args: {
   fagId: string;
   chunkId: string;
   temaId?: string;
@@ -632,12 +631,12 @@ export function foreslaKobling(args: {
   innsats: "lav" | "medium" | "hoy" | "maks";
   promptId: string;
 }) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(args.fagId);
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(args.fagId);
     if (!args.temaId && !args.maalId) return feil("Oppgi temaId eller maalId.");
-    const chunk = lesChunk(args.chunkId);
+    const chunk = await lesChunk(args.chunkId);
     if (!chunk) return feil(`Ukjent chunkId: ${args.chunkId}`);
-    const kilde = lesKilde(chunk.kildeId);
+    const kilde = await lesKilde(chunk.kildeId);
     if (!kilde) return feil(`Kilden til ${args.chunkId} finnes ikke.`);
     if (kilde.fagId !== id) {
       return feil(`Kilden «${kilde.tittel}» tilhører ${kilde.fagId}, ikke ${id}.`);
@@ -671,18 +670,20 @@ export function foreslaKobling(args: {
   });
 }
 
-export function listKoblinger(fagId?: string, tilstand?: string) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function listKoblinger(fagId?: string, tilstand?: string) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     const koblinger = foldKoblinger(state.hendelser)
       .filter((k) => k.fagId === id)
       .filter((k) => (tilstand ? k.tilstand === tilstand : true));
     return jsonText({
       fagId: id,
-      koblinger: koblinger.map((k) => ({
-        ...k,
-        chunk: lesChunk(k.chunkId)?.tekst.slice(0, 160) ?? null,
-      })),
+      koblinger: await Promise.all(
+        koblinger.map(async (k) => ({
+          ...k,
+          chunk: (await lesChunk(k.chunkId))?.tekst.slice(0, 160) ?? null,
+        })),
+      ),
     });
   });
 }
@@ -690,9 +691,9 @@ export function listKoblinger(fagId?: string, tilstand?: string) {
 
 // ── Læringsløp ─────────────────────────────────────────────────────────────
 
-export function hentLaringslop(fagId?: string) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(fagId);
+export async function hentLaringslop(fagId?: string) {
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(fagId);
     const fag = krevFag(state, id);
     const lop = laringslop(state, id);
     const linjer = sorterEtterGap(lop.linjer);
@@ -760,7 +761,7 @@ export function hentLaringslop(fagId?: string) {
 }
 
 
-export function leggInnKilde(args: {
+export async function leggInnKilde(args: {
   fagId: string;
   tittel: string;
   tekst: string;
@@ -768,14 +769,14 @@ export function leggInnKilde(args: {
   kapittel?: string;
   dato?: string;
 }) {
-  return wrap(() => {
-    const { state, fagId: id } = medFag(args.fagId);
+  return wrap(async () => {
+    const { state, fagId: id } = await medFag(args.fagId);
     if (!args.tittel.trim()) return feil("tittel er påkrevd. Gi stoffet et navn du kjenner igjen.");
     if (!args.tekst.trim()) return feil("tekst er påkrevd.");
     const type = args.type ?? "notat";
     if (!erKildeType(type)) return feil(`Ukjent type: ${type}. Bruk forelesning, bok, oppgave eller notat.`);
 
-    const { kilde, antallBiter } = indekserTekst({
+    const { kilde, antallBiter } = await indekserTekst({
       tekst: args.tekst,
       fagId: id,
       tittel: args.tittel.trim(),

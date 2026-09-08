@@ -46,7 +46,7 @@ Fag: ${lesBaseState().fag.map((f) => f.id).join(", ")}`);
   process.exit(1);
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const { fil, flagg } = parseArgs(process.argv.slice(2));
   if (!fil) brukVeiledning("Oppgi filen som skal legges inn.");
 
@@ -57,7 +57,7 @@ function main(): void {
   const type = flagg.type ?? "forelesning";
   if (!erKildeType(type)) brukVeiledning(`Ukjent type: ${type}`);
 
-  const { kilde, antallBiter } = indekserFil({
+  const { kilde, antallBiter } = await indekserFil({
     fil: path.resolve(fil),
     fagId,
     type,
@@ -79,4 +79,4 @@ function main(): void {
   }
 }
 
-main();
+await main();

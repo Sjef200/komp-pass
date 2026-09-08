@@ -74,7 +74,7 @@ function fagordTilObservasjoner(
   return ut;
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const base = lesBaseState();
   const temaer = base.temaer.map((t) => ({ id: t.id, fagId: t.fagId }));
   const kjenteHoringer = new Set(base.horinger.map((h) => h.id));
@@ -118,13 +118,13 @@ function main(): void {
     for (const h of hoppet) console.log(`  hoppet over ${h}`);
   }
 
-  const for_ = antallHendelser();
-  const nye = skrivHendelser(alle);
+  const for_ = await antallHendelser();
+  const nye = await skrivHendelser(alle);
   console.log(`\nDatabase: ${dbSti()}`);
-  console.log(`${for_} hendelser fra før, ${nye} nye, ${antallHendelser()} totalt.`);
+  console.log(`${for_} hendelser fra før, ${nye} nye, ${await antallHendelser()} totalt.`);
   if (nye === 0 && alle.length > 0) {
     console.log("Alt lå der allerede. Migreringen kan kjøres om igjen uten skade.");
   }
 }
 
-main();
+await main();

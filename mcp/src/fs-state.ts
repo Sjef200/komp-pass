@@ -216,11 +216,12 @@ export function lesBaseState(): AppState {
  * Databasen er sannheten for alt som skjer. JSON-filene i src/data er
  * utgangspunktet: læreplan, temaer og begrepsdefinisjoner.
  */
-export function lastMcpState(): AppState {
+export async function lastMcpState(): Promise<AppState> {
+  const [hendelser, kilder] = await Promise.all([lesHendelser(), lesKilder()]);
   return mergeTreLag(lesBaseState(), null, {
     prompts: lesPrompterFraDisk(),
-    hendelser: lesHendelser(),
-    kilder: lesKilder(),
+    hendelser,
+    kilder,
   });
 }
 
@@ -243,7 +244,7 @@ export function byggProveniens(
   };
 }
 
-export function loggHoring(input: {
+export async function loggHoring(input: {
   fagId: string;
   temaId: string;
   karakter: Karakter;
@@ -257,8 +258,8 @@ export function loggHoring(input: {
   modell: string;
   innsats: AiInnsats;
   promptId: string;
-}): Horing {
-  const state = lastMcpState();
+}): Promise<Horing> {
+  const state = await lastMcpState();
   const fag = krevFag(state, input.fagId);
   krevTemaIFag(state, fag.id, input.temaId);
   krevSporsmalOgSvar(input);
@@ -278,11 +279,11 @@ export function loggHoring(input: {
     kilde: "ai",
     ai,
   };
-  skrivHendelse(horingTilHendelse(horing, fag.id));
+  await skrivHendelse(horingTilHendelse(horing, fag.id));
   return horing;
 }
 
-export function oppdaterFagord(input: {
+export async function oppdaterFagord(input: {
   fagId: string;
   id: string;
   status: FagordStatus;
@@ -290,8 +291,8 @@ export function oppdaterFagord(input: {
   modell: string;
   innsats: AiInnsats;
   promptId: string;
-}): Fagord {
-  const state = lastMcpState();
+}): Promise<Fagord> {
+  const state = await lastMcpState();
   const fag = krevFag(state, input.fagId);
   const eksisterende = krevFagordIFag(state, fag.id, input.id);
   const ai = byggProveniens(input.modell, input.innsats, input.promptId, state.prompts);
@@ -306,7 +307,7 @@ export function oppdaterFagord(input: {
     status: input.status,
     ...(input.sisteFeil?.trim() ? { sisteFeil: input.sisteFeil.trim() } : {}),
   };
-  skrivHendelse(observasjon);
+  await skrivHendelse(observasjon);
   return {
     ...eksisterende,
     status: observasjon.status,
@@ -316,13 +317,15 @@ export function oppdaterFagord(input: {
 }
 
 /** Alle observasjoner på ett fagord, nyeste først. */
-export function lesFagordHistorikk(fagordId: string): FagordObservert[] {
-  return fagordHistorikk(lesHendelser(), fagordId);
+export async function lesFagordHistorikk(fagordId: string): Promise<FagordObservert[]> {
+  return fagordHistorikk(await lesHendelser(), fagordId);
 }
 
 /** Hendelser inn utenfra, for eksempel fra UI eller en importert eksportfil. */
-export function skrivHendelserFraKlient(hendelser: Hendelse[]): Hendelse[] {
-  return hendelser.map(skrivHendelse);
+export async function skrivHendelserFraKlient(hendelser: Hendelse[]): Promise<Hendelse[]> {
+  const ut: Hendelse[] = [];
+  for (const h of hendelser) ut.push(await skrivHendelse(h));
+  return ut;
 }
 
 export async function importerPromptFraUrl(url: string): Promise<Prompt[]> {

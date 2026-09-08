@@ -22,11 +22,11 @@ import {
  * Tekstene til de bitene koblingene faktisk peker på. Hele transkriptet skal
  * ikke over til nettleseren — bare det som trengs for å bekrefte et forslag.
  */
-function koblingTekster(hendelser: Hendelse[]): Record<string, unknown> {
+async function koblingTekster(hendelser: Hendelse[]): Promise<Record<string, unknown>> {
   const ut: Record<string, unknown> = {};
   for (const k of foldKoblinger(hendelser)) {
     if (ut[k.chunkId]) continue;
-    const chunk = lesChunk(k.chunkId);
+    const chunk = await lesChunk(k.chunkId);
     if (!chunk) continue;
     ut[k.chunkId] = {
       tekst: chunk.tekst,
@@ -38,20 +38,20 @@ function koblingTekster(hendelser: Hendelse[]): Record<string, unknown> {
   return ut;
 }
 
-function tilstand() {
-  const hendelser = lesHendelser();
+async function tilstand() {
+  const hendelser = await lesHendelser();
   return {
     hendelser,
-    kilder: lesKilder(),
-    koblingTekster: koblingTekster(hendelser),
+    kilder: await lesKilder(),
+    koblingTekster: await koblingTekster(hendelser),
     prompts: lesPrompterFraDisk(),
     skills: lesSkillsFraDisk(),
   };
 }
 
-function sendLive(server: ViteDevServer): void {
+async function sendLive(server: ViteDevServer): Promise<void> {
   try {
-    const data = tilstand();
+    const data = await tilstand();
     server.ws.send({
       type: "custom",
       event: "mfl:ai-overlay",
@@ -140,7 +140,7 @@ export function mflLive(): Plugin {
 
   return {
     name: "mfl-live",
-    configureServer(server) {
+    async configureServer(server) {
       server.watcher.add(promptsDir);
       server.watcher.add(skillsDir);
 
@@ -149,24 +149,26 @@ export function mflLive(): Plugin {
         const n = fil.replaceAll("\\", "/");
         if (!n.includes("/src/data/prompts") && !n.includes("/src/data/skills")) return;
         clearTimeout(timer);
-        timer = setTimeout(() => sendLive(server), 80);
+        timer = setTimeout(() => void sendLive(server), 80);
       };
       server.watcher.on("change", bump);
       server.watcher.on("add", bump);
 
       // Databasen ligger utenfor repoet og skrives av MCP-prosessen. Å følge
       // sekvensnummeret er mer robust enn å se på WAL-filen.
-      let sett = sisteSeq();
+      let sett = await sisteSeq();
       const puls = setInterval(() => {
-        try {
-          const na = sisteSeq();
-          if (na !== sett) {
-            sett = na;
-            sendLive(server);
+        void (async () => {
+          try {
+            const na = await sisteSeq();
+            if (na !== sett) {
+              sett = na;
+              await sendLive(server);
+            }
+          } catch (e) {
+            console.error("[mfl-live] databasen svarer ikke", e);
           }
-        } catch (e) {
-          console.error("[mfl-live] databasen svarer ikke", e);
-        }
+        })();
       }, 1000);
       puls.unref?.();
       server.httpServer?.on("close", () => clearInterval(puls));
@@ -215,7 +217,7 @@ export function mflLive(): Plugin {
           return;
         }
         if (url === "/api/tilstand" && req.method === "GET") {
-          apiJson(res, 200, tilstand());
+          apiJson(res, 200, await tilstand());
           return;
         }
         if (url === "/api/hendelser" && req.method === "POST") {
@@ -228,10 +230,10 @@ export function mflLive(): Plugin {
               apiJson(res, 400, { error: "Noen av hendelsene manglet id, tid eller type." });
               return;
             }
-            const skrevet = skrivHendelserFraKlient(gyldige);
-            sett = sisteSeq();
-            sendLive(server);
-            apiJson(res, 200, { skrevet: skrevet.length, ...tilstand() });
+            const skrevet = await skrivHendelserFraKlient(gyldige);
+            sett = await sisteSeq();
+            await sendLive(server);
+            apiJson(res, 200, { skrevet: skrevet.length, ...(await tilstand()) });
           } catch (e) {
             apiJson(res, 400, {
               error: e instanceof Error ? e.message : "Kunne ikke lagre hendelsene.",

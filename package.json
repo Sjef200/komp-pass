@@ -15,7 +15,8 @@
     "migrer": "tsx scripts/migrer-til-sqlite.ts",
     "transkriber": "tsx scripts/transkriber.ts",
     "indekser": "tsx scripts/indekser-kilde.ts",
-    "bygg:plugin": "tsx scripts/bygg-plugin.ts"
+    "bygg:plugin": "tsx scripts/bygg-plugin.ts",
+    "logg-inn": "tsx scripts/logg-inn.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",

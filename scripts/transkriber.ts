@@ -42,7 +42,7 @@ function parseArgs(argv: string[]): { lyd?: string; flagg: Record<string, string
   return { lyd, flagg };
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const { lyd, flagg } = parseArgs(process.argv.slice(2));
 
   if (flagg.sjekk) {
@@ -80,7 +80,7 @@ Fag: ${lesBaseState().fag.map((f) => f.id).join(", ")}`);
   const id = flagg.id ?? `${fagId}-${slugify(tittel)}`;
 
   const transkript = transkriberLyd(lydfil, id);
-  const { kilde, antallBiter } = indekserFil({
+  const { kilde, antallBiter } = await indekserFil({
     fil: transkript,
     fagId,
     type: "forelesning",
@@ -96,4 +96,4 @@ Fag: ${lesBaseState().fag.map((f) => f.id).join(", ")}`);
   console.log(`\nLydfilen ligger igjen der den var. Verken den eller transkriptet havner i git.`);
 }
 
-main();
+await main();

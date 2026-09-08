@@ -40,7 +40,7 @@ En trigger avviser `update` og `delete` på `hendelse`, så append-only håndhev
 
 ---
 
-## Del A2 — Postgres bak samme grensesnitt
+## Del A2 — Postgres bak samme grensesnitt ✅ gjort
 
 `mcp/src/db-postgres.ts` implementerer samme signaturer som `db.ts`: `lesHendelser`, `skrivHendelse`, `skrivHendelser`, `sisteSeq`, `lesKilder`, `lesKilde`, `lesChunks`, `lesChunk`, `skrivKilde`, `slettKilde`, `sokChunks`.
 
@@ -51,15 +51,23 @@ To ting å passe på:
 - **`sokChunks`** går fra FTS5 til `sok_chunks()`-funksjonen i migreringen. `websearch_to_tsquery` bruker AND, mens `ftsUttrykk` i dag bruker OR. For `finn_belegg`, som søker med mange ord fra temanavn og fagord, blir AND for strengt — der trengs OR-semantikk.
 - **`sokeord()`** i `src/lib/kilder.ts` kan forenkles for Postgres-veien; stemmingen gjør stoppordlista overflødig.
 
-**Verifisering:** kjør hele testsuiten mot begge implementasjonene. Logg en høring gjennom MCP mot Postgres og se den i UI.
+**Gjort.** `db.ts` er en asynkron fasade, `db-sqlite.ts` er den gamle implementasjonen, `db-postgres.ts` er ny. Datalaget måtte bli asynkront — `node:sqlite` er synkron, Supabase er over nettet — og det løftet rippet gjennom `fs-state.ts`, `tools.ts`, `kilde-inntak.ts`, vite-pluginen, skriptene og testene.
+
+Underveis oppdaget jeg at `mcp/` og `scripts/` aldri har vært typesjekket: ingen `tsconfig` inkluderte dem. `tsconfig.mcp.json` er lagt til og referert fra rot-konfigurasjonen.
+
+**Verifisert:** 69/69 tester, 0 typefeil. SQLite-veien gir samme tall som før (4,0 · 8/13 · 14). Postgres-adapteret kobler til, og RLS avviser både lesing og skriving uten innlogging — «new row violates row-level security policy». OR-spørringen bygges som ventet.
+
+**Gjenstår å teste med innlogging:** en full runde skriv/les mot Postgres.
 
 ---
 
-## Del A3 — Innlogging for den lokale MCP-serveren
+## Del A3 — Innlogging for den lokale MCP-serveren ✅ gjort
 
 Serveren må opptre som deg mot Supabase. Publiserbar nøkkel pluss et brukertoken, ikke en secret key — en secret key ville omgått RLS.
 
-`npm run logg-inn` gjør e-post/passord én gang og lagrer sesjonen i `~/mfl-data/session.json`, utenfor repoet. Adapteret fornyer den ved behov.
+**Gjort.** `npm run logg-inn` leser e-post og passord fra din terminal, lagrer bare tokenet i `~/mfl-data/session.json` med rettigheter 600, utenfor repoet. `--ny` oppretter konto, `--ut` glemmer sesjonen, `--hvem` viser hvem du er.
+
+Presedensen i `db.ts` er bevisst: `MFL_DB` satt eksplisitt vinner alltid (det holder testene lokale), så Supabase hvis du er logget inn, ellers SQLite. Nøkler uten innlogging faller tilbake til lokal base med en beskjed — du mister ikke dataene dine av å legge inn en URL.
 
 **Verifisering:** to kontoer mot samme base ser bare sine egne rader.
 

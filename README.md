@@ -23,6 +23,20 @@ npm run dev
 
 For at KI-høringer skal dukke opp i UI uten refresh, må **både** `npm run dev` og MCP-serveren kjøre.
 
+## Supabase
+
+Databasen kan ligge lokalt eller i skyen, bak samme grensesnitt.
+
+```bash
+npm run logg-inn            # e-post og passord, tokenet lagres i ~/mfl-data
+npm run logg-inn -- --hvem  # hvem er jeg
+npm run logg-inn -- --ut    # tilbake til lokal base
+```
+
+Skjemaet ligger i `supabase/migrations/`. Kjør det i SQL Editor før første innlogging.
+
+Rekkefølgen `db.ts` velger etter: `MFL_DB` satt eksplisitt vinner alltid, så Supabase hvis du er logget inn, ellers SQLite. Serveren bruker den publiserbare nøkkelen og ditt eget token — aldri en secret key, som ville omgått RLS.
+
 ## Tilgang
 
 Serveren lytter bare på `127.0.0.1`. Ingen andre på nettverket kommer til, og det er med vilje: databasen inneholder karakterene dine, hva du svarte feil, og hvilke modeller som har hørt deg.
