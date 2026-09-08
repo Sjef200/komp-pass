@@ -216,6 +216,11 @@ export function mflLive(): Plugin {
           offentligJson(res, 200, pluginManifestForOrigin(origin));
           return;
         }
+        // SPA-ruting for samtykkesiden: Supabase sender brukeren hit med
+        // en authorization_id, og Vite ville ellers svart 404.
+        if (req.method === "GET" && url === "/oauth/consent") {
+          req.url = "/";
+        }
         if (url === "/api/tilstand" && req.method === "GET") {
           apiJson(res, 200, await tilstand());
           return;

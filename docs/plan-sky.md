@@ -121,6 +121,12 @@ Verifikatoren må kaste `OAuthError`, ikke en vanlig `Error` — ellers svarer S
 
    **Mulig forbedring:** verifikatoren spør Supabase per forespørsel med `auth.getUser()`. Med JWKS live kan tokenet verifiseres lokalt i stedet, og spare et nettverkskall per MCP-kall. Ikke nødvendig for å komme i gang.
 
+   **Rettelse:** jeg skrev først at de 150 linjene falt bort. Det stemte bare halvveis. Du slipper `/authorize` og `/token`, men Supabase krever at **du** bygger samtykkesiden — den som viser hvem som spør og om hva. Omtrent samme arbeidsmengde, i en annen form.
+
+   `src/components/Samtykke.tsx` er nå bygget. Den leser `authorization_id`, logger deg inn om nødvendig, henter detaljene med `getAuthorizationDetails`, viser klientnavn og scopes på norsk, og kaller `approveAuthorization` eller `denyAuthorization` før den sender deg til `redirect_url`. Ruten `/oauth/consent` serveres av vite-pluginen, og siden står utenfor `StoreProvider` — den skal ikke laste læringstilstand, og kan treffes før du er logget inn.
+
+   **Innstillinger i dashbordet:** Site URL må peke der appen faktisk kjører. `http://localhost:3000` er feil; appen er på `43147`. Autorisasjonssti `/oauth/consent`, og dynamisk registrering på.
+
 **Verifisering til slutt:** koble til fra claude.ai, kall `hent_oversikt`, se samme tall som lokalt.
 
 ---

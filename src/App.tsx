@@ -3,6 +3,7 @@ import { FagordListe } from "./components/Fagord";
 import { Horinger } from "./components/Horinger";
 import { Kilder } from "./components/Kilder";
 import { Laringslop } from "./components/Laringslop";
+import { Samtykke } from "./components/Samtykke";
 import { Oversikt } from "./components/Oversikt";
 import { Promptbibliotek } from "./components/Promptbibliotek";
 import { KompetansemaalListe } from "./components/Kompetansemaal";
@@ -37,6 +38,12 @@ const SIDER: { id: Side; label: string }[] = [
 ];
 
 export default function App() {
+  // Samtykkesiden står utenfor appen: den skal ikke laste læringstilstand,
+  // og den kan treffes før du i det hele tatt er logget inn.
+  if (window.location.pathname === "/oauth/consent") {
+    const id = new URLSearchParams(window.location.search).get("authorization_id");
+    if (id) return <Samtykke authorizationId={id} />;
+  }
   return (
     <StoreProvider>
       <Skall />
