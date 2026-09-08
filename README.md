@@ -45,7 +45,7 @@ Nettsiden og MCP-serveren ligger på samme Cloudflare Worker:
 npm run deploy
 ```
 
-https://mfl-ovingsapp.william-kiautomatisering.workers.dev
+https://learn.aiplanpicker.com
 
 | Sti | Hva |
 |---|---|

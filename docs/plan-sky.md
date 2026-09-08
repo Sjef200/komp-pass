@@ -133,7 +133,7 @@ Verifikatoren må kaste `OAuthError`, ikke en vanlig `Error` — ellers svarer S
 
 ## Del C — Hostet UI og synk ⏳ startet
 
-**Gjort: nettsiden er deployet.** Cloudflare Workers som statisk SPA, `npm run deploy`. https://mfl-ovingsapp.william-kiautomatisering.workers.dev
+**Gjort: nettsiden er deployet.** Cloudflare Workers som statisk SPA, `npm run deploy`. https://learn.aiplanpicker.com
 
 Samtykkesiden virker der nå — den trenger bare Supabase fra nettleseren. Det er den som skal stå i Site URL, i stedet for en localhost-adresse som bare virker mens dev-serveren kjører.
 

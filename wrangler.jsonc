@@ -4,6 +4,7 @@
   "main": "mcp/src/worker.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
 
   // Nettsiden og MCP-serveren på samme domene. Statiske filer serveres av
   // ASSETS; /mcp og OAuth-metadataen går til Workeren.
@@ -20,10 +21,17 @@
     "./db-sqlite.ts": "./mcp/src/db-sqlite-tom.ts"
   },
 
+  "routes": [
+    {
+      "pattern": "learn.aiplanpicker.com",
+      "custom_domain": true
+    }
+  ],
+
   // Den publiserbare nøkkelen er ment å være synlig; RLS beskytter radene.
   "vars": {
     "SUPABASE_URL": "https://fttxneqwowavmxzcscnv.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_OUkDfXoeCu1xwTSk80ND2Q_RIz4ZjHC",
-    "MFL_HTTP_URL": "https://mfl-ovingsapp.william-kiautomatisering.workers.dev"
+    "MFL_HTTP_URL": "https://learn.aiplanpicker.com"
   }
 }
