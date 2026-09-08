@@ -256,7 +256,7 @@ Kilder: `list_kilder`, `sok_kilder`, `hent_kilde`, `finn_belegg`, `list_koblinge
 
 Skriving: `logg_horing` og `oppdater_fagord` krever `fagId`, modell, innsats (`lav` | `medium` | `hoy` | `maks`) og `promptId`. `logg_horing` krever i tillegg `sporsmal` og `svar` — karakteren skal ha beviset med seg. Tema og fagord må tilhøre faget. Høringer er append-only.
 
-Kilder inn: `legg_inn_kilde` for stoff limt inn i chatten. Import: `importer_prompt` med plattform-URL.
+Kilder inn: `legg_inn_kilde` for stoff limt inn i chatten. Import: `importer_prompt` med plattform-URL (bare lokalt — den skriver til disk).
 
 ### Resources
 
@@ -305,7 +305,9 @@ Skills ligger på **denne plattformen**. Samme mønster som Claude: du gir URL-e
 
 Plattform-skills (alle fag): `velg-fag-forst`, `kompetansemaal-mot-kapittel`, `nytt-fagstoff`, `lareplanstyrt-horing`, `muntlig-horing`, `logg-etter-horing`, `fagbytte`.
 
-Fagskill: `markedsforingslaering` (MFL1 og MFL2) med referansene karakterkjennetegn, markedsføringsfaget og markedsundersøkelser. Last opp en `.skill`-zip i fanen Prompter. Scripts og annen kode i pakken ignoreres.
+Fagskill: `markedsforingslaering` (MFL1 og MFL2) med referansene karakterkjennetegn, markedsføringsfaget og markedsundersøkelser.
+
+Skills redigeres i `src/data/skills/`, ikke i appen. De hører til Claude-siden av systemet, og UI-et er for læringen din.
 
 Claude skal starte med fagvalg. Deretter læreplanstyrt høring, ett spørsmål om gangen, og logging med proveniens.
 

@@ -1,10 +1,7 @@
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { byggSkillKatalog, hentSkillsFraUrl, parseSkillMarkdown } from "../../src/lib/skill-import.ts";
-import { erTillattSkillFil, normaliserSkillSti, parseSkillPack, skillGjelderFag } from "../../src/lib/skill-pack.ts";
 import type {
   AiOverlay,
   FagId,
@@ -210,81 +207,7 @@ export async function importerPromptFraUrl(url: string): Promise<Prompt[]> {
   return lesPrompterFraDiskDirekte();
 }
 
-export function pakkUtSkillZip(buffer: Buffer): { path: string; text: string }[] {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "mfl-skill-"));
-  const zipFil = path.join(tmp, "pack.skill");
-  fs.writeFileSync(zipFil, buffer);
-  try {
-    execFileSync("unzip", ["-qq", "-o", zipFil, "-d", tmp], { stdio: "pipe" });
-  } catch {
-    throw new Error("Kunne ikke åpne .skill-pakken. Den må være en zip med SKILL.md.");
-  }
-  const ut: { path: string; text: string }[] = [];
-  function walk(dir: string, rel: string): void {
-    for (const navn of fs.readdirSync(dir)) {
-      const abs = path.join(dir, navn);
-      const nesteRel = rel ? `${rel}/${navn}` : navn;
-      if (nesteRel.includes("..")) continue;
-      const st = fs.statSync(abs);
-      if (st.isDirectory()) {
-        if (navn === "scripts" || navn === "script" || navn === "bin") continue;
-        walk(abs, nesteRel);
-        continue;
-      }
-      if (abs === zipFil) continue;
-      const norm = normaliserSkillSti(nesteRel);
-      if (!erTillattSkillFil(norm)) continue;
-      ut.push({ path: norm, text: fs.readFileSync(abs, "utf8") });
-    }
-  }
-  walk(tmp, "");
-  fs.rmSync(tmp, { recursive: true, force: true });
-  return ut;
-}
 
-export function importerSkillPackFiler(
-  filer: { path: string; text: string }[],
-  kildeUrl = "fil",
-): Skill[] {
-  const parsed = parseSkillPack(filer, {
-    kilde: "plattform",
-    kildeUrl,
-    kategori: "fag",
-  });
-  const indexFil = dataFil("skills", "index.json");
-  const index = fs.existsSync(indexFil)
-    ? lesJson<{ skills: SkillKatalogRad[] }>(indexFil)
-    : { skills: [] };
-  const brukt = new Set(index.skills.map((s) => s.id));
-
-  for (const skill of parsed) {
-    if (brukt.has(skill.id)) continue;
-    brukt.add(skill.id);
-    const mappe = dataFil("skills", skill.id);
-    fs.mkdirSync(path.join(mappe, "references"), { recursive: true });
-    const md = `---\nname: ${JSON.stringify(skill.navn)}\ndescription: ${JSON.stringify(skill.beskrivelse)}\n---\n\n${skill.markdown.trim()}\n`;
-    fs.writeFileSync(path.join(mappe, "SKILL.md"), md, "utf8");
-    const referanser = skill.referanser.map((ref) => {
-      const filnavn = `${ref.id}.md`;
-      fs.writeFileSync(path.join(mappe, "references", filnavn), ref.markdown, "utf8");
-      return { id: ref.id, navn: ref.navn, sti: `${skill.id}/references/${filnavn}` };
-    });
-    index.skills.push({
-      id: skill.id,
-      fil: `${skill.id}/SKILL.md`,
-      navn: skill.navn,
-      beskrivelse: skill.beskrivelse,
-      kilde: "plattform",
-      kildeUrl,
-      importert: skill.importert,
-      fagIds: skill.fagIds,
-      kategori: skill.kategori,
-      referanser,
-    });
-  }
-  atomicWrite(indexFil, `${JSON.stringify(index, null, 2)}\n`);
-  return lesSkillsFraDiskDirekte();
-}
 
 /**
  * Skills og prompter fra disk vinner over bundelen når vi kjører lokalt.
@@ -293,7 +216,7 @@ export function importerSkillPackFiler(
  */
 settKilder({ skills: lesSkillsFraDiskDirekte, prompts: lesPrompterFraDiskDirekte });
 
-export { skillGjelderFag };
+export { skillGjelderFag } from "../../src/lib/fag-utvalg.ts";
 export {
   byggProveniens,
   lastMcpState,

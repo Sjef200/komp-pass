@@ -1,4 +1,4 @@
-import type { AppState, Fag, Fagord, Horing, Kompetansemaal, Tema } from "./types";
+import type { AppState, Fag, FagId, Fagord, Horing, Kompetansemaal, Skill, Tema } from "./types";
 
 export function filtrerFag<T extends { fagId: string }>(
   items: T[],
@@ -27,4 +27,11 @@ export function horingerIFag(state: AppState, fagId = state.innstillinger.aktivt
 
 export function aktivtFag(state: AppState): Fag | undefined {
   return state.fag.find((f) => f.id === state.innstillinger.aktivtFag);
+}
+
+/** En skill uten fagIds gjelder alle fag. Med fagIds gjelder den bare dem. */
+export function skillGjelderFag(skill: Pick<Skill, "fagIds">, fagId?: string): boolean {
+  if (!fagId) return true;
+  if (!skill.fagIds.length) return true;
+  return skill.fagIds.includes(fagId as FagId);
 }

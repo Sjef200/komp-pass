@@ -7,9 +7,8 @@ import {
 } from "../../src/lib/dekning.ts";
 import { grupperKapittel, kapittelNavn } from "../../src/lib/kapittel.ts";
 import { nesteTemaer } from "../../src/lib/planlegging.ts";
-import { fagordIFag, horingerIFag, maalIFag, temaerIFag } from "../../src/lib/fag-utvalg.ts";
+import { fagordIFag, horingerIFag, maalIFag, skillGjelderFag, temaerIFag } from "../../src/lib/fag-utvalg.ts";
 import { krevFag, krevTemaIFag } from "../../src/lib/fag-validering.ts";
-import { skillGjelderFag } from "../../src/lib/skill-pack.ts";
 import type { AppState, FagId, FagordStatus, Karakter, Skill } from "../../src/lib/types.ts";
 import {
   bekreftedeKoblinger,

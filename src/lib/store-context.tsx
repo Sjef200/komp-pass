@@ -54,8 +54,6 @@ type StoreApi = {
   setInnstillinger: (patch: Partial<Innstillinger>) => void;
   importer: (raw: unknown) => Promise<void>;
   eksporter: () => AppState;
-  settPromptsFraDisk: (prompts: Prompt[]) => void;
-  settBibliotekFraDisk: (prompts: Prompt[], skills?: Skill[]) => void;
   /** Satt når databasen ikke svarer. Da er ingenting lagret. */
   lagringsfeil: string | null;
   /** Læringsdata som fortsatt ligger i nettleseren og ikke i databasen. */
@@ -297,17 +295,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [lagre, state.temaer],
   );
 
-  const settPromptsFraDisk = useCallback(
-    (prompts: Prompt[]) => byggPaNytt({ ...aiOverlay, prompts }),
-    [aiOverlay, byggPaNytt],
-  );
-
-  const settBibliotekFraDisk = useCallback(
-    (prompts: Prompt[], nyeSkills?: Skill[]) =>
-      byggPaNytt({ ...aiOverlay, prompts }, nyeSkills),
-    [aiOverlay, byggPaNytt],
-  );
-
   const loggUt = useCallback(async () => {
     if (harSupabase()) await supabase().auth.signOut();
     setInnlogget(null);
@@ -327,8 +314,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setInnstillinger,
       importer,
       eksporter,
-      settPromptsFraDisk,
-      settBibliotekFraDisk,
       lagringsfeil,
       umigrert,
       koblingTekster,
@@ -345,8 +330,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setInnstillinger,
       importer,
       eksporter,
-      settPromptsFraDisk,
-      settBibliotekFraDisk,
       lagringsfeil,
       umigrert,
       koblingTekster,

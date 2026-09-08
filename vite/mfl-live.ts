@@ -5,13 +5,10 @@ import { lesChunk, lesHendelser, lesKilder, sisteSeq } from "../mcp/src/db.ts";
 import { erHendelse, foldKoblinger, type Hendelse } from "../src/lib/hendelser.ts";
 import { tidsstempel } from "../src/lib/kilder.ts";
 import {
-  importerPromptFraUrl,
-  importerSkillPackFiler,
   lesPrompterFraDisk,
   lesSkillMarkdown,
   lesSkillsFraDisk,
   lesUdirMeta,
-  pakkUtSkillZip,
   pluginManifestForOrigin,
   repoRot,
   skillKatalogForOrigin,
@@ -256,40 +253,6 @@ export function mflLive(): Plugin {
         }
         if (url === "/api/udir-meta" && req.method === "GET") {
           apiJson(res, 200, lesUdirMeta());
-          return;
-        }
-        if (url === "/api/hent-skill" && req.method === "POST") {
-          try {
-            const raw = (await lesBody(req)).toString("utf8");
-            const { url: kilde } = JSON.parse(raw) as { url?: string };
-            if (!kilde) {
-              apiJson(res, 400, { error: "Lim inn URL-en til plattformen. Vi henter /skills." });
-              return;
-            }
-            const prompts = await importerPromptFraUrl(kilde);
-            sendLive(server);
-            apiJson(res, 200, { prompts, skills: lesSkillsFraDisk() });
-          } catch (e) {
-            const melding = e instanceof Error ? e.message : "Kunne ikke hente.";
-            apiJson(res, 400, { error: melding });
-          }
-          return;
-        }
-        if (url === "/api/importer-skill-fil" && req.method === "POST") {
-          try {
-            const buf = await lesBody(req);
-            if (!buf.length) {
-              apiJson(res, 400, { error: "Last opp en .skill-fil (zip med SKILL.md)." });
-              return;
-            }
-            const filer = pakkUtSkillZip(buf);
-            const skills = importerSkillPackFiler(filer, "fil");
-            sendLive(server);
-            apiJson(res, 200, { skills, prompts: lesPrompterFraDisk() });
-          } catch (e) {
-            const melding = e instanceof Error ? e.message : "Kunne ikke importere .skill-filen.";
-            apiJson(res, 400, { error: melding });
-          }
           return;
         }
         next();

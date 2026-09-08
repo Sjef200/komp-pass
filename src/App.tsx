@@ -6,7 +6,6 @@ import { Laringslop } from "./components/Laringslop";
 import { Samtykke } from "./components/Samtykke";
 import { Innlogging } from "./components/Innlogging";
 import { Oversikt } from "./components/Oversikt";
-import { Promptbibliotek } from "./components/Promptbibliotek";
 import { KompetansemaalListe } from "./components/Kompetansemaal";
 import { Temaer } from "./components/Temaer";
 import { Utvikling } from "./components/Utvikling";
@@ -22,7 +21,6 @@ type Side =
   | "fagord"
   | "kilder"
   | "laringslop"
-  | "prompter"
   | "horinger"
   | "utvikling";
 
@@ -33,7 +31,6 @@ const SIDER: { id: Side; label: string }[] = [
   { id: "fagord", label: "Fagord" },
   { id: "kilder", label: "Kilder" },
   { id: "laringslop", label: "Læringsløp" },
-  { id: "prompter", label: "Prompter" },
   { id: "horinger", label: "Høringer" },
   { id: "utvikling", label: "Utvikling" },
 ];
@@ -60,7 +57,6 @@ function Skall() {
     setInnstillinger,
     importer,
     eksporter,
-    settBibliotekFraDisk,
     lagringsfeil,
     umigrert,
     koblingTekster,
@@ -311,14 +307,6 @@ function Skall() {
         )}
         {side === "laringslop" && (
           <Laringslop key={state.innstillinger.aktivtFag} state={state} />
-        )}
-        {side === "prompter" && (
-          <Promptbibliotek
-            prompts={state.prompts}
-            skills={state.skills}
-            fag={state.fag}
-            onImportert={settBibliotekFraDisk}
-          />
         )}
         {side === "horinger" && (
           <Horinger
