@@ -73,19 +73,36 @@ Presedensen i `db.ts` er bevisst: `MFL_DB` satt eksplisitt vinner alltid (det ho
 
 ---
 
-## Del B — HTTP-transport med auth
+## Del B — HTTP-transport med auth ⏳ halvveis
 
 Dette er delen som gir deg «overalt».
 
-`mcp/src/http.ts` pakker samme `createServer()` med `createMcpHandler` og `requireBearerAuth`. Deployes på en offentlig HTTPS-URL — Vercel, Fly eller Supabase Edge Functions.
+**Gjort: selve transporten.** `mcp/src/http.ts` pakker samme `createServer()` med `createMcpHandler`, verifiserer bearer-tokenet mot Supabase, og eksponerer OAuth-metadataen klienten trenger. `mcp/src/http-server.ts` kjører den lokalt med `npm run mcp:http`.
 
-Stdio blir stående ved siden av. Samme server, to inngangsdører.
+`server.ts` er delt: `server-def.ts` holder definisjonen med alle 25 verktøyene, `server.ts` er stdio-inngangen. Samme server, to dører.
 
-Så legges URL-en inn som custom connector på claude.ai. Da har du læreplanen, temaene, karakterene og køen i nettleseren og på telefonen.
+**Brukerkontekst per forespørsel.** Over stdio er det alltid deg, men en HTTP-server har mange brukere samtidig. `bruker-kontekst.ts` bærer tokenet gjennom `AsyncLocalStorage`, og `db-postgres.ts` har én klient per token. Uten det ville én brukers klient svart på en annens kall, og RLS ville beskyttet feil person.
 
-**Den reelle vanskeligheten** er OAuth-flyten mot claude.ai. SDK-en har byggeklossene, men oppsettet må stemme, og det er her tiden går.
+**Verifisert lokalt:**
 
-**Verifisering:** koble til fra claude.ai, kall `hent_oversikt`, se samme tall som lokalt.
+```
+/helse                          200
+/.well-known/oauth-protected-resource
+                                peker på Supabase som autorisasjonsserver
+uten token                      401 + WWW-Authenticate med resource_metadata
+ugyldig token                   401, Supabase avviste signaturen
+stdio etter splitten            25 verktøy, uendret
+```
+
+Verifikatoren må kaste `OAuthError`, ikke en vanlig `Error` — ellers svarer SDK-en 500 i stedet for 401 med utfordringen klienten trenger for å starte innloggingen. Det tok den første testrunden å oppdage.
+
+**Gjenstår:**
+
+1. **Gyldig token ende til ende.** Krever en innlogget bruker. `npm run logg-inn`, så en runde `tools/list` og `hent_oversikt` mot Postgres.
+2. **Deploy til en offentlig HTTPS-URL.** Vercel, Fly eller Supabase Edge Functions. `MFL_HTTP_URL` må være URL-en klienten ser, siden den går inn i metadataen.
+3. **OAuth-flyten mot claude.ai.** Connectors støtter OAuth med klient-ID og hemmelighet, ikke statiske tokens. Supabase Auth må enten fungere som autorisasjonsserver, eller så må serveren tilby et minimalt `/authorize` og `/token` som logger inn mot Supabase. Dette er den reelle gjenstående vanskeligheten.
+
+**Verifisering til slutt:** koble til fra claude.ai, kall `hent_oversikt`, se samme tall som lokalt.
 
 ---
 

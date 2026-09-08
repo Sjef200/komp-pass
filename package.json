@@ -16,7 +16,8 @@
     "transkriber": "tsx scripts/transkriber.ts",
     "indekser": "tsx scripts/indekser-kilde.ts",
     "bygg:plugin": "tsx scripts/bygg-plugin.ts",
-    "logg-inn": "tsx scripts/logg-inn.ts"
+    "logg-inn": "tsx scripts/logg-inn.ts",
+    "mcp:http": "tsx mcp/src/http-server.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",

@@ -37,6 +37,21 @@ Skjemaet ligger i `supabase/migrations/`. Kjør det i SQL Editor før første in
 
 Rekkefølgen `db.ts` velger etter: `MFL_DB` satt eksplisitt vinner alltid, så Supabase hvis du er logget inn, ellers SQLite. Serveren bruker den publiserbare nøkkelen og ditt eget token — aldri en secret key, som ville omgått RLS.
 
+## MCP over HTTP
+
+Samme server, to inngangsdører. Stdio for Claude Desktop og Claude Code, HTTP for claude.ai — web støtter ikke lokale stdio-servere.
+
+```bash
+npm run mcp:http                                    # localhost:8787
+MFL_HTTP_URL=https://din-url npm run mcp:http       # bak en tunnel
+```
+
+Tokenet i `Authorization` er ditt eget Supabase-token, og det følger forespørselen helt ned til Postgres. RLS gjør resten: to brukere mot samme server ser hver sine rader.
+
+`/.well-known/oauth-protected-resource` forteller klienten hvor den skal logge inn. Uten gyldig token svarer serveren 401 med utfordringen som starter flyten.
+
+Ikke deployet ennå — se `docs/plan-sky.md`.
+
 ## Tilgang
 
 Serveren lytter bare på `127.0.0.1`. Ingen andre på nettverket kommer til, og det er med vilje: databasen inneholder karakterene dine, hva du svarte feil, og hvilke modeller som har hørt deg.

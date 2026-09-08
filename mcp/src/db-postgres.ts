@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Hendelse } from "../../src/lib/hendelser.ts";
 import { sokeord, type Chunk, type Kildedokument } from "../../src/lib/kilder.ts";
 import type { ChunkRad, Lager, Treff } from "./db-typer.ts";
+import { aktivBruker } from "./bruker-kontekst.ts";
 import { lesSesjon } from "./sesjon.ts";
 
 /**
@@ -14,10 +15,9 @@ import { lesSesjon } from "./sesjon.ts";
  * former som SQLite-veien gir.
  */
 
-let klient: SupabaseClient | null = null;
+const klienter = new Map<string, SupabaseClient>();
 
-export function hentKlient(): SupabaseClient {
-  if (klient) return klient;
+function oppsett(): { url: string; nokkel: string } {
   const url = process.env.SUPABASE_URL?.trim();
   const nokkel = process.env.SUPABASE_PUBLISHABLE_KEY?.trim();
   if (!url || !nokkel) {
@@ -25,19 +25,31 @@ export function hentKlient(): SupabaseClient {
       "SUPABASE_URL og SUPABASE_PUBLISHABLE_KEY mangler. Sett dem i .env.local.",
     );
   }
-  const sesjon = lesSesjon();
-  klient = createClient(url, nokkel, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: sesjon
-      ? { headers: { Authorization: `Bearer ${sesjon.access_token}` } }
-      : {},
-  });
-  return klient;
+  return { url, nokkel };
 }
 
-/** Tvinger ny klient neste gang, for eksempel etter innlogging. */
+/**
+ * Én klient per token. Over HTTP er tokenet forespørselens, over stdio er
+ * det sesjonsfilas. Klientene bufres, men aldri på tvers av brukere.
+ */
+export function hentKlient(): SupabaseClient {
+  const { url, nokkel } = oppsett();
+  const token = aktivBruker()?.token ?? lesSesjon()?.access_token ?? "";
+  const bufret = klienter.get(token);
+  if (bufret) return bufret;
+
+  const ny = createClient(url, nokkel, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+  });
+  if (klienter.size > 32) klienter.clear();
+  klienter.set(token, ny);
+  return ny;
+}
+
+/** Tvinger nye klienter, for eksempel etter innlogging. */
 export function glemKlient(): void {
-  klient = null;
+  klienter.clear();
 }
 
 function krev<T>(data: T | null, feil: { message: string } | null, hva: string): T {
