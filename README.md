@@ -51,7 +51,7 @@ https://learn.aiplanpicker.com
 |---|---|
 | `/` og `/oauth/consent` | Nettsiden, statiske filer fra `dist` |
 | `/mcp` | MCP over HTTP — dette er URL-en claude.ai kobler til |
-| `/.well-known/oauth-protected-resource` | Peker på Supabase som autorisasjonsserver |
+| `/.well-known/oauth-protected-resource/mcp` | OAuth-metadata for MCP-endepunktet (resource = `/mcp`) |
 | `/helse` | Livstegn |
 
 Samme domene for samtykkesiden og endepunktet er med vilje.
@@ -88,12 +88,12 @@ Samme server, to inngangsdører. Stdio for Claude Desktop og Claude Code, HTTP f
 
 ```bash
 npm run mcp:http                                    # localhost:8787
-MFL_HTTP_URL=https://din-url npm run mcp:http       # bak en tunnel
+MFL_HTTP_URL=https://din-url/mcp npm run mcp:http   # bak en tunnel
 ```
 
 Tokenet i `Authorization` er ditt eget Supabase-token, og det følger forespørselen helt ned til Postgres. RLS gjør resten: to brukere mot samme server ser hver sine rader.
 
-`/.well-known/oauth-protected-resource` forteller klienten hvor den skal logge inn. Uten gyldig token svarer serveren 401 med utfordringen som starter flyten.
+`/.well-known/oauth-protected-resource/mcp` forteller klienten hvor den skal logge inn. Uten gyldig token svarer serveren 401 med utfordringen som starter flyten.
 
 Ikke deployet ennå — se `docs/plan-sky.md`.
 

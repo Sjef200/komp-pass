@@ -5,14 +5,14 @@ import { lagFetchHandler } from "./http.ts";
  * Kjører HTTP-transporten lokalt, så den kan testes før den deployes.
  *
  *   npm run mcp:http
- *   MFL_HTTP_PORT=8787 MFL_HTTP_URL=https://mfl.example.com npm run mcp:http
+ *   MFL_HTTP_PORT=8787 MFL_HTTP_URL=https://mfl.example.com/mcp npm run mcp:http
  *
- * MFL_HTTP_URL må være den URL-en klienten ser, siden den går inn i
- * OAuth-metadataen. Bak en tunnel eller proxy er det ikke localhost.
+ * MFL_HTTP_URL må være MCP-URL-en klienten ser (inkl. /mcp), siden den går
+ * inn i OAuth-metadataen. Bak en tunnel eller proxy er det ikke localhost.
  */
 
 const port = Number(process.env.MFL_HTTP_PORT ?? 8787);
-const serverUrl = new URL(process.env.MFL_HTTP_URL ?? `http://localhost:${port}`);
+const serverUrl = new URL(process.env.MFL_HTTP_URL ?? `http://localhost:${port}/mcp`);
 
 const mcp = lagFetchHandler({ serverUrl });
 
@@ -65,7 +65,9 @@ const http = createHttpServer((req, res) => {
 http.listen(port, "127.0.0.1", () => {
   console.log(`mfl MCP over HTTP: http://127.0.0.1:${port}`);
   console.log(`  klienten ser:   ${serverUrl.href}`);
-  console.log(`  metadata:       ${serverUrl.origin}/.well-known/oauth-protected-resource`);
+  console.log(
+    `  metadata:       ${serverUrl.origin}/.well-known/oauth-protected-resource${serverUrl.pathname === "/" ? "" : serverUrl.pathname.replace(/\/$/, "")}`,
+  );
   console.log(`\nBind til loopback med vilje. Skal den nås utenfra, sett en tunnel foran.`);
 });
 

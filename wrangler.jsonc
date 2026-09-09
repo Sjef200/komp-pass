@@ -32,6 +32,6 @@
   "vars": {
     "SUPABASE_URL": "https://fttxneqwowavmxzcscnv.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_OUkDfXoeCu1xwTSk80ND2Q_RIz4ZjHC",
-    "MFL_HTTP_URL": "https://learn.aiplanpicker.com"
+    "MFL_HTTP_URL": "https://learn.aiplanpicker.com/mcp"
   }
 }

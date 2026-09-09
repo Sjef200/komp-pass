@@ -42,7 +42,7 @@ export default {
 
     speilEnv(env);
     handler ??= lagFetchHandler({
-      serverUrl: new URL(env.MFL_HTTP_URL ?? new URL(request.url).origin),
+      serverUrl: new URL(env.MFL_HTTP_URL ?? `${new URL(request.url).origin}/mcp`),
     });
 
     // aktivBruker settes av http.ts inne i medBruker; her er den alltid tom.

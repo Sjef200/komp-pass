@@ -6,8 +6,10 @@ import {
   getOAuthProtectedResourceMetadataUrl,
   OAuthError,
   OAuthErrorCode,
+  oauthMetadataResponse,
   requireBearerAuth,
   type AuthInfo,
+  type OAuthMetadata,
   type OAuthTokenVerifier,
 } from "@modelcontextprotocol/server";
 import { medBruker } from "./bruker-kontekst.ts";
@@ -31,6 +33,19 @@ function supabaseUrl(): string {
   return url;
 }
 
+/** Les `exp` fra JWT-payload uten å stole på signaturen (Supabase har allerede sjekket). */
+function jwtExpiresAt(token: string): number | undefined {
+  const del = token.split(".");
+  if (del.length < 2) return undefined;
+  try {
+    const json = atob(del[1].replace(/-/g, "+").replace(/_/g, "/"));
+    const payload = JSON.parse(json) as { exp?: unknown };
+    return typeof payload.exp === "number" ? payload.exp : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Verifiserer tokenet ved å spørre Supabase hvem det tilhører. Supabase
  * sjekker signatur og utløp; vi stoler ikke på innholdet selv.
@@ -50,10 +65,15 @@ export function supabaseVerifier(): OAuthTokenVerifier {
           error?.message ?? "Tokenet er ukjent eller utløpt.",
         );
       }
+      const expiresAt = jwtExpiresAt(token);
+      if (expiresAt == null) {
+        throw new OAuthError(OAuthErrorCode.InvalidToken, "Tokenet mangler utløpstid.");
+      }
       return {
         token,
         clientId: data.user.id,
         scopes: ["openid", "email"],
+        expiresAt,
         extra: { epost: data.user.email },
       };
     },
@@ -77,29 +97,36 @@ export function lagFetchHandler(opts: HttpOpts) {
   // ikke på prosjektroten. Endepunktene er hentet fra prosjektets egen
   // openid-configuration, ikke gjettet.
   const as = `${supabaseUrl()}/auth/v1`;
-  const metadata = buildOAuthProtectedResourceMetadata({
-    oauthMetadata: {
-      issuer: as,
-      authorization_endpoint: `${as}/oauth/authorize`,
-      token_endpoint: `${as}/oauth/token`,
-      registration_endpoint: `${as}/oauth/clients/register`,
-      response_types_supported: ["code"],
-      grant_types_supported: ["authorization_code", "refresh_token"],
-      code_challenge_methods_supported: ["S256"],
-      token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post", "none"],
-    },
+  const oauthMetadata: OAuthMetadata = {
+    issuer: as,
+    authorization_endpoint: `${as}/oauth/authorize`,
+    token_endpoint: `${as}/oauth/token`,
+    registration_endpoint: `${as}/oauth/clients/register`,
+    response_types_supported: ["code"],
+    grant_types_supported: ["authorization_code", "refresh_token"],
+    code_challenge_methods_supported: ["S256"],
+    token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post", "none"],
+  };
+  const metaOpts = {
+    oauthMetadata,
     resourceServerUrl: opts.serverUrl,
     resourceName: "MFL øvingsapp",
     scopesSupported: ["openid", "email", "offline_access"],
-  });
+  };
+  const metadata = buildOAuthProtectedResourceMetadata(metaOpts);
 
   return {
     close: () => handler.close(),
     async fetch(request: Request): Promise<Response> {
       const url = new URL(request.url);
 
+      // Path-aware PRM (…/oauth-protected-resource/mcp) + AS-metadata på RS-origin.
+      const oauthDoc = oauthMetadataResponse(request, metaOpts);
+      if (oauthDoc) return oauthDoc;
+
+      // Bakoverkompatibel rot-PRM for klienter som fortsatt leser den gamle URL-en.
       if (url.pathname === "/.well-known/oauth-protected-resource") {
-        return Response.json(metadata);
+        return Response.json(metadata, { headers: { "Access-Control-Allow-Origin": "*" } });
       }
       if (url.pathname === "/helse") {
         return Response.json({ ok: true, tjeneste: "mfl", tid: new Date().toISOString() });
