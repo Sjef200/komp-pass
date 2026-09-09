@@ -52,6 +52,8 @@ const maal: Kompetansemaal[] = [
 const horinger: Horing[] = [
   {
     id: "h-1",
+    hjelp: "ingen",
+    maalIds: ["male1-04"],
     temaId: "def",
     dato: "2026-09-01",
     karakter: 5,
@@ -74,6 +76,7 @@ test("kompetansemål dekkes av temaer, ikke av at kapittelet finnes", () => {
   const pris = maalDekning(maal[2]!, temaer, horinger);
   assert.equal(undersokelse.totaltTemaer, 2);
   assert.equal(undersokelse.status, "sterk");
+  assert.equal(undersokelse.delvis, true);
   assert.equal(pris.totaltTemaer, 0);
   assert.equal(pris.status, "udekket");
 });

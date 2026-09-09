@@ -61,11 +61,16 @@ export type Tema = {
   navn: string;
   emoji: string;
   maalIds: string[];
+  foreslatteMaalIds?: string[];
   kapittel?: string;
 };
 
 /** Læreverkets kapittel. Ikke det samme som et kompetansemål. */
 export type Kapittel = {
+  bokId?: string;
+  bokTittel?: string;
+  utgave?: string;
+  underpunkter?: Array<{ id: string; navn: string; side?: number }>;
   id: string;
   fagId: string;
   nummer: number;
@@ -86,6 +91,9 @@ export type AiProveniens = {
 };
 
 export type Horing = {
+  forsokId?: string;
+  hjelp?: import("./laering").Hjelp;
+  arbeidsmate?: import("./laering").Arbeidsmate;
   id: string;
   temaId: string;
   dato: string;
@@ -175,6 +183,7 @@ export type PromptKatalogRad = {
 export type Innstillinger = {
   aktivtFag: string;
   visEmoji: boolean;
+  bokValg?: Record<string, { kapittelId: string; plass: string }>;
 };
 
 export type AiOverlay = {

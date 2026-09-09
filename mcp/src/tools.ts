@@ -1,3 +1,5 @@
+import { foldForsok, gjeldendeNotat, innholdIFag, notatHistorikk, oppgaver, underpunkter, synligVurdering, framgang, stabileId } from "../../src/lib/laering.ts";
+import { ovingKo } from "../../src/lib/oving-ko.ts";
 import {
   formatSnitt,
   maalDekning,
@@ -17,7 +19,6 @@ import {
   type KapittelNotat,
   type KapittelVedlegg,
   type KoblingForeslatt,
-  type OvingBesvart,
   type OvingLagtInn,
 } from "../../src/lib/hendelser.ts";
 import {
@@ -45,6 +46,7 @@ import {
   lesSkillsFraDisk,
   lesUdirMeta,
   loggHoring,
+  skrivHendelserFraKlient,
   oppdaterFagord,
 } from "./state.ts";
 
@@ -132,6 +134,8 @@ export async function hentOversikt(fagId?: string) {
     const snitt = snittSisteKarakter(temaer, state.horinger);
     return jsonText({
       fagId: fag.id,
+      framgang: framgang(state, id),
+      kartlegging: "Ufullstendig innholdskartlegging. Snitt er oppgavevurderinger, ikke eksamenskarakter.",
       fag: { id: fag.id, navn: fag.navn, kode: fag.kode, laereplanKode: fag.laereplanKode ?? null },
       snittkarakter: formatSnitt(snitt),
       temaerHort: `${horte.length}/${temaer.length}`,
@@ -143,6 +147,8 @@ export async function hentOversikt(fagId?: string) {
           kortnavn: m.kortnavn,
           udirKode: m.udirKode ?? null,
           status: d.status,
+          delvisVurdert: d.delvis,
+          vurderteTemaer: d.horteTemaer,
           snitt: formatSnitt(d.snitt),
           temaer: d.totaltTemaer,
         };
@@ -880,6 +886,13 @@ export async function hentKapittel(fagId: string | undefined, kapittelId: string
         oving: kapittelOvingTittel(kapittel),
         seksjoner: kapittel.seksjoner,
       },
+      underpunkter: underpunkter(kapittel),
+      notater: ["kapittel", "min-oppsummering", ...underpunkter(kapittel).map(s => s.id)].map(plass => ({ plass, gjeldende: gjeldendeNotat(state, kapittel.id, plass) ?? null, historikk: notatHistorikk(state, kapittel.id, plass) })),
+      kommentarer: state.hendelser.filter(h => h.type === "notat-kommentar" && h.kapittelId === kapittel.id),
+      oppsummering: innholdIFag(state, id).filter(h => h.innhold.kapittel.id === kapittel.id && h.innhold.oppsummering).at(-1)?.innhold.oppsummering ?? null,
+      oppgaver: oppgaver(state, kapittel.id),
+      forsok: foldForsok(state.hendelser).filter(f => f.kapittelId === kapittel.id).map(f => ({ ...f, vurderinger: synligVurdering(f, state.hendelser) ? f.vurderinger : [] })),
+      framgang: framgang(state, id),
       notat: arbeid.gjeldendeNotat
         ? {
             notatId: arbeid.gjeldendeNotat.notatId,
@@ -1025,11 +1038,15 @@ export async function leggInnOving(args: {
   });
 }
 
-export async function nesteOving(fagId: string | undefined, kapittelId: string) {
+export async function nesteOving(fagId: string | undefined, kapittelId: string, repetisjon = false, oktId?: string) {
   return wrap(async () => {
     const { state, fagId: id } = await medFag(fagId);
     const kapittel = krevKapittelIFag(state, id as FagId, kapittelId);
     const arbeid = kapittelArbeid(state.hendelser, state.horinger, kapittel.id);
+    const ko = ovingKo(state, id, { kapittelId, repetisjon, oktId });
+    if (repetisjon || foldForsok(state.hendelser).some(f => f.kapittelId === kapittelId) || oppgaver(state, kapittelId).some(o => !arbeid.ovinger.some(x => x.ovingId === o.id))) {
+      return jsonText({ fagId: id, kapittelId, ferdig: ko.length === 0, oving: ko[0] ? { ...ko[0].oppgave, ovingId: ko[0].oppgave.id } : null, ko, merknad: "Lagre med logg_forsok og vurder_forsok. Registrer hjelp. Hent kildegrunnlaget før vurdering." });
+    }
     const neste = nesteUbesvarteOving(arbeid.ovinger);
     const temaer = temaerIKapittel(kapittel, temaerIFag(state, id));
     if (arbeid.ovinger.length === 0) {
@@ -1090,27 +1107,19 @@ export async function loggOving(args: {
     if (args.temaId) krevTemaIFag(state, id as FagId, args.temaId);
     const karakter =
       args.karakter != null ? (args.karakter as Karakter) : undefined;
-    const hendelse: OvingBesvart = {
-      id: nyId("k-osvar"),
-      type: "oving-besvart",
-      tid: new Date().toISOString(),
-      fagId: id,
-      kilde: "ai",
-      kapittelId: args.kapittelId,
-      ovingId: args.ovingId,
-      svar,
-      ...(karakter != null ? { karakter } : {}),
-      ...(args.riktig?.trim() ? { riktig: args.riktig.trim() } : {}),
-      ...(args.mangler?.trim() ? { mangler: args.mangler.trim() } : {}),
-      ...(args.temaId ? { temaId: args.temaId } : {}),
-    };
-    await skrivHendelse(hendelse);
+    const forsokId = `legacy-${stabileId(JSON.stringify([id, args.ovingId, oving.tekst.trim(), svar, new Date().toISOString().slice(0, 10)]))}`;
+    if (args.temaId && karakter != null) {
+      await loggHoring({ fagId: id, temaId: args.temaId, karakter, sporsmal: oving.tekst, svar, riktig: args.riktig ?? "", mangler: args.mangler ?? "", ovingId: args.ovingId, kapittelId: args.kapittelId, modell: "Ukjent AI (eldre verktøy)", innsats: "medium", promptId: "kapittelarbeid" });
+    } else if (!foldForsok(state.hendelser).some(f => f.id === forsokId)) {
+      await skrivHendelserFraKlient([{ id: `forsok:${forsokId}`, tid: new Date().toISOString(), fagId: id, kilde: "ai", type: "forsok-lagret",
+        forsok: { id: forsokId, fagId: id, oppgaveId: args.ovingId, kapittelId: args.kapittelId, sporsmal: oving.tekst, svar, arbeidsmate: "laering", hjelp: "ukjent", referanser: [] } }]);
+    }
     return jsonText({
       fagId: id,
       kapittelId: args.kapittelId,
       ovingId: args.ovingId,
       merknad: args.temaId
-        ? "Besvarelsen er lagret. Logg også høring med logg_horing (samme ovingId og kapittelId) når temaet er hørt."
+        ? "Besvarelsen er lagret som ett forsøk. Bruk vurder_forsok for videre vurdering."
         : "Besvarelsen er lagret. Kapittelet har kanskje ingen temaer ennå — da teller dette ikke mot kompetansemål.",
     });
   });

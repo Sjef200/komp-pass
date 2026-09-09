@@ -1,7 +1,8 @@
+import { foldForsok, stabileId } from "../../src/lib/laering.ts";
+import { hendelseInnhold, validerLaeringsHendelse } from "../../src/lib/laering-validering.ts";
 import { mergeTreLag } from "../../src/lib/ai-overlay.ts";
 import {
   fagordHistorikk,
-  horingTilHendelse,
   type FagordObservert,
   type Hendelse,
 } from "../../src/lib/hendelser.ts";
@@ -231,8 +232,24 @@ export async function loggHoring(input: {
     kilde: "ai",
     ai,
   };
-  await skrivHendelse(horingTilHendelse(horing, fag.id));
-  return horing;
+  const forsokId = `legacy-${stabileId(JSON.stringify([fag.id, input.ovingId ?? "", input.sporsmal.trim(), input.svar.trim(), (input.dato ?? new Date().toISOString()).slice(0, 10)]))}`;
+  const eksisterende = foldForsok(state.hendelser).find(f => f.id === forsokId);
+  if (!eksisterende) await skrivHendelserFraKlient([{
+    id: `forsok:${forsokId}`, tid: input.dato ?? new Date().toISOString(), fagId: fag.id, kilde: "ai", type: "forsok-lagret",
+    forsok: { id: forsokId, fagId: fag.id, oppgaveId: input.ovingId, kapittelId: input.kapittelId,
+      sporsmal: input.sporsmal.trim(), svar: input.svar.trim(), arbeidsmate: "laering", hjelp: "ukjent", referanser: [] },
+  }]);
+  const vurderingId = `legacy-v-${stabileId(JSON.stringify([forsokId, input.karakter, input.riktig, input.mangler, input.modell, input.promptId, maalIds]))}`;
+  if (!eksisterende?.vurderinger.some(v => v.id === vurderingId)) await skrivHendelserFraKlient([{
+    id: `vurdering:${vurderingId}`, tid: new Date().toISOString(), fagId: fag.id, kilde: "ai", type: "forsok-vurdert",
+    vurdering: { id: vurderingId, forsokId, riktig: input.riktig, mangler: input.mangler,
+      nesteSteg: input.mangler || "Prøv oppgaven selvstendig i en ny økt.", karakter: input.karakter,
+      begrunnelse: "Vurdering fra eldre loggeverktøy. Hjelp er ikke registrert.", modell: input.modell,
+      skillId: input.promptId, kriterieversjon: "legacy-ukjent", erstatter: eksisterende?.vurderinger.at(-1)?.id,
+      modellsvar: input.modellsvar, maal: maalIds.map(maalId => ({ temaId: input.temaId, maalId, karakter: input.karakter, begrunnelse: input.riktig || input.mangler || "Vurdert i eldre høring." })),
+    },
+  }]);
+  return { ...horing, forsokId, hjelp: "ukjent", arbeidsmate: "laering" };
 }
 
 export async function oppdaterFagord(input: {
@@ -278,7 +295,19 @@ export async function lesFagordHistorikk(fagordId: string): Promise<FagordObserv
 
 export async function skrivHendelserFraKlient(hendelser: Hendelse[]): Promise<Hendelse[]> {
   const ut: Hendelse[] = [];
-  for (const h of hendelser) ut.push(await skrivHendelse(h));
+  for (const h of hendelser) {
+    const state = await lastMcpState();
+    const gammel = state.hendelser.find(x => x.id === h.id);
+    const payload = hendelseInnhold;
+    if (gammel) {
+      if (payload(gammel) !== payload(h)) throw new Error("ID-en finnes med et annet innhold. Bruk en ny ID for et nytt forsøk.");
+      ut.push(gammel); continue;
+    }
+    validerLaeringsHendelse(state, h);
+    const lagret = await skrivHendelse(h);
+    if (payload(lagret) !== payload(h)) throw new Error("Samtidig skriving brukte samme ID med annet innhold.");
+    ut.push(lagret);
+  }
   return ut;
 }
 

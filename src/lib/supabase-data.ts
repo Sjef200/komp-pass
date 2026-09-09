@@ -35,27 +35,36 @@ function tidsstempel(sekunder: number): string {
   return t > 0 ? `${t}:${to(m)}:${to(s % 60)}` : `${m}:${to(s % 60)}`;
 }
 
-export async function lesTilstand(): Promise<SkyTilstand> {
+export async function lesTilstand(tidligere?: SkyTilstand): Promise<SkyTilstand> {
   const db = supabase();
 
-  const [hendelseSvar, kildeSvar] = await Promise.all([
-    db.from("hendelse").select("seq, data").order("tid").order("seq"),
-    db.from("kilde").select(KILDE_FELT).order("dato", { ascending: false }),
-  ]);
-  if (hendelseSvar.error) throw new Error(hendelseSvar.error.message);
-  if (kildeSvar.error) throw new Error(kildeSvar.error.message);
-
-  const hendelser = ((hendelseSvar.data ?? []) as HendelseRad[]).map(radTilHendelse);
+  const nye: Hendelse[] = [];
+  let cursor = Math.max(0, ...(tidligere?.hendelser ?? []).map(h => h.seq ?? 0));
+  while (true) {
+    const { data, error } = await db.from("hendelse").select("seq, data").gt("seq", cursor).order("seq").limit(500);
+    if (error) throw new Error(error.message);
+    const side = ((data ?? []) as HendelseRad[]).map(radTilHendelse);
+    nye.push(...side);
+    if (side.length < 500) break;
+    cursor = side.at(-1)!.seq!;
+  }
+  const kildeRader: KildeRad[] = [];
+  for (let fra = 0; ; fra += 500) {
+    const { data, error } = await db.from("kilde").select(KILDE_FELT).order("id").range(fra, fra + 499);
+    if (error) throw new Error(error.message);
+    const side = (data ?? []) as KildeRad[]; kildeRader.push(...side); if (side.length < 500) break;
+  }
+  const hendelser = [...new Map([...(tidligere?.hendelser ?? []), ...nye].map(h => [h.id, h])).values()];
 
   // Bare bitene koblingene faktisk peker på. Hele transkriptet skal ikke
   // over til nettleseren.
   const chunkIds = [...new Set(foldKoblinger(hendelser).map((k) => k.chunkId))];
   const koblingTekster: SkyTilstand["koblingTekster"] = {};
-  if (chunkIds.length > 0) {
+  for (let fra = 0; fra < chunkIds.length; fra += 200) {
     const { data, error } = await db
       .from("kilde_chunk")
       .select(CHUNK_FELT)
-      .in("id", chunkIds.slice(0, 200));
+      .in("id", chunkIds.slice(fra, fra + 200));
     if (error) throw new Error(error.message);
     for (const rad of (data ?? []) as ChunkPgRad[]) {
       const c = radTilChunk(rad);
@@ -70,7 +79,7 @@ export async function lesTilstand(): Promise<SkyTilstand> {
 
   return {
     hendelser,
-    kilder: ((kildeSvar.data ?? []) as KildeRad[]).map(radTilKilde),
+    kilder: kildeRader.map(radTilKilde),
     koblingTekster,
   };
 }

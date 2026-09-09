@@ -1,3 +1,4 @@
+import { registrerLaeringsverktoy } from "./laering-tools.ts";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
 import { z } from "zod";
 import { lesSkillMarkdown, lesSkillsFraDisk } from "./state.ts";
@@ -49,16 +50,18 @@ Fagene er adskilte kontekster. Kall list_fag og bekreft fagId før neste verktø
 Appen eleven ser har fem faner:
 - Kompetansemål — Udirs krav. Hukes ikke av. Dekning kommer fra høringer på temaer.
 - Boka — læreverkets kapitler: lesing, bokas øvinger, ordbank per kapittel. Bruk list_kapitler og skillen kapittelarbeid.
-- Prøver — resultattavlen. Live høring skjer i denne chatten. Kall logg_horing når høringen er ferdig, så dukker resultatet opp under Prøver.
+- Øving — aktive økter og resultater. Live høring skjer i denne chatten. Lagre forsøk og vurdering, så dukker resultatet opp under Øving.
 - Ordbank — alle fagbegrep, kapittelvis og totalt. Verktøyene heter list_fagord og oppdater_fagord.
 - Utvikling — karakter over tid.
 
-Etter hver høring: logg_horing med spørsmål, svar, karakter og proveniens (modell, innsats, promptId). Oppdater ordbanken med oppdater_fagord for begrepene som ble brukt eller blandet.
+Følg skillen laeringsokt. Start eller hent varig økt. Lagre med logg_forsok, deretter vurder_forsok. logg_horing og logg_oving er eldre kompatibilitetsverktøy. Registrer arbeidsmåte og hjelp; ingen automatisk måluttelling fra temakoblinger. Under eksamen holdes karakter og fasit tilbake til avslutt_okt. Oppdater ordbanken med oppdater_fagord for begrepene som ble brukt eller blandet.
 
 Kompetansemål er ikke kapittel. Et ferdiglest kapittel er ikke et avhuket mål.`;
 
 export function createServer(): McpServer {
   const server = new McpServer({ name: "mfl", version: "0.2.0" }, { instructions: INSTRUKSJONER });
+
+  registrerLaeringsverktoy(server);
 
   server.registerTool(
     "list_fag",
@@ -177,9 +180,11 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         fagId: fagIdFelt.optional(),
         kapittelId: z.string(),
+        repetisjon: z.boolean().optional(),
+        oktId: z.string().optional(),
       }),
     },
-    async ({ fagId, kapittelId }) => nesteOving(fagId, kapittelId),
+    async ({ fagId, kapittelId, repetisjon, oktId }) => nesteOving(fagId, kapittelId, repetisjon, oktId),
   );
 
   server.registerTool(

@@ -1,0 +1,1 @@
+export const NYE_TYPER = ["innhold-importert", "forsok-lagret", "forsok-vurdert", "okt-startet", "okt-avsluttet", "notat-versjon", "notat-kommentar", "oppgave-koblet", "tema-koblet", "ukesmaal-satt"];

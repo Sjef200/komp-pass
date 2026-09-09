@@ -70,6 +70,7 @@ export type MaalDekning = {
   dagerSiden: number | null;
   /** Minst ett hørt tema har stått lenge nok til at det bør høres igjen. */
   moden: boolean;
+  delvis: boolean;
 };
 
 export function maalStatusFraSnitt(snitt: number | null): MaalStatus {
@@ -87,7 +88,7 @@ export function maalDekning(
 ): MaalDekning {
   const linked = temaer.filter((t) => t.maalIds.includes(maal.id));
   const segmenter: TemaSegment[] = linked.map((tema) => {
-    const siste = sisteHoring(horinger, tema.id);
+    const siste = sisteHoring(horinger.filter(h => h.hjelp === "ingen" && h.maalIds?.includes(maal.id)), tema.id);
     const karakter = siste?.karakter ?? null;
     const dager = siste ? dagerSiden(siste.dato, iDag) : null;
     return {
@@ -110,6 +111,7 @@ export function maalDekning(
 
   return {
     maal,
+    delvis: horte.length > 0 && horte.length < linked.length,
     snitt,
     status: maalStatusFraSnitt(snitt),
     segmenter,

@@ -66,7 +66,7 @@ function bekreftetKobling(koblingId: string, chunkId: string, temaId: string): H
 }
 
 function horing(temaId: string, dato: string, karakter: Karakter): Horing {
-  return { id: `h-${temaId}-${dato}`, temaId, dato, karakter, riktig: "", mangler: "", kilde: "selv" };
+  return { id: `h-${temaId}-${dato}`, temaId, dato, karakter, riktig: "", mangler: "", kilde: "selv", hjelp: "ingen", maalIds: [temaId.replace("t-", "m-")] };
 }
 
 test("uten kilder og høringer er alt ikke gjennomgått", () => {
@@ -147,7 +147,7 @@ test("tidslinjen teller bare høringer etter at kilden ble gjennomgått", () => 
   assert.deepEqual(punkter[0]?.maal.map((m) => m.id), ["m-1"]);
 });
 
-test("temanivået fanger gapet der målnivået skjuler det", () => {
+test("både mål og tema viser gap når bare ett av flere temaer er vurdert", () => {
   // Begge temaene henger på samme mål. Kilden dekker bare tema 2.
   const state = tilstand({
     kompetansemaal: [{ id: "m-1", fagId: "male1", kortnavn: "mål 1", tekst: "", emoji: "📊" }],
@@ -161,7 +161,8 @@ test("temanivået fanger gapet der målnivået skjuler det", () => {
   });
   const lop = laringslop(state, "male1", IDAG);
 
-  assert.equal(lop.fordeling["undervist-ikke-hort"], 0, "målet ser dekket ut");
+  assert.equal(lop.linjer[0]?.dekning.delvis, true, "målet er bare delvis vurdert");
+  assert.notEqual(lop.linjer[0]?.gap, "sitter");
   assert.equal(lop.temaFordeling["undervist-ikke-hort"], 1, "temaet avslører gapet");
 
   const t2 = lop.temaLinjer.find((l) => l.tema.id === "t-2")!;

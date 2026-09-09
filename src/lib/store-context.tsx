@@ -1,3 +1,6 @@
+import { mergeTreLag } from "./ai-overlay";
+import { hendelseInnhold, validerLaeringsHendelse } from "./laering-validering";
+import type { SkyTilstand } from "./supabase-data";
 import {
   createContext,
   useCallback,
@@ -101,6 +104,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [harApi, setHarApi] = useState<boolean | null>(null);
   const [klar, setKlar] = useState(false);
   const skills = useRef<Skill[] | null>(null);
+  const skyCache = useRef<SkyTilstand | undefined>(undefined);
+  const skyBruker = useRef<string | null>(null);
+  const skyGenerasjon = useRef(0);
+  const synk = useRef<Promise<void> | null>(null);
+  const stateRef = useRef(state);
+  useEffect(() => { stateRef.current = state; }, [state]);
+  function velgSkyBruker(id: string | null) {
+    if (skyBruker.current === id) return;
+    skyBruker.current = id; skyCache.current = undefined; skyGenerasjon.current += 1;
+  }
 
   useEffect(() => {
     skills.current = diskSkills;
@@ -135,10 +148,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [byggPaNytt]);
 
   const lastFraSky = useCallback(async () => {
-    const { hendelser, kilder, koblingTekster: tekster } = await lesSkyTilstand();
-    setKoblingTekster(tekster);
-    byggPaNytt({ hendelser, kilder });
+    if (synk.current) await synk.current.catch(() => undefined);
+    if (!skyBruker.current) return;
+    const generasjon = skyGenerasjon.current;
+    const jobb = (async () => {
+      const data = await lesSkyTilstand(skyCache.current);
+      if (generasjon !== skyGenerasjon.current) return;
+      skyCache.current = data;
+      setKoblingTekster(data.koblingTekster);
+      byggPaNytt({ hendelser: data.hendelser, kilder: data.kilder });
+      setLagringsfeil(null);
+    })();
+    synk.current = jobb;
+    try { await jobb; } finally { if (synk.current === jobb) synk.current = null; }
   }, [byggPaNytt]);
+
+  useEffect(() => {
+    if (!innlogget) return;
+    const oppdater = () => {
+      if (document.visibilityState !== "visible" || synk.current) return;
+      void lastFraSky().catch(e => setLagringsfeil(`Synkronisering feilet: ${e instanceof Error ? e.message : "ukjent feil"}`));
+    };
+    const timer = window.setInterval(oppdater, 5000);
+    window.addEventListener("focus", oppdater);
+    document.addEventListener("visibilitychange", oppdater);
+    return () => { window.clearInterval(timer); window.removeEventListener("focus", oppdater); document.removeEventListener("visibilitychange", oppdater); };
+  }, [innlogget, lastFraSky]);
 
   const lastFraApi = useCallback(async (): Promise<boolean> => {
     const res = await fetch("/api/tilstand").catch(() => null);
@@ -174,12 +209,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (harSupabase()) {
         const { data } = await supabase().auth.getSession();
         epost = data.session?.user.email ?? null;
+        velgSkyBruker(data.session?.user.id ?? null);
       }
       if (avbrutt) return;
       setInnlogget(epost);
 
       if (epost) {
-        await lastFraSky().catch(() => undefined);
+        await lastFraSky().catch(e => setLagringsfeil(String(e)));
         if (!avbrutt) {
           setHarApi(true);
           setKlar(true);
@@ -200,18 +236,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!harSupabase()) return () => { avbrutt = true; };
     const { data: lytter } = supabase().auth.onAuthStateChange((_h, sesjon) => {
       const epost = sesjon?.user.email ?? null;
+      velgSkyBruker(sesjon?.user.id ?? null);
       setInnlogget(epost);
-      if (epost) void lastFraSky().catch(() => undefined);
+      if (!epost) { setKoblingTekster({}); byggPaNytt({ hendelser: [], kilder: [] }); }
+      if (epost) void lastFraSky().catch(e => setLagringsfeil(String(e)));
     });
     return () => {
       avbrutt = true;
       lytter.subscription.unsubscribe();
     };
-  }, [lastFraApi, lastFraSky]);
+  }, [lastFraApi, lastFraSky, byggPaNytt]);
 
   const lagre = useCallback(
     async (hendelser: Hendelse[]) => {
       try {
+        let validert = stateRef.current;
+        for (const h of hendelser) {
+          const eksisterende = validert.hendelser.find(x => x.id === h.id);
+          if (eksisterende && hendelseInnhold(eksisterende) !== hendelseInnhold(h)) throw new Error("ID-en finnes med et annet innhold.");
+          if (!eksisterende) validerLaeringsHendelse(validert, h);
+          validert = mergeTreLag(validert, null, { hendelser: [h] });
+        }
         if (innlogget) {
           await skrivSkyHendelser(hendelser);
           await lastFraSky();
@@ -222,6 +267,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setLagringsfeil(null);
       } catch (e) {
         setLagringsfeil(e instanceof Error ? e.message : LAGRINGSFEIL);
+        throw e;
       }
     },
     [aiOverlay, byggPaNytt, innlogget, lastFraSky],
@@ -298,6 +344,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const loggUt = useCallback(async () => {
     if (harSupabase()) await supabase().auth.signOut();
+    velgSkyBruker(null);
     setInnlogget(null);
     setKoblingTekster({});
     byggPaNytt({ hendelser: [], kilder: [] });

@@ -279,7 +279,17 @@ claude plugin marketplace add .
 claude plugin install mfl@komp-pass
 ```
 
-Pluginen gir åtte skills, én MCP-server og fire kommandoer:
+Lag en plugin-zip for å dele eller installere pluginen som en fil:
+
+```bash
+npm run bygg:plugin:zip
+```
+
+Filen blir `dist/mfl-plugin.zip`. Den inneholder skills, kommandoer og manifest.
+MCP-serveren pakkes ikke inn fordi Claude allerede kan bruke den hostede
+MCP-en på `https://learn.aiplanpicker.com/mcp`.
+
+Pluginen gir ni skills, én MCP-server og fem kommandoer:
 
 | Kommando | Gjør |
 |---|---|

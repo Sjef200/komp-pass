@@ -1,21 +1,18 @@
 import { useState } from "react";
 import { FagordListe } from "./components/Fagord";
-import { Prover } from "./components/Prover";
+import { BokRom, OvingRom, FramgangRom } from "./components/Laeringsrom";
 import { Samtykke } from "./components/Samtykke";
 import { Innlogging } from "./components/Innlogging";
 import { KompetansemaalListe } from "./components/Kompetansemaal";
-import { KapittelArbeidsbok } from "./components/KapittelArbeidsbok";
-import { Utvikling } from "./components/Utvikling";
 import { StoreProvider, useStore } from "./lib/store-context";
 import udirMetaJson from "./data/udir-meta.json";
-import { skillsSomPrompts } from "./lib/skill-katalog";
 
 type Side = "kompetansemaal" | "kapittel" | "prover" | "ordbank" | "utvikling";
 
 const SIDER: { id: Side; label: string }[] = [
-  { id: "kompetansemaal", label: "Kompetansemål" },
   { id: "kapittel", label: "Boka" },
-  { id: "prover", label: "Prøver" },
+  { id: "kompetansemaal", label: "Kompetansemål" },
+  { id: "prover", label: "Øving" },
   { id: "ordbank", label: "Ordbank" },
   { id: "utvikling", label: "Utvikling" },
 ];
@@ -37,7 +34,6 @@ export default function App() {
 function Skall() {
   const {
     state,
-    appendHoring,
     setFagordStatus,
     setInnstillinger,
     lagringsfeil,
@@ -46,9 +42,8 @@ function Skall() {
     loggUt,
     krevInnlogging,
     klar,
-    appendHendelser,
   } = useStore();
-  const [side, setSide] = useState<Side>("kompetansemaal");
+  const [side, setSide] = useState<Side>("kapittel");
   const [horingPagar, setHoringPagar] = useState(false);
   const fag = state.fag.find((f) => f.id === state.innstillinger.aktivtFag);
   const visEmoji = state.innstillinger.visEmoji;
@@ -57,10 +52,7 @@ function Skall() {
     hentet?: string;
     feilmelding?: string | null;
   };
-  const proveniensPrompts = [
-    ...skillsSomPrompts(state.skills),
-    ...state.prompts.filter((p) => !state.skills.some((s) => s.id === p.id)),
-  ];
+
 
   function byttFag(neste: string) {
     if (neste === state.innstillinger.aktivtFag) return;
@@ -180,29 +172,12 @@ function Skall() {
         {side === "kompetansemaal" && (
           <KompetansemaalListe key={state.innstillinger.aktivtFag} state={state} />
         )}
-        {side === "kapittel" && (
-          <KapittelArbeidsbok
-            key={state.innstillinger.aktivtFag}
-            state={state}
-            onLagreHoring={appendHoring}
-            onHendelser={appendHendelser}
-            onFagordStatus={setFagordStatus}
-            onHoringPagar={setHoringPagar}
-          />
-        )}
-        {side === "prover" && (
-          <Prover
-            key={state.innstillinger.aktivtFag}
-            state={state}
-            prompts={proveniensPrompts}
-            onLagreHoring={appendHoring}
-            onHoringPagar={setHoringPagar}
-          />
-        )}
+        {side === "kapittel" && <BokRom key={state.innstillinger.aktivtFag} />}
+        {side === "prover" && <OvingRom key={state.innstillinger.aktivtFag} />}
         {side === "ordbank" && (
           <FagordListe key={state.innstillinger.aktivtFag} state={state} onStatus={setFagordStatus} />
         )}
-        {side === "utvikling" && <Utvikling key={state.innstillinger.aktivtFag} state={state} />}
+        {side === "utvikling" && <FramgangRom key={state.innstillinger.aktivtFag} />}
       </main>
     </div>
   );

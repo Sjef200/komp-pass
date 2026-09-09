@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { lesSkillsFraDisk, repoRot } from "../mcp/src/fs-state.ts";
+import { fileURLToPath } from "node:url";
 
 /**
  * Bygger Claude Code-pluginen fra skillene som allerede ligger i
@@ -14,7 +14,7 @@ import { lesSkillsFraDisk, repoRot } from "../mcp/src/fs-state.ts";
  * Stiene i `.mcp.json` er absolutte. Flytter du repoet, kjør skriptet igjen.
  */
 
-const rot = repoRot();
+const rot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pluginDir = path.join(rot, "plugin");
 
 function skriv(fil: string, innhold: string): void {
@@ -30,15 +30,24 @@ function byggSkills(): number {
   const ut = path.join(pluginDir, "skills");
   fs.rmSync(ut, { recursive: true, force: true });
 
-  const skills = lesSkillsFraDisk();
+  const index = JSON.parse(
+    fs.readFileSync(path.join(rot, "src", "data", "skills", "index.json"), "utf8"),
+  ) as {
+    skills: Array<{
+      id: string;
+      fil: string;
+      referanser?: Array<{ id: string; sti: string }>;
+    }>;
+  };
+  const skills = index.skills ?? [];
   for (const skill of skills) {
-    const fra = path.join(rot, "src", "data", "skills", skill.id, "SKILL.md");
+    const fra = path.join(rot, "src", "data", "skills", skill.fil);
     if (!fs.existsSync(fra)) {
       console.warn(`  hopper over ${skill.id}: fant ikke SKILL.md`);
       continue;
     }
     skriv(path.join(ut, skill.id, "SKILL.md"), fs.readFileSync(fra, "utf8"));
-    for (const ref of skill.referanser) {
+    for (const ref of skill.referanser ?? []) {
       const refFra = path.join(rot, "src", "data", "skills", ref.sti);
       if (!fs.existsSync(refFra)) continue;
       skriv(

@@ -32,7 +32,7 @@ export function KompetansemaalListe({ state }: { state: AppState }) {
       <p className="text-sm text-[#191C1F]/70">
         Kompetansemål er Udirs krav til hva du skal kunne
         {fag ? ` i ${fag.navn}` : ""}. De er ikke kapitler i boka. Dekning kommer fra
-        høringer på temaer som er koblet til målet — du huker ikke av.
+        selvstendige svar som eksplisitt er vurdert mot målet. Innholdskartleggingen er foreløpig ufullstendig; dette er ikke en eksamenskarakter.
       </p>
       <ul className="space-y-2">
         {dekning.map((d) => (
@@ -91,7 +91,7 @@ export function MaalRad({
           <div className="min-w-0">
             <p className="truncate font-medium">{maal.kortnavn}</p>
             <p className="text-xs text-[#191C1F]/55">
-              <span style={{ color: statusFarge }}>{maalStatusLabel(d.status)}</span>
+              <span style={{ color: statusFarge }}>{d.delvis ? "delvis vurdert" : maalStatusLabel(d.status)}</span>
               {d.snitt != null && <> · snitt {formatSnitt(d.snitt)}</>}
               {maal.udirKode ? <> · Udir {maal.udirKode}</> : null}
             </p>
@@ -102,7 +102,7 @@ export function MaalRad({
           <span className="w-20 shrink-0 text-right text-xs text-[#191C1F]/55">
             {d.totaltTemaer === 0
               ? "0 temaer"
-              : `${d.totaltTemaer} tema${d.totaltTemaer === 1 ? "" : "er"}`}
+              : `${d.horteTemaer} av ${d.totaltTemaer} vurdert`}
           </span>
         </div>
       </button>

@@ -3,6 +3,11 @@ name: markedsforingslaering
 description: "Læringsmodus for faget markedsføring, bygget for å trene fram karakter 6. Svarer på fagspørsmål med definisjon, begrunnelse, konkret eksempel og avgrensning mot nabobegrep, og kan drive quiz og karaktervurdering av elevens egne svar. Bruk denne ALLTID når brukeren stiller et faglig spørsmål innen markedsføring, markedsundersøkelser, metode, markedsstrategi, kjøpsatferd, segmentering, konkurransemidler, merkevare eller salg, uansett hvor kort spørsmålet er. Trigger på formuleringer som 'hva er et eksperiment', 'hva betyr [fagbegrep]', 'hvilke hovedtyper undersøkelser har vi', 'hvorfor velger du survey', 'forklar 4P', 'forskjell på kvalitativ og kvantitativ', 'quiz meg', 'hør meg i markedsføring', 'øve til prøve', 'hvordan svarer jeg på denne oppgaven', 'er dette svaret godt nok'. Trigger også på løsrevne fagord uten spørsmålstegn, som 'posisjonering', 'reliabilitet' eller 'fokusgruppe', og på engelske varianter som 'marketing exam', 'explain segmentation'."
 ---
 
+## Økter og vurderinger
+
+Følg `laeringsokt` for arbeidsmåte og logging. Den har prioritet ved eksamen og kapittelarbeid. Bruk `logg_forsok` og `vurder_forsok`; registrer hjelp og eksplisitte mål. Karakter og fasit holdes tilbake under eksamen til økten er avsluttet.
+
+
 # Markedsføringslæring, nivå 6
 
 ## Hva denne skillen finnes for

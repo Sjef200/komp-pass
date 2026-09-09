@@ -3,9 +3,14 @@ name: lareplanstyrt-horing
 description: "Koble spørsmål og vurdering til konkrete kompetansemål i det valgte faget. Bruk når eleven skal høres, øve til prøve, eller når du vurderer et svar. Trigger på 'hør meg', 'knytt til læreplanen', 'kompetansemål', 'er dette godt nok', 'øve til eksamen'."
 ---
 
+## Økter og vurderinger
+
+Følg `laeringsokt` for arbeidsmåte og logging. Den har prioritet ved eksamen og kapittelarbeid. Bruk `logg_forsok` og `vurder_forsok`; registrer hjelp og eksplisitte mål. Karakter og fasit holdes tilbake under eksamen til økten er avsluttet.
+
+
 # Læreplanstyrt høring
 
-Hvert spørsmål skal treffe minst ett kompetansemål i det aktive faget. Dekning kommer fra siste høring per tema, ikke fra avkryssing.
+Hvert spørsmål skal treffe minst ett kompetansemål i det aktive faget. Dekning krever selvstendig besvarelse vurdert eksplisitt mot målet.
 
 ## Trigger
 

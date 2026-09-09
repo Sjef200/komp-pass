@@ -1,3 +1,4 @@
+import { foldStruktur, forsokTilHoringer } from "./laering";
 import { fold, sorterHendelser, type Hendelse } from "./hendelser";
 import type { AiOverlay, AppState, Horing, PersistedState } from "./types";
 
@@ -59,7 +60,7 @@ export function mergeTreLag(
   const hendelser = mergeHendelser([base.hendelser, local?.hendelser, ai?.hendelser]);
   const folded = fold(
     {
-      horinger: mergeHoringerAppendOnly([base.horinger, local?.horinger, ai?.horinger]),
+      horinger: mergeHoringerAppendOnly([base.horinger.filter(h => !h.forsokId), local?.horinger?.filter(h => !h.forsokId), ai?.horinger?.filter(h => !h.forsokId)]),
       fagord: mergeByIdSisteVinner([base.fagord, local?.fagord, ai?.fagord]),
     },
     hendelser,
@@ -67,9 +68,8 @@ export function mergeTreLag(
   return {
     fag: mergeByIdSisteVinner([base.fag, local?.fag]),
     kompetansemaal: mergeByIdSisteVinner([base.kompetansemaal, local?.kompetansemaal]),
-    temaer: mergeByIdSisteVinner([base.temaer, local?.temaer]),
-    kapitler: mergeByIdSisteVinner([base.kapitler, local?.kapitler]),
-    horinger: folded.horinger,
+    ...foldStruktur(mergeByIdSisteVinner([base.kapitler, local?.kapitler]), mergeByIdSisteVinner([base.temaer, local?.temaer]), hendelser),
+    horinger: [...folded.horinger, ...forsokTilHoringer(hendelser)],
     fagord: folded.fagord,
     hendelser,
     koblinger: folded.koblinger,

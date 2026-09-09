@@ -1,3 +1,5 @@
+import type { LaeringsHendelse } from "./laering";
+import { NYE_TYPER } from "./laering-typer";
 import { nyId } from "./format";
 import type {
   AiProveniens,
@@ -80,6 +82,8 @@ export type KapittelVedlegg = HendelseBase & {
   sti: string;
   mime: string;
   notatId?: string;
+  lager?: "lokal" | "sky";
+  byte?: number;
 };
 
 export type OvingLagtInn = HendelseBase & {
@@ -103,6 +107,7 @@ export type OvingBesvart = HendelseBase & {
 };
 
 export type Hendelse =
+  | LaeringsHendelse
   | HoringLogget
   | FagordObservert
   | KoblingForeslatt
@@ -127,6 +132,7 @@ export type Kobling = {
 };
 
 const TYPER = new Set([
+  ...NYE_TYPER,
   "horing-logget",
   "fagord-observert",
   "kobling-foreslatt",

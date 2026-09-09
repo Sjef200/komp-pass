@@ -1,3 +1,5 @@
+import { lastMcpState } from "../mcp/src/state.ts";
+import { krevFag, krevKapittelIFag } from "../src/lib/fag-validering.ts";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import type { Plugin, ViteDevServer } from "vite";
@@ -69,7 +71,8 @@ async function sendLive(server: ViteDevServer): Promise<void> {
 function lesBody(req: IncomingMessage): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-    req.on("data", (c: Buffer) => chunks.push(c));
+    let antall = 0;
+    req.on("data", (c: Buffer) => { antall += c.length; if (antall > 26 * 1024 * 1024) { reject(new Error("Filen er for stor.")); req.destroy(); } else chunks.push(c); });
     req.on("end", () => resolve(Buffer.concat(chunks)));
     req.on("error", reject);
   });
@@ -256,6 +259,8 @@ export function mflLive(): Plugin {
               apiJson(res, 400, { error: "Mangler kapittel eller fag." });
               return;
             }
+            const state = await lastMcpState();
+            krevKapittelIFag(state, krevFag(state, fagId).id, kapittelId);
             const bytes = await lesBody(req);
             const lagret = lagreVedleggFil({
               kapittelId,

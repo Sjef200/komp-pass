@@ -1,6 +1,22 @@
 {
   "skills": [
     {
+      "id": "laeringsokt",
+      "fil": "laeringsokt/SKILL.md",
+      "navn": "Læringsøkt",
+      "beskrivelse": "Varige økter med læring, selvtest, eksamenstrening og sporbare vurderinger.",
+      "kilde": "plattform",
+      "kategori": "plattform",
+      "fagIds": [],
+      "referanser": [
+        {
+          "id": "eksamensformer",
+          "navn": "Fagspesifikke eksamensformer",
+          "sti": "laeringsokt/references/eksamensformer.md"
+        }
+      ]
+    },
+    {
       "id": "velg-fag-forst",
       "fil": "velg-fag-forst/SKILL.md",
       "navn": "Velg fag først",

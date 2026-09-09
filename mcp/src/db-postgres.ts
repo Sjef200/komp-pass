@@ -74,16 +74,13 @@ function krev<T>(data: T | null, feil: { message: string } | null, hva: string):
 
 
 export async function lesHendelser(): Promise<Hendelse[]> {
-  const { data, error } = await hentKlient()
-    .from("hendelse")
-    .select("seq, data")
-    .order("tid", { ascending: true })
-    .order("seq", { ascending: true });
-  return krev(data, error, "Kunne ikke lese hendelser").map((r) =>
-    tilHendelse(r as HendelseRad),
-  );
+  const ut: Hendelse[] = []; let cursor = 0;
+  while (true) {
+    const { data, error } = await hentKlient().from("hendelse").select("seq, data").gt("seq", cursor).order("seq").limit(500);
+    const side = krev(data, error, "Kunne ikke lese hendelser").map(r => tilHendelse(r as HendelseRad));
+    ut.push(...side); if (side.length < 500) return ut; cursor = side.at(-1)!.seq!;
+  }
 }
-
 
 /** Append-only: en id som finnes fra før røres ikke, og raden leses tilbake. */
 export async function skrivHendelse(hendelse: Hendelse): Promise<Hendelse> {

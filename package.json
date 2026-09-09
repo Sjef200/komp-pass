@@ -16,6 +16,7 @@
     "transkriber": "tsx scripts/transkriber.ts",
     "indekser": "tsx scripts/indekser-kilde.ts",
     "bygg:plugin": "tsx scripts/bygg-plugin.ts",
+    "bygg:plugin:zip": "npm run bygg:plugin && mkdir -p dist && rm -f dist/mfl-plugin.zip && cd plugin && zip -qr ../dist/mfl-plugin.zip . -x .mcp.json",
     "logg-inn": "tsx scripts/logg-inn.ts",
     "mcp:http": "tsx mcp/src/http-server.ts",
     "deploy": "npm run bygg:basedata && npm run build && npx wrangler deploy",

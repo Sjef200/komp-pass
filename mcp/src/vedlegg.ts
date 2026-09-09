@@ -12,6 +12,7 @@ function dataMappe(): string {
 }
 
 const TILLATT: Record<string, string> = {
+  ".pdf": "application/pdf",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".png": "image/png",
@@ -20,7 +21,7 @@ const TILLATT: Record<string, string> = {
   ".heic": "image/heic",
 };
 
-const MAKS_BYTE = 12 * 1024 * 1024;
+const maksByte = (mime: string) => (mime === "application/pdf" ? 25 : 12) * 1024 * 1024;
 
 export function vedleggRot(): string {
   return path.join(dataMappe(), "vedlegg");
@@ -32,6 +33,7 @@ export function mimeFraNavn(filnavn: string): string | null {
 }
 
 export function extFraMime(mime: string): string {
+  if (mime === "application/pdf") return ".pdf";
   if (mime === "image/jpeg") return ".jpg";
   if (mime === "image/png") return ".png";
   if (mime === "image/webp") return ".webp";
@@ -63,8 +65,8 @@ export function lagreVedleggFil(opts: {
 }): LagretVedlegg {
   const filnavn = path.basename(opts.filnavn);
   const mime = opts.mime?.trim() || mimeFraNavn(filnavn);
-  if (!mime) {
-    throw new Error("Bare bildefiler: jpg, png, webp, gif eller heic.");
+  if (!mime || !Object.values(TILLATT).includes(mime)) {
+    throw new Error("Bare foto (jpg, png, webp, gif, heic) eller PDF.");
   }
   const ext = path.extname(filnavn).toLowerCase() || extFraMime(mime);
   if (!TILLATT[ext] && !extFraMime(mime)) {
@@ -77,7 +79,7 @@ export function lagreVedleggFil(opts: {
   fs.mkdirSync(path.dirname(abs), { recursive: true });
 
   if (opts.bytes) {
-    if (opts.bytes.length > MAKS_BYTE) throw new Error("Bildet er for stort (maks 12 MB).");
+    if (opts.bytes.length > maksByte(mime)) throw new Error("Filen er for stor (foto maks 12 MB, PDF maks 25 MB).");
     fs.writeFileSync(abs, opts.bytes);
   } else if (opts.kildeSti) {
     const kilde = path.resolve(opts.kildeSti);
@@ -87,7 +89,7 @@ export function lagreVedleggFil(opts: {
     if (!fs.existsSync(kilde)) throw new Error(`Fant ikke fila: ${opts.kildeSti}`);
     const stat = fs.statSync(kilde);
     if (!stat.isFile()) throw new Error("Stien er ikke en fil.");
-    if (stat.size > MAKS_BYTE) throw new Error("Bildet er for stort (maks 12 MB).");
+    if (stat.size > maksByte(mime)) throw new Error("Filen er for stor (foto maks 12 MB, PDF maks 25 MB).");
     fs.copyFileSync(kilde, abs);
   } else {
     throw new Error("Mangler filinnhold.");
@@ -98,7 +100,8 @@ export function lagreVedleggFil(opts: {
 
 export function lesVedleggFil(rel: string): { abs: string; bytes: Buffer } | null {
   const abs = path.resolve(vedleggRot(), rel);
-  if (!underData(abs)) return null;
+  const rot = path.resolve(vedleggRot());
+  if (!abs.startsWith(rot + path.sep)) return null;
   if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) return null;
   return { abs, bytes: fs.readFileSync(abs) };
 }

@@ -85,7 +85,7 @@ function kilderForMaal(
 
 function horingerForMaal(maal: Kompetansemaal, temaer: Tema[], horinger: Horing[]): Horing[] {
   const temaIds = new Set(temaer.filter((t) => t.maalIds.includes(maal.id)).map((t) => t.id));
-  return horinger.filter((h) => temaIds.has(h.temaId));
+  return horinger.filter((h) => temaIds.has(h.temaId) && h.hjelp === "ingen" && h.maalIds?.includes(maal.id));
 }
 
 export function gapFor(args: {
@@ -170,7 +170,7 @@ export function laringslop(
       gap: gapFor({
         harKilde: undervist.kilder.length > 0,
         hortAntall: hort.length,
-        svak: dekning.status === "svak",
+        svak: dekning.status === "svak" || dekning.delvis,
         moden: dekning.moden,
       }),
     };
@@ -184,7 +184,7 @@ export function laringslop(
       ...(datoer.length > 0 ? { forst: datoer[0], sist: datoer.at(-1) } : {}),
     };
     const hort = state.horinger.filter((h) => h.temaId === tema.id);
-    const siste = sisteHoring(state.horinger, tema.id);
+    const siste = sisteHoring(state.horinger.filter(h => h.hjelp === "ingen"), tema.id);
     const karakter = siste?.karakter ?? null;
     const dager = siste ? dagerSiden(siste.dato, iDag) : null;
     const moden = erModen(karakter, dager);
@@ -199,7 +199,7 @@ export function laringslop(
       gap: gapFor({
         harKilde: treff.length > 0,
         hortAntall: hort.length,
-        svak: karakter != null && karakter < 4,
+        svak: karakter == null || karakter < 4,
         moden,
       }),
     };
